@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.vocabulary.DOAP;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.OWL;
@@ -50,7 +51,7 @@ public class KnownURIsDictionaryTest {
 	private BIndex dummyIndex;
 	private boolean isPredicate;
 
-	private final Node firstMember = Node.createURI("http://pippo.pluto.paperino#first");
+	private final Node firstMember = NodeFactory.createURI("http://pippo.pluto.paperino#first");
 
 	/**
 	 * Setup fixture for this test case.

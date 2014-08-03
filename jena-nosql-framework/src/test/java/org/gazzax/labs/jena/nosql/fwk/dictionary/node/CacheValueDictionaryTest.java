@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
  * Test case for {@link CacheValueDictionary}.
@@ -35,7 +36,7 @@ public class CacheValueDictionaryTest {
 	private TopLevelDictionary decoratee;
 
 	byte[] id = { 4, 5, 3, 2, 6, 3, 2, 1 };
-	final Node aValue = Node.createLiteral(randomString());
+	final Node aValue = NodeFactory.createLiteral(randomString());
 
 	/**
 	 * Setup fixture for this test.

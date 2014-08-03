@@ -2,8 +2,6 @@ package org.gazzax.labs.jena.nosql.fwk.dictionary.node;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
-import org.apache.lucene.document.Field.Index;
 import org.gazzax.labs.jena.nosql.fwk.BIndex;
 import org.gazzax.labs.jena.nosql.fwk.InitialisationException;
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;

@@ -5,6 +5,7 @@ import java.util.Random;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 public class TestUtility {
@@ -17,17 +18,17 @@ public class TestUtility {
 	}
 	
 	public static Node buildResource(final String uriOrLocalName) {
-		return Node.createURI(
+		return NodeFactory.createURI(
 				uriOrLocalName.startsWith("http") 
 					? uriOrLocalName 
 					: "http://gazzax.rdf.org/" + uriOrLocalName);
 	}
 	
 	public static Node buildLiteral(final String label) {
-		return Node.createLiteral(label);
+		return NodeFactory.createLiteral(label);
 	}
 	
 	public static Node buildBNode(final String id) {
-		return Node.createAnon(AnonId.create(id));
+		return NodeFactory.createAnon(AnonId.create(id));
 	}	
 }

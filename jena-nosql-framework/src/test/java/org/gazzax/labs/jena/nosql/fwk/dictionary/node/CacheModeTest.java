@@ -15,6 +15,7 @@ import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
  * Test case for modes available in {@link CacheValueDictionary}.
@@ -37,7 +38,7 @@ public class CacheModeTest {
 
 	byte[] id = { 4, 5, 3, 2, 6, 3, 2, 1 };
 	
-	final Node aValue = Node.createLiteral(String.valueOf(new Date()));
+	final Node aValue = NodeFactory.createLiteral(String.valueOf(new Date()));
 
 	/**
 	 * First level cache test.
@@ -66,7 +67,7 @@ public class CacheModeTest {
 
 		frontendDictionary.initialise(STORAGE_LAYER_FACTORY);
 		
-		final Node uri = Node.createURI("http://example.org#it");
+		final Node uri = NodeFactory.createURI("http://example.org#it");
 		final byte [] id = frontendDictionary.getID(uri, false);
 		
 		assertTrue(frontendDictionary.node2id_cache.containsKey(uri));
@@ -80,7 +81,7 @@ public class CacheModeTest {
 			builder.append('a');
 		}
 
-		final Node longLiteral = Node.createLiteral(builder.toString());
+		final Node longLiteral = NodeFactory.createLiteral(builder.toString());
 		final byte [] longLiteralId = frontendDictionary.getID(longLiteral, false);
 		
 		assertFalse(frontendDictionary.node2id_cache.containsKey(longLiteral));

@@ -16,7 +16,6 @@ import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import org.gazzax.labs.jena.nosql.fwk.mx.ManageableKnownURIsDictionary;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.sparql.vocabulary.DOAP;
 import com.hp.hpl.jena.sparql.vocabulary.EARL;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
@@ -131,7 +130,7 @@ public class KnownURIsDictionary extends SingleIndexValueDictionary implements M
 
 	@Override
 	public void removeValue(final Node value, final boolean p) throws StorageLayerException {
-		if (value.isURI() && contains(((Node_URI) value).getNameSpace())) {
+		if (value.isURI() && contains(value.getNameSpace())) {
 			final String n3 = asNtURI(value);
 			index.remove(n3);
 		} else {

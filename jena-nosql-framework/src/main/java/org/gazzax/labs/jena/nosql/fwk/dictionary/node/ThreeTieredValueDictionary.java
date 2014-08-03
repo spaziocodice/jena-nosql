@@ -11,6 +11,7 @@ import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_URI;
 
 /**
@@ -82,7 +83,7 @@ public class ThreeTieredValueDictionary extends ValueDictionaryBase {
 	@Override
 	protected Node getValueInternal(final byte[] id, final boolean p) throws StorageLayerException {
 		if (id[0] == MARKER) {
-			return Node.createURI(
+			return NodeFactory.createURI(
 					new StringBuilder()
 					.append(namespaces.getValue(subarray(id, 1, 8), p))
 					.append(localNames.getValue(subarray(id, 9, id.length - 9), p))

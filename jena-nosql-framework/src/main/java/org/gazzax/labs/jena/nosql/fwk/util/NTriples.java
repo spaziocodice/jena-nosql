@@ -1,6 +1,7 @@
 package org.gazzax.labs.jena.nosql.fwk.util;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 public class NTriples {
@@ -31,19 +32,19 @@ public class NTriples {
 
 	public static Node asURI(final String nt) throws IllegalArgumentException {
 		if (nt.startsWith("<") && nt.endsWith(">")) {
-			internalAsURI(nt);
+			return internalAsURI(nt);
 		} 
 		throw new IllegalArgumentException(nt);
 	}
 
 	private static Node internalAsURI(final String nt) {
 		final String uri = unescapeString(nt.substring(1, nt.length() - 1));
-		return Node.createURI(uri);		
+		return NodeFactory.createURI(uri);		
 	}
 	
 	public static Node asBlankNode(String nt) throws IllegalArgumentException {
 		if (nt.startsWith("_:")) {
-			return Node.createAnon(AnonId.create(nt.substring(2)));
+			return NodeFactory.createAnon(AnonId.create(nt.substring(2)));
 		}
 		throw new IllegalArgumentException(nt);
 	}
@@ -69,13 +70,13 @@ public class NTriples {
 				if (startLangIdx != -1) {
 					// Get language
 					String language = nt.substring(startLangIdx + 1);
-					return Node.createLiteral(label, language, null);
+					return NodeFactory.createLiteral(label, language, null);
 				} else if (startDtIdx != -1) {
 					// Get datatype
 					String datatype = nt.substring(startDtIdx + 2);
-					return Node.createLiteral(label, null, Node.getType(datatype));
+					return NodeFactory.createLiteral(label, null, NodeFactory.getType(datatype));
 				} else {
-					return Node.createLiteral(label);
+					return NodeFactory.createLiteral(label);
 				}
 			}
 		}
