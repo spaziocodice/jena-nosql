@@ -7,13 +7,14 @@
 	<packaging>pom</packaging>
 	<properties>
 		<jena.version>2.6.4</jena.version>
-		<arq.version>2.8.7</arq.version>
+		<arq.version>2.8.8</arq.version>
 		<jdk.version>1.6</jdk.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<slf4j.version>1.6.1</slf4j.version>
 		<junit.version>4.11</junit.version>
+		<mockito.version>1.9.5-rc1</mockito.version>
 	</properties>
 	<licenses>
 		<license>
@@ -28,6 +29,25 @@
 			<url>http://it.linkedin.com/in/andreagazzarini</url>
 		</developer>
 	</developers>
+	<dependencies>
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>arq</artifactId>
+			<version>${arq.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 	<modules>
 		<module>jena-nosql-framework</module>
 		<module>jena-nosql-binding</module>

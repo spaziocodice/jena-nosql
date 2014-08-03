@@ -1,20 +1,38 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>jena-nosql</artifactId>
-    <groupId>org.gazzax.labs</groupId>
-    <version>1.0</version>
-    <relativePath>..</relativePath>
-  </parent>
-  <artifactId>jena-nosql-framework</artifactId>
-  <name>Jena-NoSQL Framework API</name>
-  <description>Provides extension points for creating new NoSQL bindings</description>
-  <url>https://github.com/agazzarini/jena-nosql</url>
-  <scm>
-  	<url>https://github.com/agazzarini/jena-nosql</url>
-  </scm>
-  <issueManagement>
-  	<system>Github</system>
-  	<url>https://github.com/agazzarini/jena-nosql/issues</url>
-  </issueManagement>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>jena-nosql</artifactId>
+		<groupId>org.gazzax.labs</groupId>
+		<version>1.0</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>jena-nosql-framework</artifactId>
+	<name>Jena-NoSQL Framework API</name>
+	<description>Provides extension points for creating new NoSQL bindings</description>
+	<url>https://github.com/agazzarini/jena-nosql</url>
+	<scm>
+		<url>https://github.com/agazzarini/jena-nosql</url>
+	</scm>
+	<issueManagement>
+		<system>Github</system>
+		<url>https://github.com/agazzarini/jena-nosql/issues</url>
+	</issueManagement>
+	<dependencies>
+		<dependency>
+			<groupId>com.googlecode.concurrentlinkedhashmap</groupId>
+			<artifactId>concurrentlinkedhashmap-lru</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>17.0</version>
+		</dependency>
+	</dependencies>
 </project>
