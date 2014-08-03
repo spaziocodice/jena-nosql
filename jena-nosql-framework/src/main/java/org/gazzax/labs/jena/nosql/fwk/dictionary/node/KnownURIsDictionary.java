@@ -23,6 +23,8 @@ import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 /**
  * A dictionary that manages a fixed set of vocabularies.
  * This is useful when you want to separate the management of triples coming 
@@ -48,9 +50,9 @@ public class KnownURIsDictionary extends SingleIndexValueDictionary implements M
 		DOAP.NS,
 		EARL.NS,
 		FOAF.NS,
-		OWL.NS};
-//		RDF.NS,
-//		RDFS.NS};
+		OWL.NS,
+		RDF.getURI(),
+		RDFS.getURI()};
 	
 	private TopLevelDictionary decoratee;
 	final String[] domains;
