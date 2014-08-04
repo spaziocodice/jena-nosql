@@ -4,79 +4,120 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
+/**
+ * Booch utility for parsing RDF resources.
+ * 
+ * @author Andrea Gazzarini
+ * @since 1.0
+ */
 public class NTriples {
-
+	private final static String START_URI_CHAR = "<";
+	private final static String END_URI_CHAR = ">";
+	private final static String START_BNODE_CHARS = "_:";
+	private final static String START_LITERAL_CHAR = "\"";
+	private final static String LANGUAGE_MARKER = "@";
+	private final static String DATATYPE_MARKER = "^^";
+	
+	/**
+	 * Returns true if the given NT value denotes a URI.
+	 * 
+	 * @param nt the value to be checked.
+	 * @return true if the given NT value denotes a URI.
+	 */
+	static boolean isURI(final String nt) {
+		return nt != null && nt.startsWith(START_URI_CHAR) && nt.endsWith(END_URI_CHAR);
+	}
+	
+	/**
+	 * Returns true if the given NT value denotes a blank node.
+	 * 
+	 * @param nt the value to be checked.
+	 * @return true if the given NT value denotes a blank node.
+	 */
+	static boolean isBlankNode(final String nt) {
+		return nt != null && nt.startsWith(START_BNODE_CHARS);
+	}
+	
+	/**
+	 * Tries to parse the given input as a (nt) resource.
+	 * 
+	 * @param nt
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	// FIXME: bad sequential logic
 	public static Node asNode(final String nt) throws IllegalArgumentException {
-		if (nt != null) {
-			if (nt.startsWith("<")) {
-				return asURI(nt);
-			}
-			else if (nt.startsWith("_:")) {
-				return asBlankNode(nt);
-			}
-			else if (nt.startsWith("\"")) {
-				return asLiteral(nt);
-			}
-		}
-		throw new IllegalArgumentException(nt);
+		if (isURI(nt)) {
+			return internalAsURI(nt);
+		} else if (isBlankNode(nt)) {
+			return internalAsBlankNode(nt);
+		} 
+		return asLiteral(nt);
 	}
 
 	public static Node asURIorBlankNode(final String nt) throws IllegalArgumentException {
-		if (nt.startsWith("<") && nt.endsWith(">")) {
-			return internalAsURI(nt);
-		} else if (nt.startsWith("_:")) {
-			return asBlankNode(nt);
-		}
-		throw new IllegalArgumentException(nt);
+		return (isURI(nt)) ? internalAsURI(nt) : internalAsBlankNode(nt);
 	}
 
 	public static Node asURI(final String nt) throws IllegalArgumentException {
-		if (nt.startsWith("<") && nt.endsWith(">")) {
+		if (isURI(nt)) {
 			return internalAsURI(nt);
 		} 
 		throw new IllegalArgumentException(nt);
 	}
 
+	/**
+	 * Parses the given input as URI.
+	 * 
+	 * @param nt the URI string value.
+	 * @return the {@link Node} URI representation of the given value.
+	 */
 	private static Node internalAsURI(final String nt) {
 		final String uri = unescapeString(nt.substring(1, nt.length() - 1));
 		return NodeFactory.createURI(uri);		
 	}
 	
+	/**
+	 * Parses the given input as a blank node.
+	 * 
+	 * @param nt the blank node string value.
+	 * @return the {@link Node} Blank node representation of the given value.
+	 */
+	private static Node internalAsBlankNode(final String nt) {
+		return NodeFactory.createAnon(AnonId.create(nt.substring(2)));	
+	}
+	
+	
 	public static Node asBlankNode(String nt) throws IllegalArgumentException {
-		if (nt.startsWith("_:")) {
-			return NodeFactory.createAnon(AnonId.create(nt.substring(2)));
+		if (isBlankNode(nt)) {
+			return internalAsBlankNode(nt);
 		}
 		throw new IllegalArgumentException(nt);
 	}
-
-	public static Node asLiteral(String nt) throws IllegalArgumentException
+	
+	public static Node asLiteral(final String nt) throws IllegalArgumentException
 	{
-		if (nt.startsWith("\"")) {
-			// Find string separation points
-			int endLabelIdx = findEndOfLabel(nt);
+		if (nt.startsWith(START_LITERAL_CHAR)) {
+			int endIndexOfValue = endIndexOfValue(nt);
 
-			if (endLabelIdx != -1) {
-				int startLangIdx = nt.indexOf("@", endLabelIdx);
-				int startDtIdx = nt.indexOf("^^", endLabelIdx);
+			if (endIndexOfValue != -1) {
+				final String literalValue = unescapeString(nt.substring(1, endIndexOfValue));
 
-				if (startLangIdx != -1 && startDtIdx != -1) {
-					throw new IllegalArgumentException("Literals can not have both a language and a datatype");
-				}
+				final int startIndexOfLanguage = nt.indexOf(LANGUAGE_MARKER, endIndexOfValue);
+				final int startIndexOfDatatype = nt.indexOf(DATATYPE_MARKER, endIndexOfValue);
 
-				// Get label
-				String label = nt.substring(1, endLabelIdx);
-				label = unescapeString(label);
-
-				if (startLangIdx != -1) {
-					// Get language
-					String language = nt.substring(startLangIdx + 1);
-					return NodeFactory.createLiteral(label, language, null);
-				} else if (startDtIdx != -1) {
-					// Get datatype
-					String datatype = nt.substring(startDtIdx + 2);
-					return NodeFactory.createLiteral(label, null, NodeFactory.getType(datatype));
+				if (startIndexOfLanguage != -1) {
+					return NodeFactory.createLiteral(
+							literalValue, 
+							nt.substring(startIndexOfLanguage + LANGUAGE_MARKER.length()), 
+							null);
+				} else if (startIndexOfDatatype != -1) {
+					return NodeFactory.createLiteral(
+							literalValue, 
+							null, 
+							NodeFactory.getType(nt.substring(startIndexOfDatatype + DATATYPE_MARKER.length())));
 				} else {
-					return NodeFactory.createLiteral(label);
+					return NodeFactory.createLiteral(literalValue);
 				}
 			}
 		}
@@ -84,7 +125,7 @@ public class NTriples {
 		throw new IllegalArgumentException(nt);
 	}
 
-	private static int findEndOfLabel(String nTriplesLiteral) {
+	private static int endIndexOfValue(String nTriplesLiteral) {
 		boolean previousWasBackslash = false;
 
 		for (int i = 1; i < nTriplesLiteral.length(); i++) {

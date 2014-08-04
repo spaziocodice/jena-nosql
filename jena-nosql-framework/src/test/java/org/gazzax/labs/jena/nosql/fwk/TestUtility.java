@@ -14,7 +14,13 @@ public class TestUtility {
 	public final static Random RANDOMIZER = new Random();
 	
 	public static String randomString() {
-		return String.valueOf(RANDOMIZER.nextLong());
+		final long value = RANDOMIZER.nextLong();
+		return String.valueOf(value < 0 ? value * -1 : value);
+	}
+	
+	public static void main(String[] args) {
+		Node n = NodeFactory.createURI("http://xmlns.com/foaf/0.1#952994123989279397");
+		System.out.println(n.getNameSpace());
 	}
 	
 	public static Node buildResource(final String uriOrLocalName) {

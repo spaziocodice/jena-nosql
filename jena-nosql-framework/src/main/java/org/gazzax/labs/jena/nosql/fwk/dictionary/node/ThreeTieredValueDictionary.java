@@ -14,6 +14,8 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_URI;
 
+import static org.gazzax.labs.jena.nosql.fwk.util.Utility.*;
+
 /**
  * A dictionary with a good compromise between I/O and in-memory work.
  * Basically, values are managed differently depending on their nature:
@@ -72,8 +74,8 @@ public class ThreeTieredValueDictionary extends ValueDictionaryBase {
 	protected byte[] getIdInternal(final Node value, final boolean p) throws StorageLayerException {
 		if (value.isURI()) {
 			final Node_URI uri = (Node_URI) value;
-			byte[] namespaceId = namespaces.getID(uri.getNameSpace(), p);
-			byte[] localNameId = localNames.getID(uri.getLocalName(), p);
+			byte[] namespaceId = namespaces.getID(namespace(uri), p);
+			byte[] localNameId = localNames.getID(localName(uri), p);
 			return concat(MARKER, namespaceId, localNameId);
 		} else {
 			return bNodesAndLiterals.getID(value, p);

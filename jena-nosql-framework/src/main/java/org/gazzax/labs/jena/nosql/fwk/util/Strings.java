@@ -4,12 +4,9 @@ package org.gazzax.labs.jena.nosql.fwk.util;
  * Booch utility for string manipulation.
  * 
  * @author Andrea Gazzarini
- * @since 1.1
+ * @since 1.0
  */
 public abstract class Strings {
-	
-	public static final String EMPTY_STRING = "";
-		
 	/**
 	 * Checks if the given string is not null or (not) empty string.
 	 * 
@@ -29,19 +26,4 @@ public abstract class Strings {
 	public static boolean isNullOrEmptyString(final String value) {
 		return value == null || value.trim().length() == 0;
 	}	
-
-	/**
-	 * Returns the given value as an int.
-	 * 
-	 * @param value the string that will be converted.
-	 * @param defaultValue in case the conversion fails this value will be returned.
-	 * @return the given value as an int.
-	 */
-	public static int asInt(final String value, final int defaultValue) {
-		try {
-			return Integer.parseInt(value);
-		} catch (final Exception exception) {
-			return defaultValue;
-		}
-	}
 }

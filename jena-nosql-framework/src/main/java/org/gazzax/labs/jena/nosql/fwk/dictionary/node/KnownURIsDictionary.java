@@ -3,7 +3,7 @@ package org.gazzax.labs.jena.nosql.fwk.dictionary.node;
 import static org.gazzax.labs.jena.nosql.fwk.Constants.CHARSET_UTF8;
 import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asNtURI;
 import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asURI;
-import static org.gazzax.labs.jena.nosql.fwk.util.Utility.murmurHash3;
+import static org.gazzax.labs.jena.nosql.fwk.util.Utility.*;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,6 +24,7 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
+
 /**
  * A dictionary that manages a fixed set of vocabularies.
  * This is useful when you want to separate the management of triples coming 
@@ -95,7 +96,7 @@ public class KnownURIsDictionary extends SingleIndexValueDictionary implements M
 	
 	@Override
 	protected byte[] getIdInternal(final Node value, final boolean p) throws StorageLayerException {
-		if (value.isURI() && contains(value.getNameSpace())) {
+		if (value.isURI() && contains(namespace(value))) {
 			RUNTIME_CONTEXTS.get().isFirstLevelResult = true;
 			idKnownURIsHitsCount.incrementAndGet();
 			final String nt = asNtURI(value);
@@ -130,7 +131,7 @@ public class KnownURIsDictionary extends SingleIndexValueDictionary implements M
 
 	@Override
 	public void removeValue(final Node value, final boolean p) throws StorageLayerException {
-		if (value.isURI() && contains(value.getNameSpace())) {
+		if (value.isURI() && contains(namespace(value))) {
 			final String n3 = asNtURI(value);
 			index.remove(n3);
 		} else {
