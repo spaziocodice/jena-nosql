@@ -4,7 +4,6 @@ package org.gazzax.labs.jena.nosql.cassandra;
  * CQL tablenames.
  * 
  * @author Andrea Gazzarini
- * 
  * @since 1.0
  */
 public interface Table {

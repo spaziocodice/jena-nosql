@@ -73,7 +73,7 @@ public class NTriples {
 	 * @return the {@link Node} URI representation of the given value.
 	 */
 	private static Node internalAsURI(final String nt) {
-		final String uri = unescapeString(nt.substring(1, nt.length() - 1));
+		final String uri = unescape(nt.substring(1, nt.length() - 1));
 		return NodeFactory.createURI(uri);		
 	}
 	
@@ -101,7 +101,7 @@ public class NTriples {
 			int endIndexOfValue = endIndexOfValue(nt);
 
 			if (endIndexOfValue != -1) {
-				final String literalValue = unescapeString(nt.substring(1, endIndexOfValue));
+				final String literalValue = unescape(nt.substring(1, endIndexOfValue));
 
 				final int startIndexOfLanguage = nt.indexOf(LANGUAGE_MARKER, endIndexOfValue);
 				final int startIndexOfDatatype = nt.indexOf(DATATYPE_MARKER, endIndexOfValue);
@@ -133,13 +133,9 @@ public class NTriples {
 
 			if (c == '"' && !previousWasBackslash) {
 				return i;
-			}
-			else if (c == '\\' && !previousWasBackslash) {
-				// start of escape
+			} else if (c == '\\' && !previousWasBackslash) {
 				previousWasBackslash = true;
-			}
-			else if (previousWasBackslash) {
-				// c was escaped
+			} else if (previousWasBackslash) {
 				previousWasBackslash = false;
 			}
 		}
@@ -158,7 +154,7 @@ public class NTriples {
 		} else if (value.isLiteral()) {
 			return asNtLiteral(value);
 		}
-		throw new IllegalArgumentException("Unknown value type: " + value.getClass());
+		throw new IllegalArgumentException(value.getClass().getName());
 	}
 
 	public static String asNtURI(Node uri) {
@@ -191,36 +187,7 @@ public class NTriples {
 		return buffer.toString();
 	}
 
-	/**
-	 * Checks whether the supplied character is a letter or number according to
-	 * the N-Triples specification.
-	 * 
-	 * @see #isLetter
-	 * @see #isNumber
-	 */
-	public static boolean isLetterOrNumber(int c) {
-		return isLetter(c) || isNumber(c);
-	}
-
-	/**
-	 * Checks whether the supplied character is a letter according to the
-	 * N-Triples specification. N-Triples letters are A - Z and a - z.
-	 */
-	public static boolean isLetter(int c) {
-		return (c >= 65 && c <= 90) || // A - Z
-				(c >= 97 && c <= 122); // a - z
-	}
-
-	/**
-	 * Checks whether the supplied character is a number according to the
-	 * N-Triples specification. N-Triples numbers are 0 - 9.
-	 */
-	public static boolean isNumber(int c) {
-		return (c >= 48 && c <= 57); // 0 - 9
-	}
-
-	public static void escapeAndAppend(String value, final StringBuilder buffer)
-	{
+	public static void escapeAndAppend(String value, final StringBuilder buffer) {
 		int labelLength = value.length();
 
 		for (int i = 0; i < labelLength; i++) {
@@ -246,10 +213,10 @@ public class NTriples {
 				if (cInt >= 0x0 && cInt <= 0x8 || cInt == 0xB || cInt == 0xC || cInt >= 0xE && cInt <= 0x1F
 				|| cInt >= 0x7F && cInt <= 0xFFFF) {
 					buffer.append("\\u");
-					buffer.append(toHexString(cInt, 4));
+					buffer.append(hex(cInt, 4));
 				} else if (cInt >= 0x10000 && cInt <= 0x10FFFF) {
 					buffer.append("\\U");
-					buffer.append(toHexString(cInt, 8));
+					buffer.append(hex(cInt, 8));
 				}
 				else {
 					buffer.append(c);
@@ -257,141 +224,111 @@ public class NTriples {
 			} 
 		}
 	}
+	
+	public static String unescape(final String value) {
+		int indexOfBackSlash = value.indexOf('\\');
 
-	/**
-	 * Unescapes an escaped Unicode string. Any Unicode sequences (
-	 * <tt>&#x5C;uxxxx</tt> and <tt>&#x5C;Uxxxxxxxx</tt>) are restored to the
-	 * value indicated by the hexadecimal argument and any backslash-escapes (
-	 * <tt>\"</tt>, <tt>\\</tt>, etc.) are decoded to their original form.
-	 * 
-	 * @param s
-	 *        An escaped Unicode string.
-	 * @return The unescaped string.
-	 * @throws IllegalArgumentException
-	 *         If the supplied string is not a correctly escaped N-Triples
-	 *         string.
-	 */
-	public static String unescapeString(String s) {
-		int backSlashIdx = s.indexOf('\\');
-
-		if (backSlashIdx == -1) {
-			// No escaped characters found
-			return s;
+		if (indexOfBackSlash == -1) {
+			return value;
 		}
 
-		int startIdx = 0;
-		int sLength = s.length();
-		StringBuilder sb = new StringBuilder(sLength);
+		int startIndexOfEscapedSequence = 0;
+		final int valueLength = value.length();
+		final StringBuilder builder = new StringBuilder(valueLength);
 
-		while (backSlashIdx != -1) {
-			sb.append(s.substring(startIdx, backSlashIdx));
+		while (indexOfBackSlash != -1) {
+			builder.append(value.substring(startIndexOfEscapedSequence, indexOfBackSlash));
 
-			if (backSlashIdx + 1 >= sLength) {
-				throw new IllegalArgumentException("Unescaped backslash in: " + s);
+			if (indexOfBackSlash + 1 >= valueLength) {
+				throw new IllegalArgumentException(value);
 			}
 
-			char c = s.charAt(backSlashIdx + 1);
-
-			if (c == 't') {
-				sb.append('\t');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == 'b') {
-				sb.append('\b');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == 'n') {
-				sb.append('\n');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == 'r') {
-				sb.append('\r');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == 'f') {
-				sb.append('\f');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == '"') {
-				sb.append('"');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == '\'') {
-				sb.append('\'');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == '\\') {
-				sb.append('\\');
-				startIdx = backSlashIdx + 2;
-			}
-			else if (c == 'u') {
-				// \\uxxxx
-				if (backSlashIdx + 5 >= sLength) {
-					throw new IllegalArgumentException("Incomplete Unicode escape sequence in: " + s);
+			char c = value.charAt(indexOfBackSlash + 1);
+			switch(c) {
+			case 't' :
+				builder.append('\t');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case 'b' :
+				builder.append('\b');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case 'n' :
+				builder.append('\n');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case 'r' :
+				builder.append('\r');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case 'f':
+				builder.append('\f');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case '"' : 
+				builder.append('"');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case '\'' :
+				builder.append('\'');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case '\\' : 
+				builder.append('\\');
+				startIndexOfEscapedSequence = indexOfBackSlash + 2;
+				break;
+			case 'u' : 
+				if (indexOfBackSlash + 5 >= valueLength) {
+					throw new IllegalArgumentException(value);
 				}
-				String xx = s.substring(backSlashIdx + 2, backSlashIdx + 6);
+				
+				final String hex5 = value.substring(indexOfBackSlash + 2, indexOfBackSlash + 6);
 
 				try {
-					c = (char)Integer.parseInt(xx, 16);
-					sb.append(c);
-
-					startIdx = backSlashIdx + 6;
+					c = (char)Integer.parseInt(hex5, 16);
+					builder.append(c);
+					startIndexOfEscapedSequence = indexOfBackSlash + 6;
 				}
-				catch (NumberFormatException e) {
-					throw new IllegalArgumentException("Illegal Unicode escape sequence '\\u" + xx + "' in: " + s);
+				catch (final NumberFormatException e) {
+					throw new IllegalArgumentException("Bad unicode escape sequence '\\u" + hex5 + "' in: " + value);
 				}
-			}
-			else if (c == 'U') {
-				// \\Uxxxxxxxx
-				if (backSlashIdx + 9 >= sLength) {
-					throw new IllegalArgumentException("Incomplete Unicode escape sequence in: " + s);
+				break;
+			case 'U' :
+				if (indexOfBackSlash + 9 >= valueLength) {
+					throw new IllegalArgumentException(value);
 				}
-				String xx = s.substring(backSlashIdx + 2, backSlashIdx + 10);
+				
+				final String hex9 = value.substring(indexOfBackSlash + 2, indexOfBackSlash + 10);
 
 				try {
-					c = (char)Integer.parseInt(xx, 16);
-					sb.append(c);
-
-					startIdx = backSlashIdx + 10;
+					c = (char)Integer.parseInt(hex9, 16);
+					builder.append(c);
+					startIndexOfEscapedSequence = indexOfBackSlash + 10;
+				} catch (final NumberFormatException exception) {
+					throw new IllegalArgumentException("Bad unicode escape sequence '\\U" + hex9 + "' in: " + value);
 				}
-				catch (NumberFormatException e) {
-					throw new IllegalArgumentException("Illegal Unicode escape sequence '\\U" + xx + "' in: " + s);
-				}
-			}
-			else {
-				throw new IllegalArgumentException("Unescaped backslash in: " + s);
+				break;
+			default:
+				throw new IllegalArgumentException("Unescaped backslash found in: " + value);
 			}
 
-			backSlashIdx = s.indexOf('\\', startIdx);
+			indexOfBackSlash = value.indexOf('\\', startIndexOfEscapedSequence);
 		}
 
-		sb.append(s.substring(startIdx));
+		builder.append(value.substring(startIndexOfEscapedSequence));
 
-		return sb.toString();
+		return builder.toString();
 	}
 
-	/**
-	 * Converts a decimal value to a hexadecimal string represention of the
-	 * specified length.
-	 * 
-	 * @param decimal
-	 *        A decimal value.
-	 * @param stringLength
-	 *        The length of the resulting string.
-	 */
-	public static String toHexString(int decimal, int stringLength) {
-		StringBuilder sb = new StringBuilder(stringLength);
+	public static String hex(final int decimal, final int length) {
+		final StringBuilder builder = new StringBuilder(length);
+		final String hex = Integer.toHexString(decimal).toUpperCase();
 
-		String hexVal = Integer.toHexString(decimal).toUpperCase();
-
-		// insert zeros if hexVal has less than stringLength characters:
-		int nofZeros = stringLength - hexVal.length();
+		final int nofZeros = length - hex.length();
 		for (int i = 0; i < nofZeros; i++) {
-			sb.append('0');
+			builder.append('0');
 		}
 
-		sb.append(hexVal);
-
-		return sb.toString();
+		return builder.append(hex).toString();
 	}
 }
