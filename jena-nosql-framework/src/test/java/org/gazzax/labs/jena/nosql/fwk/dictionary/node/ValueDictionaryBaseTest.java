@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * Test case for {@link ValueDictionaryBase}.
+ * Test case for {@link TopLevelDictionaryBase}.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -27,14 +27,14 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class ValueDictionaryBaseTest {
 
-	private ValueDictionaryBase _cut;
+	private TopLevelDictionaryBase _cut;
 
 	/**
 	 * Setup fixture for this test case.
 	 */
 	@Before
 	public void setUp() {
-		_cut = spy(new ValueDictionaryBase(randomString()) {
+		_cut = spy(new TopLevelDictionaryBase(randomString()) {
 
 			@Override
 			public void initialiseInternal(final StorageLayerFactory factory) throws InitialisationException {
@@ -98,9 +98,9 @@ public class ValueDictionaryBaseTest {
 	 */
 	@Test
 	public void dictionaryRuntimeContext() {
-		final DictionaryRuntimeContext context = ValueDictionaryBase.RUNTIME_CONTEXTS.get();
+		final DictionaryRuntimeContext context = TopLevelDictionaryBase.RUNTIME_CONTEXTS.get();
 
-		final DictionaryRuntimeContext mustBeTheSame = ValueDictionaryBase.RUNTIME_CONTEXTS.get();
+		final DictionaryRuntimeContext mustBeTheSame = TopLevelDictionaryBase.RUNTIME_CONTEXTS.get();
 
 		assertSame(context, mustBeTheSame);
 	}

@@ -12,7 +12,7 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
  * theoretically they could interact with a persistent storage.
  * 
  * @author Andrea Gazzarini
- * @since 1.1.0
+ * @since 1.0
  * 
  * @param <K> the key kind / type managed by the underlying map structure.
  * @param <V> the value kind / type managed by the underlying map structure.

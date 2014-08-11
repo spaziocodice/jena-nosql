@@ -24,7 +24,7 @@ import org.junit.Test;
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * Test case for {@link ThreeTieredValueDictionary}.
+ * Test case for {@link ThreeTieredNodeDictionary}.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -38,7 +38,7 @@ public class ThreeTieredValueDictionaryTest {
 	final Node aLiteral = buildLiteral("Hello there! It's Gazza!");
 	final Node aBNode = buildBNode(String.valueOf(System.currentTimeMillis()));
 	
-	private ThreeTieredValueDictionary cut;
+	private ThreeTieredNodeDictionary cut;
 	private Dictionary<String> namespacesDictionary;
 	private Dictionary<String> localNamesDictionary;
 	private TopLevelDictionary bnodesAndLiteralsDictionary;
@@ -55,7 +55,7 @@ public class ThreeTieredValueDictionaryTest {
 		localNamesDictionary = mock(Dictionary.class);
 		bnodesAndLiteralsDictionary = mock(TopLevelDictionary.class);
 
-		cut = new ThreeTieredValueDictionary(
+		cut = new ThreeTieredNodeDictionary(
 				randomString(), 
 				namespacesDictionary, 
 				localNamesDictionary, 
@@ -68,7 +68,7 @@ public class ThreeTieredValueDictionaryTest {
 	@Test
 	public void nullWrappedDictionary() {
 		try {
-			cut = new ThreeTieredValueDictionary(
+			cut = new ThreeTieredNodeDictionary(
 					randomString(), 
 					null, 
 					localNamesDictionary, 
@@ -79,7 +79,7 @@ public class ThreeTieredValueDictionaryTest {
 		}
 		
 		try {
-			cut = new ThreeTieredValueDictionary(
+			cut = new ThreeTieredNodeDictionary(
 					randomString(), 
 					namespacesDictionary, 
 					null, 
@@ -90,7 +90,7 @@ public class ThreeTieredValueDictionaryTest {
 		}
 		
 		try {
-			cut = new ThreeTieredValueDictionary(
+			cut = new ThreeTieredNodeDictionary(
 				randomString(), 
 				namespacesDictionary, 
 				localNamesDictionary, 
@@ -110,11 +110,11 @@ public class ThreeTieredValueDictionaryTest {
 
 		assertFalse(cut.isBNode(null));
 
-		id[0] = ThreeTieredValueDictionary.MARKER;
+		id[0] = ThreeTieredNodeDictionary.MARKER;
 		assertFalse(cut.isBNode(id));
 		verify(bnodesAndLiteralsDictionary, times(0)).isBNode(id);
 
-		id[0] = ThreeTieredValueDictionary.MARKER + 1;
+		id[0] = ThreeTieredNodeDictionary.MARKER + 1;
 		cut.isBNode(id);
 
 		verify(bnodesAndLiteralsDictionary).isBNode(id);
@@ -130,11 +130,11 @@ public class ThreeTieredValueDictionaryTest {
 
 		assertFalse(cut.isLiteral(null));
 
-		id[0] = ThreeTieredValueDictionary.MARKER;
+		id[0] = ThreeTieredNodeDictionary.MARKER;
 		assertFalse(cut.isLiteral(id));
 		verify(bnodesAndLiteralsDictionary, times(0)).isLiteral(id);
 
-		id[0] = ThreeTieredValueDictionary.MARKER + 1;
+		id[0] = ThreeTieredNodeDictionary.MARKER + 1;
 		cut.isLiteral(id);
 
 		verify(bnodesAndLiteralsDictionary).isLiteral(id);
@@ -150,14 +150,14 @@ public class ThreeTieredValueDictionaryTest {
 
 		assertFalse(cut.isResource(null));
 
-		id[0] = ThreeTieredValueDictionary.MARKER;
+		id[0] = ThreeTieredNodeDictionary.MARKER;
 		assertTrue(cut.isResource(id));
 
 		final byte[] tooShort = new byte[17 - 1];
 		final byte[] tooLong = new byte[17 + 1];
 
-		tooShort[0] = ThreeTieredValueDictionary.MARKER;
-		tooLong[0] = ThreeTieredValueDictionary.MARKER;
+		tooShort[0] = ThreeTieredNodeDictionary.MARKER;
+		tooLong[0] = ThreeTieredNodeDictionary.MARKER;
 
 		assertTrue(cut.isResource(tooShort));
 		assertTrue(cut.isResource(tooLong));

@@ -1,7 +1,7 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
 /**
- * Marker exception thrown in case a dictionary fails its initialisation.
+ * Marker exception thrown in case the initialisation of an {@link Initialisable} fails.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 

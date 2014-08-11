@@ -1,6 +1,6 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
-import org.gazzax.labs.jena.nosql.fwk.dictionary.node.ValueDictionaryBase;
+import org.gazzax.labs.jena.nosql.fwk.dictionary.node.TopLevelDictionaryBase;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
 /**
@@ -20,12 +20,12 @@ public class BIndex implements Initialisable{
 	final String name;
 	
 	/**
-	 * Builds a new index with the given data.
+	 * Builds a new index with the given name.
 	 * 
-	 * @param indexName the name associated with this index.
+	 * @param name the name of this index.
 	 */
-	public BIndex(final String indexName) {
-		name = indexName;
+	public BIndex(final String name) {
+		this.name = name;
 	}
 	
 	@Override
@@ -35,7 +35,7 @@ public class BIndex implements Initialisable{
 				byte[].class,
 				name,
 				false,
-				ValueDictionaryBase.NOT_SET);
+				TopLevelDictionaryBase.NOT_SET);
 		byValue.initialise(factory);
 
 		byId = new PersistentMap<byte[], String>(
@@ -43,7 +43,7 @@ public class BIndex implements Initialisable{
 				String.class,
 				name + "_REVERSE",
 				false,
-				"");
+				Constants.EMPTY_STRING);
 		byId.initialise(factory);
 	}
 	
@@ -66,7 +66,7 @@ public class BIndex implements Initialisable{
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public String getQuick(final byte[] id) throws StorageLayerException {
-		return byId.getQuick(id);
+		return byId.get(id);
 	}
 
 	/**
@@ -77,8 +77,8 @@ public class BIndex implements Initialisable{
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public void putQuick(final String value, final byte[] id) throws StorageLayerException {
-		byValue.putQuick(value, id);
-		byId.putQuick(id, value);
+		byValue.put(value, id);
+		byId.put(id, value);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class BIndex implements Initialisable{
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public void remove(final String n3) throws StorageLayerException {
-		byId.removeQuick(byValue.get(n3));
-		byValue.removeQuick(n3);
+		byId.remove(byValue.get(n3));
+		byValue.remove(n3);
 	}
 }

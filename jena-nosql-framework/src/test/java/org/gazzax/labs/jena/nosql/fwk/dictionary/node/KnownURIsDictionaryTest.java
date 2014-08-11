@@ -182,7 +182,7 @@ public class KnownURIsDictionaryTest {
 			final String n3 = NTriples.asNtURI(uri);
 
 			// Make sure the mock index returns "Sorry, we don't have such value".
-			when(dummyIndex.get(n3)).thenReturn(ValueDictionaryBase.NOT_SET);
+			when(dummyIndex.get(n3)).thenReturn(TopLevelDictionaryBase.NOT_SET);
 
 			// 1. ask for uri.
 			byte[] id = cut.getID(uri, isPredicate);
@@ -190,7 +190,7 @@ public class KnownURIsDictionaryTest {
 			// 2. make sure the identifier is well-formed.
 			assertEquals(KnownURIsDictionary.ID_LENGTH, id.length);
 			assertEquals(KnownURIsDictionary.KNOWN_URI_MARKER, id[0]);
-			assertEquals(ValueDictionaryBase.RESOURCE_BYTE_FLAG, id[1]);
+			assertEquals(TopLevelDictionaryBase.RESOURCE_BYTE_FLAG, id[1]);
 
 			// 3. make sure the decoratee wasn't involved in identifier creation.
 			verify(decoratee, times(0)).getID(uri, isPredicate);
@@ -248,7 +248,7 @@ public class KnownURIsDictionaryTest {
 		final String n3 = NTriples.asNtURI(managedUri);
 
 		when(dummyIndex.getQuick(any(byte[].class))).thenReturn(n3);
-		when(dummyIndex.get(n3)).thenReturn(ValueDictionaryBase.NOT_SET);
+		when(dummyIndex.get(n3)).thenReturn(TopLevelDictionaryBase.NOT_SET);
 
 		byte[] id = cut.getID(managedUri, isPredicate);
 

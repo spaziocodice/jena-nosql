@@ -5,6 +5,9 @@ import javax.management.MXBean;
 /**
  * Management interface of a Cache (String or Value) dictionary.
  * 
+ * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
+ * 
+ * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
  * @since 1.1.0
  */

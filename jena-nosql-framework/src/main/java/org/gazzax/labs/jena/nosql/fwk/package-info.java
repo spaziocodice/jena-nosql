@@ -1,4 +1,5 @@
 /**
+ * Jena-nosql framework top level package.
  * This package contains code derived from CumulusRDF code with many thanks to CumulusRDF team for allowing this.
  * 
  * @see https://code.google.com/p/cumulusrdf

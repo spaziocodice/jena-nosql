@@ -18,7 +18,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
- * Test case for modes available in {@link CacheValueDictionary}.
+ * Test case for modes available in {@link CacheNodectionary}.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -28,8 +28,8 @@ import com.hp.hpl.jena.graph.NodeFactory;
  */
 public class CacheModeTest {
 
-	private CacheValueDictionary frontendDictionary;
-	private CacheValueDictionary firstLevelCache2;
+	private CacheNodectionary frontendDictionary;
+	private CacheNodectionary firstLevelCache2;
 
 	private TopLevelDictionary firstLevelDecoratee1;
 	private TopLevelDictionary firstLevelDecoratee2;
@@ -49,20 +49,20 @@ public class CacheModeTest {
 	public void firstLevelCache() throws Exception {
 		
 		leafDictionary = mock(TopLevelDictionary.class);
-		firstLevelDecoratee2 = new TransientValueDictionary(randomString(), leafDictionary, 0);
-		firstLevelCache2 = new CacheValueDictionary(
+		firstLevelDecoratee2 = new TransientNodeDictionary(randomString(), leafDictionary, 0);
+		firstLevelCache2 = new CacheNodectionary(
 				randomString(), 
 				firstLevelDecoratee2, 
-				CacheValueDictionary.DEFAULT_CACHE_SIZE, 
-				CacheValueDictionary.DEFAULT_CACHE_SIZE, 
+				CacheNodectionary.DEFAULT_CACHE_SIZE, 
+				CacheNodectionary.DEFAULT_CACHE_SIZE, 
 				false);
 
-		firstLevelDecoratee1 = new TransientValueDictionary(randomString(), firstLevelCache2, TransientValueDictionary.DEFAULT_THRESHOLD);
-		frontendDictionary = new CacheValueDictionary(
+		firstLevelDecoratee1 = new TransientNodeDictionary(randomString(), firstLevelCache2, TransientNodeDictionary.DEFAULT_THRESHOLD);
+		frontendDictionary = new CacheNodectionary(
 				randomString(), 
 				firstLevelDecoratee1, 
-				CacheValueDictionary.DEFAULT_CACHE_SIZE, 
-				CacheValueDictionary.DEFAULT_CACHE_SIZE, 
+				CacheNodectionary.DEFAULT_CACHE_SIZE, 
+				CacheNodectionary.DEFAULT_CACHE_SIZE, 
 				true);
 
 		frontendDictionary.initialise(STORAGE_LAYER_FACTORY);
@@ -77,7 +77,7 @@ public class CacheModeTest {
 		assertTrue(frontendDictionary.id2node_cache.containsKey(ByteBuffer.wrap(id)));
 		
 		final StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < ((TransientValueDictionary)firstLevelDecoratee1).threshold + 1; i++) {
+		for (int i = 0; i < ((TransientNodeDictionary)firstLevelDecoratee1).threshold + 1; i++) {
 			builder.append('a');
 		}
 

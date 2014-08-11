@@ -30,7 +30,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * This is useful when you want to separate the management of triples coming 
  * from well-known vocabularies such dc, dcterms, foaf.
  * Enabling this dictionary, which is not supposed to be used standalone, and 
- * decorating it with a {@link CacheValueDictionary} having a size moreless equal to 
+ * decorating it with a {@link CacheNodectionary} having a size moreless equal to 
  * the expected number of triples in managed vocabularies, allows for fast (in memory)
  * lookup of the corresponding entries.
  * 
@@ -40,7 +40,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class KnownURIsDictionary extends SingleIndexValueDictionary implements ManageableKnownURIsDictionary {
+public class KnownURIsDictionary extends SingleIndexNodeDictionary implements ManageableKnownURIsDictionary {
 
 	static final byte KNOWN_URI_MARKER = 31;
 	static final int ID_LENGTH = 19;
@@ -81,7 +81,7 @@ public class KnownURIsDictionary extends SingleIndexValueDictionary implements M
 		super(id, "DICT_WELL_KNOWN_URIS");
 		
 		if (decoratee == null) {
-			throw new IllegalArgumentException(MessageCatalog._00091_NULL_DECORATEE_DICT);
+			throw new IllegalArgumentException(MessageCatalog._00165_NULL_DECORATEE_DICT);
 		}
 		
 		this.decoratee = decoratee;

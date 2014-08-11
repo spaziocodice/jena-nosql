@@ -126,7 +126,7 @@ public class CacheStringDictionary extends StringDictionaryBase implements Manag
 		super(id);
 
 		if (decoratee == null) {
-			throw new IllegalArgumentException(MessageCatalog._00091_NULL_DECORATEE_DICT);
+			throw new IllegalArgumentException(MessageCatalog._00165_NULL_DECORATEE_DICT);
 		}
 
 		this.decoratee = decoratee;		

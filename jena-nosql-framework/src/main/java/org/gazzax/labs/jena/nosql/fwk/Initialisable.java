@@ -15,11 +15,11 @@ public interface Initialisable {
 	
 	/** 
 	 * Initializes this dictionary.
-	 * This is a callback method that the owning store instance uses for inform 
-	 * the domain object about its (startup) status.
+	 * This is a callback method that the owner of this instance uses for inform 
+	 * the domain object about its (startup) procedure.
 	 * 
-	 * @param factory the data access layer (abstract) factory.
-	 * @throws InitialisationException in case of initialisaton failure.
+	 * @param factory the storage layer factory.
+	 * @throws InitialisationException in case the initialisaton fails.
 	 */
 	void initialise(StorageLayerFactory factory) throws InitialisationException;
 }

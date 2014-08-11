@@ -28,7 +28,7 @@ import com.hp.hpl.jena.graph.Node;
  * @since 1.0
  */
 // FIXME deal with node deletion ...
-public class PersistentValueDictionary extends ValueDictionaryBase {
+public class PersistentNodeDictionary extends TopLevelDictionaryBase {
 	static final int ID_LENGTH = 17;
 
 	private BIndex soIndex;
@@ -39,7 +39,7 @@ public class PersistentValueDictionary extends ValueDictionaryBase {
 	 * 
 	 * @param id the dictionary identifier.
 	 */
-	public PersistentValueDictionary(final String id) {
+	public PersistentNodeDictionary(final String id) {
 		super(id);
 	} 
 	
@@ -119,7 +119,7 @@ public class PersistentValueDictionary extends ValueDictionaryBase {
 			id = resolveHashCollision(id, i);
 
 			if (i == 100) {
-				log.error(MessageCatalog._00071_UNABLE_TO_RESOLVE_COLLISION, n3, i);
+				log.error(MessageCatalog._00102_UNABLE_TO_RESOLVE_COLLISION, n3, i);
 			}
 		}
 		return id;
@@ -242,7 +242,7 @@ public class PersistentValueDictionary extends ValueDictionaryBase {
 
 		final String n3 = p ? pIndex.getQuick(id) : soIndex.getQuick(id);
 		if (n3 == null || n3.isEmpty()) {
-			log.error(MessageCatalog._00086_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
+			log.error(MessageCatalog._00726_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
 		}
 
 		return n3;

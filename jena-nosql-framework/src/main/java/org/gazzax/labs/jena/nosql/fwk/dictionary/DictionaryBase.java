@@ -34,30 +34,26 @@ import org.slf4j.LoggerFactory;
 public abstract class DictionaryBase<V> implements Dictionary<V>, ManageableDictionary  {
 	protected final Log log = new Log(LoggerFactory.getLogger(getClass()));
 	
-	protected final String id;
+	protected final String name;
 	protected final AtomicLong idLookupsCount = new AtomicLong();
 	protected final AtomicLong valueLookupsCount = new AtomicLong();
 
 	/**
-	 * Builds a new dictionary with the given identifier.
+	 * Builds a new dictionary with the given name.
 	 * 
-	 * @param id the dictionary identifier.
+	 * @param name the dictionary name.
 	 */
-	public DictionaryBase(final String id) {
-		this.id = id;
-	}
-	
-	/**
-	 * Returns the identifier associated with this dictionary.
-	 * 
-	 * @return the identifier associated with this dictionary.
-	 */
-	public String getId() {
-		return id;
+	public DictionaryBase(final String name) {
+		this.name = name;
 	}
 	
 	@Override
-	public final byte[] getID(final V value, final boolean p) throws StorageLayerException {
+	public String getName() {
+		return name;
+	}
+	
+	@Override
+	public byte[] getID(final V value, final boolean p) throws StorageLayerException {
 		idLookupsCount.incrementAndGet();
 
 		if (value == null) {
@@ -100,7 +96,7 @@ public abstract class DictionaryBase<V> implements Dictionary<V>, ManageableDict
 		try {
 			ManagementRegistrar.registerDictionary(this);
 		} catch (Exception exception) {
-			log.error(MessageCatalog._00111_MBEAN_ALREADY_REGISTERED, id);
+			log.error(MessageCatalog._00166_MBEAN_ALREADY_REGISTERED, name);
 			throw new InitialisationException(exception);
 		}
 	}

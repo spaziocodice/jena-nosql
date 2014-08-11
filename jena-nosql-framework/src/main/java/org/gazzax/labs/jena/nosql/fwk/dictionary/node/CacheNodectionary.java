@@ -29,7 +29,7 @@ import com.hp.hpl.jena.graph.Node;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class CacheValueDictionary extends ValueDictionaryBase implements ManageableCacheDictionary {
+public class CacheNodectionary extends TopLevelDictionaryBase implements ManageableCacheDictionary {
 	/**
 	 * First level strategy allows caching only for results that directly comes from the next decoratee in the chain.
 	 * This is useful in case you have an articulated decorator chain and you want to activate several caches in the chain
@@ -120,7 +120,7 @@ public class CacheValueDictionary extends ValueDictionaryBase implements Managea
 	 * @param valueCacheSize the Node cache size. In case <=0 It defaults to {@link #DEFAULT_CACHE_SIZE}
 	 * @param isFirstLevelCache a boolean that marks this cache as first level (or cumulative).
 	 */
-	public CacheValueDictionary(
+	public CacheNodectionary(
 			final String id, 
 			final TopLevelDictionary decoratee, 
 			final int idCacheSize, 
@@ -128,7 +128,7 @@ public class CacheValueDictionary extends ValueDictionaryBase implements Managea
 			final boolean isFirstLevelCache) {
 		super(id);
 		if (decoratee == null) {
-			throw new IllegalArgumentException(MessageCatalog._00091_NULL_DECORATEE_DICT);
+			throw new IllegalArgumentException(MessageCatalog._00165_NULL_DECORATEE_DICT);
 		}
 		this.decoratee = decoratee;
 		idCacheMaxSize = cacheSize(idCacheSize);

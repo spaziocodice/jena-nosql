@@ -33,7 +33,7 @@ import org.yaml.snakeyaml.Yaml;
  * @see <a href="http://en.wikipedia.org/wiki/Finite-state_machine">http://en.wikipedia.org/wiki/Finite-state_machine</a>
  * 
  * @author Andrea Gazzarini
- * @since 1.1.0
+ * @since 1.0
  */
 public class DefaultConfigurator implements Configuration<Map<String, Object>> {
 	

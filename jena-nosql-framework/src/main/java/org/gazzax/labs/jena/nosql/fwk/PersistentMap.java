@@ -14,8 +14,14 @@ import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import com.google.common.collect.AbstractIterator;
 
 /**
- * A map implementations that read and write key/value pairs from a persistent
- * storage.
+ * A map implementations that read and write key/value pairs from a persistent storage.
+ * Although the name and the behaviour recall the {@link Map} interface, this class doesn't implement
+ * that interface because 
+ * 
+ * <ul>
+ * 	<li>we don't need such complexity.</li>
+ * 	<li>we don't need polymorphism between this map and the standard {@link Map}s found in the java API</li>
+ * </ul>
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -29,8 +35,8 @@ public class PersistentMap<K, V> implements Initialisable {
 
 	private final class Entry implements Map.Entry<K, V> {
 
-		private final K _k;
-		private V _v;
+		private final K key;
+		private V value;
 
 		/**
 		 * Builds a new entry.
@@ -39,8 +45,8 @@ public class PersistentMap<K, V> implements Initialisable {
 		 * @param v the entry value.
 		 */
 		Entry(final K k, final V v) {
-			_k = k;
-			_v = v;
+			key = k;
+			value = v;
 		}
 
 		@Override
@@ -70,40 +76,39 @@ public class PersistentMap<K, V> implements Initialisable {
 
 		@Override
 		public K getKey() {
-			return _k;
+			return key;
 		}
 
 		@Override
 		public V getValue() {
-			return _v;
+			return value;
 		}
 
 		@Override
 		public int hashCode() {
-			return (_k == null ? 0 : _k.hashCode()) ^ (_v == null ? 0 : _v.hashCode());
+			return (key == null ? 0 : key.hashCode()) ^ (value == null ? 0 : value.hashCode());
 		}
 
 		@Override
 		public V setValue(final V value) {
-			this._v = value;
-			return _v;
+			this.value = value;
+			return value;
 		}
 
 		@Override
 		public String toString() {
-			return "[key = " + _k + ", value = " + _v + "]";
+			return "[key = " + key + ", value = " + value + "]";
 		}
 	}
 
-	private Class<K> _k;
-	private Class<V> _v;
+	private Class<K> k;
+	private Class<V> v;
 
-	private MapDAO<K, V> _dao;
+	private MapDAO<K, V> dao;
 
-	private int _size;
-	private final boolean _isBidirectional;
-	private final String _name;
-	private final V _defaultValue;
+	private final boolean isBidirectional;
+	private final String name;
+	private final V defaultValue;
 
 	/**
 	 * Builds a new persistent map with a given name.
@@ -112,16 +117,19 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @param k the key class.
 	 * @param v the value class.
 	 * @param bidirectional if this map is bidirectional.
-	 * @param defaultValue the default value that will be returned in case of
-	 *            empty search result.
+	 * @param defaultValue the default value that will be returned in case of empty search result.
 	 */
-	public PersistentMap(final Class<K> k, final Class<V> v, final String name, final boolean bidirectional,
+	public PersistentMap(
+			final Class<K> k, 
+			final Class<V> v, 
+			final String name, 
+			final boolean bidirectional,
 			final V defaultValue) {
-		_k = k;
-		_v = v;
-		_name = name;
-		_isBidirectional = bidirectional;
-		this._defaultValue = defaultValue;
+		this.k = k;
+		this.v = v;
+		this.name = name;
+		this.isBidirectional = bidirectional;
+		this.defaultValue = defaultValue;
 	}
 
 	/**
@@ -130,11 +138,9 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public void clear() throws StorageLayerException {
-
 		for (final K key : keySet()) {
 			remove(key);
 		}
-		_size = 0;
 	}
 
 	/**
@@ -145,7 +151,7 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public boolean containsKey(final K key) throws StorageLayerException {
-		return (key != null && _dao.contains(key));
+		return (key != null && dao.contains(key));
 	}
 
 	/**
@@ -161,11 +167,11 @@ public class PersistentMap<K, V> implements Initialisable {
 			return false;
 		}
 
-		if (_isBidirectional) {
+		if (isBidirectional) {
 			return getKeyQuick(value) != null;
 		} else {
-			for (final K key : _dao.keySet()) {
-				if (_dao.get(key).equals(value)) {
+			for (final K key : dao.keySet()) {
+				if (dao.get(key).equals(value)) {
 					return true;
 				}
 			}
@@ -199,12 +205,7 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public V get(final K key) throws StorageLayerException {
-
-		if (key == null) {
-			return null;
-		}
-
-		return _dao.get(key);
+		return (key != null) ? dao.get(key) : null;
 	}
 
 	/**
@@ -215,39 +216,18 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public K getKeyQuick(final V value) throws StorageLayerException {
-		return _dao.getKey(value);
-	}
-
-	/**
-	 * Returns the value associated with the given key.
-	 * 
-	 * @param key the key.
-	 * @return the value associated with the given key.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	public V getQuick(final K key) throws StorageLayerException {
-		return _dao.get(key);
+		return dao.getKey(value);
 	}
 
 	@Override
 	public void initialise(final StorageLayerFactory factory) throws InitialisationException {
-		_dao = factory.getMapDAO(_k, _v, _isBidirectional, _name);
+		dao = factory.getMapDAO(k, v, isBidirectional, name);
 		try {
-			_dao.setDefaultValue(_defaultValue);
-			_dao.createRequiredSchemaEntities();
+			dao.setDefaultValue(defaultValue);
+			dao.createRequiredSchemaEntities();
 		} catch (final StorageLayerException exception) {
 			throw new InitialisationException(exception);
 		}
-	}
-
-	/**
-	 * Returns true if this map is empty.
-	 * 
-	 * @return true if this map is empty.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	public boolean isEmpty() throws StorageLayerException {
-		return size() == 0;
 	}
 
 	/**
@@ -257,7 +237,7 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public Iterator<K> keyIterator() throws StorageLayerException {
-		return _dao.keyIterator();
+		return dao.keyIterator();
 	}
 
 	/**
@@ -267,32 +247,7 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	public Set<K> keySet() throws StorageLayerException {
-		return _dao.keySet();
-	}
-
-	/**
-	 * Puts the given entry key/value into this map. If a mapping already exists
-	 * for that key, it will be replaced with the new value.
-	 * 
-	 * @param key the key.
-	 * @param value the value.
-	 * @return the old mapping (if exists).
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	public V put(final K key, final V value) throws StorageLayerException {
-
-		if (key == null || value == null) {
-			return null;
-		}
-
-		final V old_value = get(key);
-		_dao.set(key, value);
-
-		if (old_value == null) {
-			_size++;
-		}
-
-		return old_value;
+		return dao.keySet();
 	}
 
 	/**
@@ -304,7 +259,7 @@ public class PersistentMap<K, V> implements Initialisable {
 	 */
 	public void putAll(final Map<? extends K, ? extends V> m) throws StorageLayerException {
 
-		for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+		for (final Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
@@ -319,42 +274,12 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @param value the value.
 	 * @throws StorageLayerException in case of data access failure.
 	 */
-	public void putQuick(final K key, final V value) throws StorageLayerException {
-
+	public void put(final K key, final V value) throws StorageLayerException {
 		if (key == null || value == null) {
 			return;
 		}
 
-		_dao.set(key, value);
-
-		_size = -1;
-	}
-
-	/**
-	 * Removes the entry with the given key from the map.
-	 * 
-	 * @param key the key.
-	 * @return the old value mapped to the key, or null if nothing was mapped to
-	 *         that key.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	@SuppressWarnings("unchecked")
-	public V remove(final K key) throws StorageLayerException {
-
-		if (key == null) {
-			return null;
-		}
-
-		final V oldValue = get(key);
-
-		if (oldValue == null) {
-			return null;
-		}
-
-		_dao.delete(key);
-
-		_size--;
-		return oldValue;
+		dao.set(key, value);
 	}
 
 	/**
@@ -364,28 +289,12 @@ public class PersistentMap<K, V> implements Initialisable {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	@SuppressWarnings("unchecked")
-	public void removeQuick(final K key) throws StorageLayerException {
-
+	public void remove(final K key) throws StorageLayerException {
 		if (key == null) {
 			return;
 		}
 
-		_dao.delete((K) key);
-		_size = -1;
-	}
-
-	/**
-	 * Returns the amount of entries in this map.
-	 * 
-	 * @return the amount of entries in this map.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	public int size() throws StorageLayerException {
-		if (_size == -1) {
-			_size = entrySet().size();
-		}
-
-		return _size;
+		dao.delete(key);
 	}
 
 	/**

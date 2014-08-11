@@ -5,10 +5,11 @@ import java.util.Arrays;
 /**
  * Booch utility for bytes manipulation.
  * 
- * @author Andreas Wagner
+ * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
+ * 
+ * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
- * @author Sebastian Schmidt
- * @since 1.0.1
+ * @since 1.0
  */
 public abstract class Bytes {
 

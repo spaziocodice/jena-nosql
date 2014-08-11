@@ -2,10 +2,11 @@ package org.gazzax.labs.jena.nosql.fwk.mx;
 
 
 /**
- * Marker interface which defines a CumulusRDF manageable object.
+ * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
+ * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
- * @since 1.1.0
+ * @since 1.0
  */
 public interface Manageable {
 	/**
@@ -13,5 +14,5 @@ public interface Manageable {
 	 * 
 	 * @return a mnemonic code that identifies this manageable instance.
 	 */
-	String getId();
+	String getName();
 }

@@ -15,7 +15,6 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
  * @param <V> the kind of resource managed by this dictionary.
  */
 public interface Dictionary<V> extends Initialisable {
-
 	byte[] NOT_SET = { 1 }; 
 	byte RESOURCE_BYTE_FLAG = 8; 
 	byte BNODE_BYTE_FLAG = 16; 
@@ -56,9 +55,10 @@ public interface Dictionary<V> extends Initialisable {
 	void removeValue(V value, boolean p) throws StorageLayerException;
 	
 	/**
-	 * Returns a mnemonic code that identifies this dictionary.
+	 * Returns the name of the dictionary.
+	 * The name should acts as an identifier, too.
 	 * 
-	 * @return a mnemonic code that identifies this dictionary.
+	 * @return the name of the dictionary.
 	 */
-	String getId();
+	String getName();
 }

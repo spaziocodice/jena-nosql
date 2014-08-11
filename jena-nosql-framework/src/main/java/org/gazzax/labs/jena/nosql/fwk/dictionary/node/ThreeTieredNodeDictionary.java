@@ -31,7 +31,7 @@ import static org.gazzax.labs.jena.nosql.fwk.util.Utility.*;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class ThreeTieredValueDictionary extends ValueDictionaryBase {
+public class ThreeTieredNodeDictionary extends TopLevelDictionaryBase {
 	static final byte MARKER = 30;
 
 	private final Dictionary<String> namespaces;
@@ -47,7 +47,7 @@ public class ThreeTieredValueDictionary extends ValueDictionaryBase {
 	 * @param localNames the dictionary that will be used for local names.
 	 * @param bNodesAndLiterals the dictionary that will be used for local names and other kind of resources.
 	 */
-	public ThreeTieredValueDictionary(
+	public ThreeTieredNodeDictionary(
 			final String id,
 			final Dictionary<String> namespaces,
 			final Dictionary<String> localNames,
@@ -55,7 +55,7 @@ public class ThreeTieredValueDictionary extends ValueDictionaryBase {
 		super(id);
 		
 		if (namespaces == null || localNames == null || bNodesAndLiterals == null) {
-			throw new IllegalArgumentException(MessageCatalog._00091_NULL_DECORATEE_DICT);
+			throw new IllegalArgumentException(MessageCatalog._00165_NULL_DECORATEE_DICT);
 		}
 		
 		this.namespaces = namespaces;

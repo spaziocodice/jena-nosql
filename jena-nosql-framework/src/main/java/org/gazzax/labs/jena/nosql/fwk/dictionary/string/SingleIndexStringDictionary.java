@@ -76,7 +76,7 @@ public abstract class SingleIndexStringDictionary extends StringDictionaryBase {
 
 		final String value = index.getQuick(id);
 		if (value == null || value.isEmpty()) {
-			log.error(MessageCatalog._00086_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
+			log.error(MessageCatalog._00726_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
 		}
 
 		return value;

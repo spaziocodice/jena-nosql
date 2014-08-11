@@ -22,7 +22,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
- * Test case for {@link CacheValueDictionary}.
+ * Test case for {@link CacheNodectionary}.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -32,7 +32,7 @@ import com.hp.hpl.jena.graph.NodeFactory;
  */
 public class CacheValueDictionaryTest {
 
-	private CacheValueDictionary cut;
+	private CacheNodectionary cut;
 	private TopLevelDictionary decoratee;
 
 	byte[] id = { 4, 5, 3, 2, 6, 3, 2, 1 };
@@ -47,11 +47,11 @@ public class CacheValueDictionaryTest {
 	public void setUp() throws Exception {
 
 		decoratee = mock(TopLevelDictionary.class);
-		cut = new CacheValueDictionary(
+		cut = new CacheNodectionary(
 				randomString(), 
 				decoratee, 
-				CacheValueDictionary.DEFAULT_CACHE_SIZE, 
-				CacheValueDictionary.DEFAULT_CACHE_SIZE, 
+				CacheNodectionary.DEFAULT_CACHE_SIZE, 
+				CacheNodectionary.DEFAULT_CACHE_SIZE, 
 				false);
 
 		cut.initialise(STORAGE_LAYER_FACTORY);
@@ -63,8 +63,8 @@ public class CacheValueDictionaryTest {
 	 */
 	@Test
 	public void defaultCacheSize() {
-		assertEquals(CacheValueDictionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-0));
-		assertEquals(CacheValueDictionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-12));
+		assertEquals(CacheNodectionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-0));
+		assertEquals(CacheNodectionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-12));
 		assertEquals(12345, cut.cacheSize(12345));
 	}
 	
@@ -74,11 +74,11 @@ public class CacheValueDictionaryTest {
 	@Test
 	public void decorateeIsNull() {
 		try {
-			cut = new CacheValueDictionary(
+			cut = new CacheNodectionary(
 					randomString(), 
 					null, 
-					CacheValueDictionary.DEFAULT_CACHE_SIZE, 
-					CacheValueDictionary.DEFAULT_CACHE_SIZE, 
+					CacheNodectionary.DEFAULT_CACHE_SIZE, 
+					CacheNodectionary.DEFAULT_CACHE_SIZE, 
 					false);
 			fail();
 		} catch (final IllegalArgumentException expected) {

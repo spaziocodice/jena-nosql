@@ -3,18 +3,11 @@ package org.gazzax.labs.jena.nosql.fwk.log;
 import org.slf4j.Logger;
 
 /**
- * CumulusRDF Logger.
- * A simple SLF4j wrapper that avoids "if" statements like
- * 
- * <pre>
- * 	if (logger.isDebugEnabled(...))
- * </pre>
- * 
- * In addition provides some optimization for string / arguments
- * concatenation.
+ * Logger wrapper.
+ * A simple SLF4j wrapper that avoids "if" statements within the code.
  * 
  * @author Andrea Gazzarini
- * @since 1.1
+ * @since 1.0
  */
 public class Log {
 	

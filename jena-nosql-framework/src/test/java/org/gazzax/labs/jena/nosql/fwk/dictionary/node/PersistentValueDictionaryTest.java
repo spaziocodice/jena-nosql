@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test case for {@link PersistentValueDictionary}.
+ * Test case for {@link PersistentNodeDictionary}.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -20,14 +20,14 @@ import org.junit.Test;
  */
 public class PersistentValueDictionaryTest {
 
-	private PersistentValueDictionary cut;
+	private PersistentNodeDictionary cut;
 
 	/**
 	 * Setup fixture for this test case.
 	 */
 	@Before
 	public void setUp() {
-		cut = new PersistentValueDictionary(randomString());
+		cut = new PersistentNodeDictionary(randomString());
 	}
 
 	/**
@@ -35,12 +35,12 @@ public class PersistentValueDictionaryTest {
 	 */
 	@Test
 	public void isBNode() {
-		byte[] id = new byte[PersistentValueDictionary.ID_LENGTH];
+		byte[] id = new byte[PersistentNodeDictionary.ID_LENGTH];
 		RANDOMIZER.nextBytes(id);
 
 		assertFalse(cut.isBNode(null));
-		assertFalse("Wrong id length.", cut.isBNode(new byte[RANDOMIZER.nextInt(PersistentValueDictionary.ID_LENGTH)]));
-		assertFalse("Wrong id length.", cut.isBNode(new byte[(RANDOMIZER.nextInt(PersistentValueDictionary.ID_LENGTH) + 1) * 100]));
+		assertFalse("Wrong id length.", cut.isBNode(new byte[RANDOMIZER.nextInt(PersistentNodeDictionary.ID_LENGTH)]));
+		assertFalse("Wrong id length.", cut.isBNode(new byte[(RANDOMIZER.nextInt(PersistentNodeDictionary.ID_LENGTH) + 1) * 100]));
 
 		id[0] = Dictionary.RESOURCE_BYTE_FLAG;
 		assertFalse(cut.isBNode(id));
@@ -57,12 +57,12 @@ public class PersistentValueDictionaryTest {
 	 */
 	@Test
 	public void isLiteral() {
-		byte[] id = new byte[PersistentValueDictionary.ID_LENGTH];
+		byte[] id = new byte[PersistentNodeDictionary.ID_LENGTH];
 		RANDOMIZER.nextBytes(id);
 
 		assertFalse(cut.isBNode(null));
-		assertFalse("Wrong id length.", cut.isLiteral(new byte[RANDOMIZER.nextInt(PersistentValueDictionary.ID_LENGTH)]));
-		assertFalse("Wrong id length.", cut.isLiteral(new byte[(RANDOMIZER.nextInt(PersistentValueDictionary.ID_LENGTH) + 1) * 100]));
+		assertFalse("Wrong id length.", cut.isLiteral(new byte[RANDOMIZER.nextInt(PersistentNodeDictionary.ID_LENGTH)]));
+		assertFalse("Wrong id length.", cut.isLiteral(new byte[(RANDOMIZER.nextInt(PersistentNodeDictionary.ID_LENGTH) + 1) * 100]));
 
 		id[0] = Dictionary.RESOURCE_BYTE_FLAG;
 		assertFalse(cut.isLiteral(id));
@@ -79,12 +79,12 @@ public class PersistentValueDictionaryTest {
 	 */
 	@Test
 	public void isResource() {
-		byte[] id = new byte[PersistentValueDictionary.ID_LENGTH];
+		byte[] id = new byte[PersistentNodeDictionary.ID_LENGTH];
 		RANDOMIZER.nextBytes(id);
 
 		assertFalse(cut.isResource(null));
-		assertFalse("Wrong id length.", cut.isResource(new byte[RANDOMIZER.nextInt(PersistentValueDictionary.ID_LENGTH)]));
-		assertFalse("Wrong id length.", cut.isResource(new byte[(RANDOMIZER.nextInt(PersistentValueDictionary.ID_LENGTH) + 1) * 100]));
+		assertFalse("Wrong id length.", cut.isResource(new byte[RANDOMIZER.nextInt(PersistentNodeDictionary.ID_LENGTH)]));
+		assertFalse("Wrong id length.", cut.isResource(new byte[(RANDOMIZER.nextInt(PersistentNodeDictionary.ID_LENGTH) + 1) * 100]));
 
 		id[0] = Dictionary.LITERAL_BYTE_FLAG;
 		assertFalse(cut.isResource(id));

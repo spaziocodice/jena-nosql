@@ -3,8 +3,11 @@ package org.gazzax.labs.jena.nosql.fwk.mx;
 import javax.management.MXBean;
 
 /**
- * Dictiobary common management interface.
+ * Dictionary common management interface.
  * 
+ * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
+ * 
+ * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
  * @since 1.1.0
  */

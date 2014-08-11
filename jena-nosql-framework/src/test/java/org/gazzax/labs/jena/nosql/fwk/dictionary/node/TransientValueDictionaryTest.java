@@ -33,7 +33,7 @@ import org.junit.Test;
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * Test case for {@link TransientValueDictionary}.
+ * Test case for {@link TransientNodeDictionary}.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -54,7 +54,7 @@ public class TransientValueDictionaryTest {
 	byte[] longLiteralIdGeneratedByEmbeddedDictionary;
 	byte[] longLiteralId;
 	
-	private TransientValueDictionary cut;
+	private TransientNodeDictionary cut;
 	
 	/**
 	 * Setup fixture for this test.
@@ -64,25 +64,25 @@ public class TransientValueDictionaryTest {
 	@Before
 	public void setUp() throws Exception {
 
-		longLiteralId = new byte[PersistentValueDictionary.ID_LENGTH + 1];
-		longLiteralId[0] = TransientValueDictionary.THRESHOLD_EXCEEDED;
-		longLiteralId[1] = ValueDictionaryBase.LITERAL_BYTE_FLAG;
+		longLiteralId = new byte[PersistentNodeDictionary.ID_LENGTH + 1];
+		longLiteralId[0] = TransientNodeDictionary.THRESHOLD_EXCEEDED;
+		longLiteralId[1] = TopLevelDictionaryBase.LITERAL_BYTE_FLAG;
 
-		longLiteralIdGeneratedByEmbeddedDictionary = new byte[PersistentValueDictionary.ID_LENGTH];
-		longLiteralIdGeneratedByEmbeddedDictionary[0] = ValueDictionaryBase.LITERAL_BYTE_FLAG;
-		for (int i = 1; i < PersistentValueDictionary.ID_LENGTH; i++) {
+		longLiteralIdGeneratedByEmbeddedDictionary = new byte[PersistentNodeDictionary.ID_LENGTH];
+		longLiteralIdGeneratedByEmbeddedDictionary[0] = TopLevelDictionaryBase.LITERAL_BYTE_FLAG;
+		for (int i = 1; i < PersistentNodeDictionary.ID_LENGTH; i++) {
 			longLiteralIdGeneratedByEmbeddedDictionary[i] = (byte) i;
 		}
 
-		for (int i = 1; i < PersistentValueDictionary.ID_LENGTH; i++) {
+		for (int i = 1; i < PersistentNodeDictionary.ID_LENGTH; i++) {
 			longLiteralId[i + 1] = (byte) i;
 		}
 
-		cut = new TransientValueDictionary(randomString())
+		cut = new TransientNodeDictionary(randomString())
 		{
 			@Override
 			public void initialiseInternal(final StorageLayerFactory factory) {
-				longLiteralsDictionary = new ValueDictionaryBase(randomString()) {
+				longLiteralsDictionary = new TopLevelDictionaryBase(randomString()) {
 					
 					@Override
 					public void removeValue(final Node value, final boolean p) {
@@ -161,10 +161,10 @@ public class TransientValueDictionaryTest {
 	@Test
 	public void isBNode() {
 		assertFalse(cut.isBNode(null));
-		assertFalse(cut.isBNode(new byte[] { TransientValueDictionary.THRESHOLD_EXCEEDED }));
-		assertFalse(cut.isBNode(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.LITERAL_BYTE_FLAG }));
-		assertFalse(cut.isBNode(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.RESOURCE_BYTE_FLAG }));
-		assertTrue(cut.isBNode(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.BNODE_BYTE_FLAG }));
+		assertFalse(cut.isBNode(new byte[] { TransientNodeDictionary.THRESHOLD_EXCEEDED }));
+		assertFalse(cut.isBNode(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.LITERAL_BYTE_FLAG }));
+		assertFalse(cut.isBNode(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.RESOURCE_BYTE_FLAG }));
+		assertTrue(cut.isBNode(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.BNODE_BYTE_FLAG }));
 	}
 
 	/**
@@ -173,11 +173,11 @@ public class TransientValueDictionaryTest {
 	@Test
 	public void isLiteral() {
 		assertFalse(cut.isLiteral(null));
-		assertFalse(cut.isLiteral(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.BNODE_BYTE_FLAG }));
-		assertFalse(cut.isLiteral(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.RESOURCE_BYTE_FLAG }));
+		assertFalse(cut.isLiteral(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.BNODE_BYTE_FLAG }));
+		assertFalse(cut.isLiteral(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.RESOURCE_BYTE_FLAG }));
 
-		assertTrue(cut.isLiteral(new byte[] { TransientValueDictionary.THRESHOLD_EXCEEDED }));
-		assertTrue(cut.isLiteral(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.LITERAL_BYTE_FLAG }));
+		assertTrue(cut.isLiteral(new byte[] { TransientNodeDictionary.THRESHOLD_EXCEEDED }));
+		assertTrue(cut.isLiteral(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.LITERAL_BYTE_FLAG }));
 	}
 
 	/**
@@ -186,11 +186,11 @@ public class TransientValueDictionaryTest {
 	@Test
 	public void isResource() {
 		assertFalse(cut.isResource(null));
-		assertFalse(cut.isResource(new byte[] { TransientValueDictionary.THRESHOLD_EXCEEDED }));
-		assertFalse(cut.isResource(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.LITERAL_BYTE_FLAG }));
-		assertFalse(cut.isResource(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.BNODE_BYTE_FLAG }));
+		assertFalse(cut.isResource(new byte[] { TransientNodeDictionary.THRESHOLD_EXCEEDED }));
+		assertFalse(cut.isResource(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.LITERAL_BYTE_FLAG }));
+		assertFalse(cut.isResource(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.BNODE_BYTE_FLAG }));
 
-		assertTrue(cut.isResource(new byte[] { TransientValueDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.RESOURCE_BYTE_FLAG }));
+		assertTrue(cut.isResource(new byte[] { TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED, Dictionary.RESOURCE_BYTE_FLAG }));
 	}
 
 	/**
@@ -199,7 +199,7 @@ public class TransientValueDictionaryTest {
 	@Test
 	public void nullLongLiteralDictionary() {
 		try {
-			cut = new TransientValueDictionary(randomString(), null, 0);
+			cut = new TransientNodeDictionary(randomString(), null, 0);
 			fail();
 		} catch (final IllegalArgumentException expected) {
 			// Nothing to be done...this is the expected behaviour
@@ -215,14 +215,14 @@ public class TransientValueDictionaryTest {
 	public void decorateeInitialisation() throws InitialisationException {
 		final TopLevelDictionary decoratee = mock(TopLevelDictionary.class);
 		
-		cut = new TransientValueDictionary(randomString(), decoratee, TransientValueDictionary.DEFAULT_THRESHOLD);
+		cut = new TransientNodeDictionary(randomString(), decoratee, TransientNodeDictionary.DEFAULT_THRESHOLD);
 		cut.initialise(STORAGE_LAYER_FACTORY);
 		
 		verify(decoratee).initialise(STORAGE_LAYER_FACTORY);
 	}
 	
 	/**
-	 * Remove() method itself has no effect on the {@link TransientValueDictionary} unless the given value is a long literal.
+	 * Remove() method itself has no effect on the {@link TransientNodeDictionary} unless the given value is a long literal.
 	 * 
 	 * @throws Exception never otherwise the test fails.
 	 */
@@ -231,26 +231,26 @@ public class TransientValueDictionaryTest {
 		final Node uri = buildResource("http://example.org#it");
 		final TopLevelDictionary decoratee = mock(TopLevelDictionary.class);
 		
-		cut = new TransientValueDictionary(randomString(), decoratee, TransientValueDictionary.DEFAULT_THRESHOLD);
+		cut = new TransientNodeDictionary(randomString(), decoratee, TransientNodeDictionary.DEFAULT_THRESHOLD);
 		cut.removeValue(uri, false);
 		
 		verify(decoratee, times(0)).removeValue(uri, false);
 	}
 	
 	/**
-	 * Remove() method itself has no effect on the {@link TransientValueDictionary} unless the given value is a long literal.
+	 * Remove() method itself has no effect on the {@link TransientNodeDictionary} unless the given value is a long literal.
 	 * 
 	 * @throws Exception never otherwise the test fails.
 	 */
 	@Test
 	public void removeValueInvolvesLongLiteralDictionary() throws Exception {
-		final byte[] persistentId = { TransientValueDictionary.THRESHOLD_EXCEEDED, 2, 3, 4, 5, 6, 7, 78, 8, 9 };
+		final byte[] persistentId = { TransientNodeDictionary.THRESHOLD_EXCEEDED, 2, 3, 4, 5, 6, 7, 78, 8, 9 };
 
 		final TopLevelDictionary decoratee = mock(TopLevelDictionary.class);
 		
 		when(decoratee.getID(longLiteral, false)).thenReturn(persistentId);
 		
-		cut = new TransientValueDictionary(randomString(), decoratee, TransientValueDictionary.DEFAULT_THRESHOLD);
+		cut = new TransientNodeDictionary(randomString(), decoratee, TransientNodeDictionary.DEFAULT_THRESHOLD);
 		cut.removeValue(longLiteral, false);
 		
 		verify(decoratee).removeValue(longLiteral, false);		
@@ -261,9 +261,9 @@ public class TransientValueDictionaryTest {
 	 */
 	@Test
 	public void disableLongLiteralDictionary() {
-		cut = new TransientValueDictionary(randomString(), new PersistentValueDictionary(randomString()), 0);
+		cut = new TransientNodeDictionary(randomString(), new PersistentNodeDictionary(randomString()), 0);
 		assertEquals(Integer.MAX_VALUE, cut.threshold);
-		assertTrue(cut.longLiteralsDictionary instanceof PersistentValueDictionary);		
+		assertTrue(cut.longLiteralsDictionary instanceof PersistentNodeDictionary);		
 	}
 
 	/**
@@ -274,20 +274,20 @@ public class TransientValueDictionaryTest {
 		final Random random = new Random();
 		for (int i = 0; i < random.nextInt(10) + 1; i++) {
 			final int negativeThreshold = (random.nextInt(1000) + 1) * -1;
-			cut = new TransientValueDictionary(randomString(), new PersistentValueDictionary(randomString()), negativeThreshold);
-			assertEquals(TransientValueDictionary.DEFAULT_THRESHOLD, cut.threshold);
-			assertTrue(cut.longLiteralsDictionary instanceof PersistentValueDictionary);					
+			cut = new TransientNodeDictionary(randomString(), new PersistentNodeDictionary(randomString()), negativeThreshold);
+			assertEquals(TransientNodeDictionary.DEFAULT_THRESHOLD, cut.threshold);
+			assertTrue(cut.longLiteralsDictionary instanceof PersistentNodeDictionary);					
 		}
 	}
 
 	/**
-	 * In case of default constructor, default values are {@link PersistentValueDictionary} for long literals and 1K as threshold.
+	 * In case of default constructor, default values are {@link PersistentNodeDictionary} for long literals and 1K as threshold.
 	 */
 	@Test
 	public void defaultValues() {
-		cut = new TransientValueDictionary(randomString());
-		assertEquals(TransientValueDictionary.DEFAULT_THRESHOLD, cut.threshold);
-		assertTrue(cut.longLiteralsDictionary instanceof PersistentValueDictionary);
+		cut = new TransientNodeDictionary(randomString());
+		assertEquals(TransientNodeDictionary.DEFAULT_THRESHOLD, cut.threshold);
+		assertTrue(cut.longLiteralsDictionary instanceof PersistentNodeDictionary);
 	}
 	
 	/**
@@ -322,13 +322,13 @@ public class TransientValueDictionaryTest {
 	public void getID() throws Exception {
 		assertIdEncodingWithoutThresholdExceeding(
 				firstMember, 
-				ValueDictionaryBase.RESOURCE_BYTE_FLAG);
+				TopLevelDictionaryBase.RESOURCE_BYTE_FLAG);
 		assertIdEncodingWithoutThresholdExceeding(
 				buildBNode("4356682"), 
-				ValueDictionaryBase.BNODE_BYTE_FLAG);
+				TopLevelDictionaryBase.BNODE_BYTE_FLAG);
 		assertIdEncodingWithoutThresholdExceeding(
 				buildLiteral("This is a literal"), 
-				ValueDictionaryBase.LITERAL_BYTE_FLAG);
+				TopLevelDictionaryBase.LITERAL_BYTE_FLAG);
 	}
 
 	/**
@@ -542,7 +542,7 @@ public class TransientValueDictionaryTest {
 		final String n3 = NTriples.asNt(value);
 		final byte[] binary = n3.getBytes(Constants.CHARSET_UTF8);
 		final byte[] expected = new byte[binary.length + 2];
-		expected[0] = TransientValueDictionary.THRESHOLD_NOT_EXCEEDED;
+		expected[0] = TransientNodeDictionary.THRESHOLD_NOT_EXCEEDED;
 		expected[1] = marker;
 		
 		fillIn(expected, 2, binary);

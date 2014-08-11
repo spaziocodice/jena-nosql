@@ -18,8 +18,8 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Quad;
 
 /**
- * Base for dictionary implementations.
- * Provides shared and common behaviour for concrete dictionary implementors.
+ * Supertype layer for Node-based (Top Level) dictionary implementations.
+ * Provides shared and common behaviour for concrete top level dictionary implementors.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -27,7 +27,7 @@ import com.hp.hpl.jena.sparql.core.Quad;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public abstract class ValueDictionaryBase extends DictionaryBase<Node> implements TopLevelDictionary {
+public abstract class TopLevelDictionaryBase extends DictionaryBase<Node> implements TopLevelDictionary {
 
 	protected static final ThreadLocal<DictionaryRuntimeContext> RUNTIME_CONTEXTS = new ThreadLocal<DictionaryRuntimeContext>() {
 		protected DictionaryRuntimeContext initialValue() {
@@ -40,7 +40,7 @@ public abstract class ValueDictionaryBase extends DictionaryBase<Node> implement
 	 * 
 	 * @param id the dictionary identifier.
 	 */
-	public ValueDictionaryBase(final String id) {
+	public TopLevelDictionaryBase(final String id) {
 		super(id);
 	}
 	
@@ -98,7 +98,7 @@ public abstract class ValueDictionaryBase extends DictionaryBase<Node> implement
 						getID(quad.getObject(), false),
 						getID(quad.getGraph(), false) };
 				} catch (StorageLayerException exception) {
-					log.error(MessageCatalog._00093_DATA_ACCESS_LAYER_FAILURE, exception);
+					log.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);
 					return endOfData();
 				}
 			}
@@ -125,7 +125,7 @@ public abstract class ValueDictionaryBase extends DictionaryBase<Node> implement
 						getID(Triple.getPredicate(), true),
 						getID(Triple.getObject(), false) };
 				} catch (final StorageLayerException exception) {
-					log.error(MessageCatalog._00093_DATA_ACCESS_LAYER_FAILURE, exception);
+					log.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);
 					return endOfData();
 				}
 			}
@@ -146,7 +146,7 @@ public abstract class ValueDictionaryBase extends DictionaryBase<Node> implement
 					try {
 						return asQuad(ids[0], ids[1], ids[2], ids[3]);
 					} catch (StorageLayerException exception) {
-						log.error(MessageCatalog._00093_DATA_ACCESS_LAYER_FAILURE, exception);
+						log.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);
 						return endOfData();
 					}
 				}
@@ -170,7 +170,7 @@ public abstract class ValueDictionaryBase extends DictionaryBase<Node> implement
 					try {
 						return asTriple(ids[0], ids[1], ids[2]);
 					} catch (StorageLayerException exception) {
-						log.error(MessageCatalog._00093_DATA_ACCESS_LAYER_FAILURE, exception);
+						log.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);
 						return endOfData();
 					}
 				}
@@ -227,4 +227,15 @@ public abstract class ValueDictionaryBase extends DictionaryBase<Node> implement
 		fillIn(result, 2 + 2 + id1.length + 2 + id2.length + 2, id3, id3.length);
 		return result;
 	}
+	
+	@Override
+	public final byte[] getID(final Node value, final boolean p) throws StorageLayerException {
+		idLookupsCount.incrementAndGet();
+
+		if (value == null || value == Node.ANY) {
+			return null;
+		}
+		
+		return getIdInternal(value, p);
+	};	
 }

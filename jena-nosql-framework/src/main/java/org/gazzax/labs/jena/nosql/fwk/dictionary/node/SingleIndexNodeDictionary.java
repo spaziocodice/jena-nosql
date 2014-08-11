@@ -17,7 +17,7 @@ import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public abstract class SingleIndexValueDictionary extends ValueDictionaryBase {
+public abstract class SingleIndexNodeDictionary extends TopLevelDictionaryBase {
 	protected BIndex index;
 	protected final String indexName;
 
@@ -27,7 +27,7 @@ public abstract class SingleIndexValueDictionary extends ValueDictionaryBase {
 	 * @param id the dictionary identifier.
 	 * @param indexName the index name.
 	 */
-	protected SingleIndexValueDictionary(final String id, final String indexName) {
+	protected SingleIndexNodeDictionary(final String id, final String indexName) {
 		super(id);
 		this.indexName = indexName;
 	}
@@ -83,7 +83,7 @@ public abstract class SingleIndexValueDictionary extends ValueDictionaryBase {
 			id = resolveHashCollision(id, i);
 
 			if (i == 100) {
-				log.error(MessageCatalog._00071_UNABLE_TO_RESOLVE_COLLISION, n3, i);
+				log.error(MessageCatalog._00102_UNABLE_TO_RESOLVE_COLLISION, n3, i);
 			}
 		}
 		return id;
@@ -117,7 +117,7 @@ public abstract class SingleIndexValueDictionary extends ValueDictionaryBase {
 	protected String getN3(final byte[] id, final boolean p) throws StorageLayerException {
 		final String n3 = index.getQuick(id);
 		if (n3 == null || n3.isEmpty()) {
-			log.error(MessageCatalog._00086_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
+			log.error(MessageCatalog._00726_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
 		}
 
 		return n3;

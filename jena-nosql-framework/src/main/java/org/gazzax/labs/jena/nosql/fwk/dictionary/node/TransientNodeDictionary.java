@@ -43,7 +43,7 @@ import com.hp.hpl.jena.graph.impl.LiteralLabel;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class TransientValueDictionary extends ValueDictionaryBase {
+public class TransientNodeDictionary extends TopLevelDictionaryBase {
 
 	static final int DEFAULT_THRESHOLD = 1000; // 1K
 	
@@ -62,14 +62,14 @@ public class TransientValueDictionary extends ValueDictionaryBase {
 	 * 				the minimum literal length that will trigger involvment of the wrapped dictionary.
 	 * 				0 disables the wrapped dictionary, -1 uses default {@link #DEFAULT_THRESHOLD}.
 	 */
-	public TransientValueDictionary(
+	public TransientNodeDictionary(
 			final String id, 
 			final TopLevelDictionary longLiteralsDictionary, 
 			final int literalLengthThresold) {
 		super(id);
 		
 		if (longLiteralsDictionary == null) {
-			throw new IllegalArgumentException(MessageCatalog._00091_NULL_DECORATEE_DICT);
+			throw new IllegalArgumentException(MessageCatalog._00165_NULL_DECORATEE_DICT);
 		}
 		
 		this.longLiteralsDictionary = longLiteralsDictionary;
@@ -88,13 +88,13 @@ public class TransientValueDictionary extends ValueDictionaryBase {
 	 * 
 	 * <ul>
 	 * 	<li>Long literals threshold length is 1K;</li>
-	 * 	<li>Long literals dictionary is {@link PersistentValueDictionary}</li>
+	 * 	<li>Long literals dictionary is {@link PersistentNodeDictionary}</li>
 	 * </ul>
 	 * 
 	 * @param id the dictionary identifier.
 	 */
-	public TransientValueDictionary(final String id) {
-		this(id, new PersistentValueDictionary(UUID.randomUUID().toString()), DEFAULT_THRESHOLD);
+	public TransientNodeDictionary(final String id) {
+		this(id, new PersistentNodeDictionary(UUID.randomUUID().toString()), DEFAULT_THRESHOLD);
 	}
 	
 	@Override

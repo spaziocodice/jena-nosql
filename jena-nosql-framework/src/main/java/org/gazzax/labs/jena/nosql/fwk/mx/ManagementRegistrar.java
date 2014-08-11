@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class for registering / unregistering MX beans.
  * 
+ * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
+ * 
+ * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
@@ -21,23 +24,7 @@ public abstract class ManagementRegistrar {
 	
 	static final MBeanServer MX_SERVER = ManagementFactory.getPlatformMBeanServer();
 	static final Log LOGGER = new Log(LoggerFactory.getLogger(ManagementRegistrar.class));
-	static String DOMAIN = "CumulusRDF:";
-	
-	/**
-	 * Registers a store management interface.
-	 * 
-	 * @param store the CumulusRDF store.
-	 * @param layout the store layout.
-	 * @param storage the storage (brief mnemonic description) of the underlying storage.
-	 * @throws JMException in case of registration failure.
-	 * @throws InstanceAlreadyExistsException in case the store has been already registered.
-	 */
-	public static void registerStore(
-			final ManageableStore store, 
-			final String layout, 
-			final String storage) throws InstanceAlreadyExistsException, JMException {
-		register(store, createStoreObjectName(layout, store.getId(), storage));
-	}
+	static String DOMAIN = "Jena-NoSQL:";
 
 	/**
 	 * Registers a value dictionary management interface.
@@ -47,7 +34,7 @@ public abstract class ManagementRegistrar {
 	 * @throws InstanceAlreadyExistsException in case the dictionary has been already registered.
 	 */
 	public static void registerDictionary(final ManageableDictionary dictionary) throws InstanceAlreadyExistsException, JMException {
-		register(dictionary, createDictionaryObjectName(dictionary.getId()));
+		register(dictionary, createDictionaryObjectName(dictionary.getName()));
 	}
 
 	/**
@@ -65,14 +52,7 @@ public abstract class ManagementRegistrar {
 		}
 		
 		MX_SERVER.registerMBean(manageable, name);
-		LOGGER.info(MessageCatalog._00110_MBEAN_REGISTERED, manageable.getId());
-	}
-	
-	public static void unregisterStore(
-			final ManageableStore store, 
-			final String layout, 
-			final String storage) {
-		unregister(createStoreObjectName(layout, store.getId(), storage));
+		LOGGER.info(MessageCatalog._00111_MBEAN_REGISTERED, manageable.getName());
 	}
 	
 	/**
@@ -81,7 +61,7 @@ public abstract class ManagementRegistrar {
 	 * @param dictionary the dictionary.
 	 */
 	public static void unregisterDictionary(final ManageableDictionary dictionary) {
-		unregister(createDictionaryObjectName(dictionary.getId()));
+		unregister(createDictionaryObjectName(dictionary.getName()));
 	}
 	/**
 	 * General purposes unregistration method.
@@ -96,9 +76,9 @@ public abstract class ManagementRegistrar {
 				MX_SERVER.unregisterMBean(name);
 			}
 
-			LOGGER.info(MessageCatalog._00112_MBEAN_UNREGISTERED, name);
+			LOGGER.info(MessageCatalog._00167_MBEAN_UNREGISTERED, name);
 		} catch (final Exception exception) {
-			LOGGER.error(MessageCatalog._00113_UNABLE_TO_UNREGISTER_MBEAN, name, exception);
+			LOGGER.error(MessageCatalog._00168_UNABLE_TO_UNREGISTER_MBEAN, name, exception);
 		}
 	}
 	
@@ -115,20 +95,4 @@ public abstract class ManagementRegistrar {
 			throw new RuntimeException(exception);
 		}
 	}
-	
-	/**
-	 * ObjectNames (i.e. management names) factory for stores.
-	 * 
-	 * @param layout the store layout.
-	 * @param id the store identifier.
-	 * @param storage the storage (brief mnemonic description) of the underlying storage.
-	 * @return the {@link ObjectName} associated with the given identifier. 
-	 */
-	static ObjectName createStoreObjectName(final String layout, final String id, final String storage) {
-		try {
-			return new ObjectName(DOMAIN + "Type=" + layout + ",Storage=" + storage + ",ID=" + id);
-		} catch (final Exception exception) {
-			throw new RuntimeException(exception);
-		}
-	}	
 }
