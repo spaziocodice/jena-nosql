@@ -170,6 +170,13 @@ public class Cassandra2xMapDAO<K, V> implements MapDAO<K, V> {
 		session.execute(batchStatement);
 	}
 
+	/**
+	 * Creates the insert statement and bounds the given parameters.
+	 * 
+	 * @param key the key.
+	 * @param value the value.
+	 * @return the insert {@link BoundStatement}.
+	 */
 	protected BoundStatement insertStatement(final K key, final V value) {
 		return insertStatement.bind(keySerializer.serialize(key), valueSerializer.serialize(value));
 	}

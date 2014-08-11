@@ -13,7 +13,6 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
  * @since 1.0
  */
 public interface TripleIndexDAO {
-
 	/**
 	 * Inserts a triple.
 	 * 
@@ -35,6 +34,7 @@ public interface TripleIndexDAO {
 	 * 
 	 * @param identifiers the incoming triples. Each triple is an array of identifiers (s,p,o or s,p,o,c)
 	 * @param batchSize how many delete will be grouped in a single chunks in order to optimize the command execution.
+	 * @return the triples that have been removed.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
 	List<byte[][]> deleteTriples(
@@ -44,7 +44,7 @@ public interface TripleIndexDAO {
 	/**
 	 * When a command defines multiple mutations, then at the end the requestor is supposed to call this method.
 	 * 
-	 * FIXME: I don't like this "client" responsibility: it could forget to call this method.
+	 * FIXME: Definitely don't like this "client" responsibility: it could forget to call this method.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
 	void executePendingMutations() throws StorageLayerException;

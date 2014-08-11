@@ -1,9 +1,12 @@
 package org.gazzax.labs.jena.nosql.fwk.dictionary.node;
 
-import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.*;
 import static org.gazzax.labs.jena.nosql.fwk.Constants.CHARSET_UTF8;
 import static org.gazzax.labs.jena.nosql.fwk.util.Bytes.fillIn;
 import static org.gazzax.labs.jena.nosql.fwk.util.Bytes.subarray;
+import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asBlankNode;
+import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asLiteral;
+import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asNt;
+import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asURIorBlankNode;
 import static org.gazzax.labs.jena.nosql.fwk.util.Utility.murmurHash3;
 
 import java.nio.ByteBuffer;
@@ -27,7 +30,6 @@ import com.hp.hpl.jena.graph.Node;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-// FIXME deal with node deletion ...
 public class PersistentNodeDictionary extends TopLevelDictionaryBase {
 	static final int ID_LENGTH = 17;
 

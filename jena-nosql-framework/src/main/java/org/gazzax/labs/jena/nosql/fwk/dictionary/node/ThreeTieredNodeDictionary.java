@@ -2,6 +2,8 @@ package org.gazzax.labs.jena.nosql.fwk.dictionary.node;
 
 import static org.gazzax.labs.jena.nosql.fwk.util.Bytes.concat;
 import static org.gazzax.labs.jena.nosql.fwk.util.Bytes.subarray;
+import static org.gazzax.labs.jena.nosql.fwk.util.Utility.localName;
+import static org.gazzax.labs.jena.nosql.fwk.util.Utility.namespace;
 
 import org.gazzax.labs.jena.nosql.fwk.InitialisationException;
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
@@ -13,8 +15,6 @@ import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_URI;
-
-import static org.gazzax.labs.jena.nosql.fwk.util.Utility.*;
 
 /**
  * A dictionary with a good compromise between I/O and in-memory work.

@@ -131,7 +131,7 @@ public abstract class CoDec<T> {
 	 * @return True if the two values are equal.
 	 */
 	public final boolean isEqual(final T a, final T b) {
-		return (a == b) || ( (a != null && b != null) && doIsEqual(a, b) );
+		return (a == b) || ((a != null && b != null) && doIsEqual(a, b));
 	}
 	
 	/**

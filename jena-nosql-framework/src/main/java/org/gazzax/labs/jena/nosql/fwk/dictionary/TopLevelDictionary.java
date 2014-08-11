@@ -91,10 +91,10 @@ public interface TopLevelDictionary extends Dictionary<Node> {
 	/**
 	 * Converts a given iterator of Triples in an iterator of identifiers.
 	 * 
-	 * @param Triples the iterator of Triples.
+	 * @param triples the iterator of Triples.
 	 * @return the corresponding iterator of identifiers.
 	 */
-	Iterator<byte[][]> asTripleIdentifiersIterator(Iterator<Triple> Triples);
+	Iterator<byte[][]> asTripleIdentifiersIterator(Iterator<Triple> triples);
 
 	/**
 	 * Converts the incoming Triples iterator in a ids (byte[][]) iterator.

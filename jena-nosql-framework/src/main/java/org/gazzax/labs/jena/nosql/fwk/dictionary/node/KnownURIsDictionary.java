@@ -3,7 +3,8 @@ package org.gazzax.labs.jena.nosql.fwk.dictionary.node;
 import static org.gazzax.labs.jena.nosql.fwk.Constants.CHARSET_UTF8;
 import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asNtURI;
 import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asURI;
-import static org.gazzax.labs.jena.nosql.fwk.util.Utility.*;
+import static org.gazzax.labs.jena.nosql.fwk.util.Utility.murmurHash3;
+import static org.gazzax.labs.jena.nosql.fwk.util.Utility.namespace;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;

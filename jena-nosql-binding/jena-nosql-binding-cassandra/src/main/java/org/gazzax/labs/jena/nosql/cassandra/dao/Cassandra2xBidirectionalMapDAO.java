@@ -34,7 +34,6 @@ public class Cassandra2xBidirectionalMapDAO<K, V> extends Cassandra2xMapDAO<K, V
 	 * 
 	 * @param session The connection to Cassandra.
 	 * @param name The name of the table that the DAO should operate on.
-	 * @param ttl The TTL for the entries.
 	 * @param keySerializer The serializer for the keys.
 	 * @param valueSerializer The serializer for the values.
 	 */

@@ -28,7 +28,7 @@ import com.datastax.driver.core.Session;
  * @since 1.0
  */
 public class CassandraTripleIndexDAO implements TripleIndexDAO {
-	protected final static byte[] EMPTY_VAL = new byte[0]; 
+	protected static final byte[] EMPTY_VAL = new byte[0]; 
 	
 	protected final Session session;
 	
@@ -59,10 +59,10 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 	protected final TopLevelDictionary dictionary;
 	
 	/**
-	 * Buils a new dao with the given data.
+	 * Buils a new {@link CassandraTripleIndexDAO} with the given data.
 	 * 
-	 * @param factory the data access layer factory.
-	 * @param dictionary the dictionary currently used in the owning store instance.
+	 * @param session The connection to Cassandra.
+	 * @param dictionary the dictionary currently used.
 	 */
 	public CassandraTripleIndexDAO(final Session session, final TopLevelDictionary dictionary) {
 		this.session = session;
@@ -134,8 +134,6 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 			for (int i = 0; i < batchSize && nodes.hasNext(); i++) {
 
 				byte[][] ids = nodes.next();
-
-				// check if valid triple or quad
 				if (ids == null || ids.length < 3) {
 					continue;
 				}
@@ -244,7 +242,6 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 	 * Internal method used for reuse delete stuff.
 	 * 
 	 * @param ids the triple identifiers.
-	 * @param rangesEnabled if ranges have been enabled on the current store.
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	void internalDelete(final byte [][]ids) throws StorageLayerException {

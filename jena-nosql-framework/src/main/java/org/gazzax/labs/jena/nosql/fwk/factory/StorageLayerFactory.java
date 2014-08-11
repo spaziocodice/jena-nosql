@@ -31,14 +31,12 @@ import com.hp.hpl.jena.graph.Graph;
  * @since 1.0
  */
 public abstract class StorageLayerFactory implements Configurable {
-	private  static StorageLayerFactory DEFAULT_FACTORY;
+	private static StorageLayerFactory default_factory;
 	static 
 	{
 		final ServiceLoader<StorageLayerFactory> loader = ServiceLoader.load(StorageLayerFactory.class);
 		final Iterator<StorageLayerFactory> iterator = loader.iterator();
-		DEFAULT_FACTORY = iterator.hasNext() ? iterator.next() : null;
-		
-		System.out.println(DEFAULT_FACTORY);
+		default_factory = iterator.hasNext() ? iterator.next() : null;
 	}
 	
 	/**
@@ -86,18 +84,28 @@ public abstract class StorageLayerFactory implements Configurable {
 	 */
 	public static StorageLayerFactory getFactory(final Configuration<Map<String, Object>> configuration) {
 		try {
-			configuration.configure(DEFAULT_FACTORY);
-			return DEFAULT_FACTORY;
+			configuration.configure(default_factory);
+			return default_factory;
 		} catch (final Exception exception) {
 			// TODO: LOG
 			throw new RuntimeException(exception);
 		}
 	}
 	
+	/**
+	 * Creates a concrete factory with using the default configuration procedures.
+	 * 
+	 * @return a concrete factory with using the default configuration procedures.
+	 */
 	public static StorageLayerFactory getFactory() {
 		return getFactory(new DefaultConfigurator());
 	}
 	
+	/**
+	 * Returns the front dictionary that will be in use.
+	 * 
+	 * @return the front dictionary that will be in use.
+	 */
 	public abstract TopLevelDictionary getDictionary();
 	
 	/**

@@ -10,13 +10,13 @@ import com.hp.hpl.jena.rdf.model.AnonId;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class NTriples {
-	private final static String START_URI_CHAR = "<";
-	private final static String END_URI_CHAR = ">";
-	private final static String START_BNODE_CHARS = "_:";
-	private final static String START_LITERAL_CHAR = "\"";
-	private final static String LANGUAGE_MARKER = "@";
-	private final static String DATATYPE_MARKER = "^^";
+public abstract class NTriples {
+	private static final String START_URI_CHAR = "<";
+	private static final String END_URI_CHAR = ">";
+	private static final String START_BNODE_CHARS = "_:";
+	private static final String START_LITERAL_CHAR = "\"";
+	private static final String LANGUAGE_MARKER = "@";
+	private static final String DATATYPE_MARKER = "^^";
 	
 	/**
 	 * Returns true if the given NT value denotes a URI.

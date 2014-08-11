@@ -7,6 +7,7 @@ import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
+// CHECKSTYLE:OFF
 public class ExampleTest {
 	public static void main(String[] args) {
 		
@@ -21,3 +22,4 @@ public class ExampleTest {
 //		storage.close();
 	}
 }
+//CHECKSTYLE:ON

@@ -2,10 +2,8 @@ package org.gazzax.labs.jena.nosql.fwk.mx;
 
 import javax.management.MXBean;
 
-import org.gazzax.labs.jena.nosql.fwk.dictionary.node.KnownURIsDictionary;
-
 /**
- * Management inteface for {@link KnownURIsDictionary}.
+ * Management inteface for KnownURIsDictionary.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 

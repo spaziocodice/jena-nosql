@@ -1,7 +1,6 @@
 package org.gazzax.labs.jena.nosql.fwk.ds;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;

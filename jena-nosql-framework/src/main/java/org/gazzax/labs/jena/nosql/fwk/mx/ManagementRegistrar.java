@@ -24,16 +24,15 @@ public abstract class ManagementRegistrar {
 	
 	static final MBeanServer MX_SERVER = ManagementFactory.getPlatformMBeanServer();
 	static final Log LOGGER = new Log(LoggerFactory.getLogger(ManagementRegistrar.class));
-	static String DOMAIN = "Jena-NoSQL:";
+	static final String DOMAIN = "Jena-NoSQL:";
 
 	/**
 	 * Registers a value dictionary management interface.
 	 * 
 	 * @param dictionary the dictionary.
 	 * @throws JMException in case of registration failure.
-	 * @throws InstanceAlreadyExistsException in case the dictionary has been already registered.
 	 */
-	public static void registerDictionary(final ManageableDictionary dictionary) throws InstanceAlreadyExistsException, JMException {
+	public static void registerDictionary(final ManageableDictionary dictionary) throws JMException {
 		register(dictionary, createDictionaryObjectName(dictionary.getName()));
 	}
 
@@ -45,9 +44,8 @@ public abstract class ManagementRegistrar {
 	 * @param name the name of the management bean.
 	 * @throws JMException in case of registration failure.
 	 */
-	public static void register(final Manageable manageable, final ObjectName name) throws InstanceAlreadyExistsException, JMException {
-		if (MX_SERVER.isRegistered(name))
-		{
+	public static void register(final Manageable manageable, final ObjectName name) throws JMException {
+		if (MX_SERVER.isRegistered(name)) {
 			throw new InstanceAlreadyExistsException();
 		}
 		
@@ -71,8 +69,7 @@ public abstract class ManagementRegistrar {
 	 */
 	public static void unregister(final ObjectName name) {
 		try {
-			if (MX_SERVER.isRegistered(name))
-			{
+			if (MX_SERVER.isRegistered(name)) {
 				MX_SERVER.unregisterMBean(name);
 			}
 

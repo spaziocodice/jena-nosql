@@ -125,27 +125,27 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 		}
 		
 		dictionary = new CacheNodectionary(
-						"TopLevelCacheDictionary",
-						new KnownURIsDictionary(
-							"KnownURIsDictionary",
-							new ThreeTieredNodeDictionary(
-									"ThreeTieredDictionary",
-									new CacheStringDictionary(
-											"NamespacesCacheDictionary",
-											new PersistentStringDictionary("NamespacesDictionary", "DICT_NAMESPACES"),
-											configuration.getParameter("namespaces-id-cache-size", Integer.valueOf(1000)),
-											configuration.getParameter("namespaces-value-cache-size", Integer.valueOf(1000)),
-											false),
-									new TransientStringDictionary("LocalNamesDictionary"),
-									new CacheNodectionary(
-											"LiteralsAndBNodesCacheDictionary",
-											new TransientNodeDictionary(
-													"LiteralAndBNodesDictionary",
-													new PersistentNodeDictionary("LongLiteralsDictionary"),
-													configuration.getParameter("long-literals-threshold", Integer.valueOf(1000))),
-											configuration.getParameter("literals-bnodes-id-cache-size", Integer.valueOf(50000)),
-											configuration.getParameter("literals-bnodes-value-cache-size", Integer.valueOf(50000)),										
-											true))),
+					"TopLevelCacheDictionary",
+					new KnownURIsDictionary(
+						"KnownURIsDictionary",
+						new ThreeTieredNodeDictionary(
+								"ThreeTieredDictionary",
+								new CacheStringDictionary(
+										"NamespacesCacheDictionary",
+										new PersistentStringDictionary("NamespacesDictionary", "DICT_NAMESPACES"),
+										configuration.getParameter("namespaces-id-cache-size", Integer.valueOf(1000)),
+										configuration.getParameter("namespaces-value-cache-size", Integer.valueOf(1000)),
+										false),
+								new TransientStringDictionary("LocalNamesDictionary"),
+								new CacheNodectionary(
+										"LiteralsAndBNodesCacheDictionary",
+										new TransientNodeDictionary(
+												"LiteralAndBNodesDictionary",
+												new PersistentNodeDictionary("LongLiteralsDictionary"),
+												configuration.getParameter("long-literals-threshold", Integer.valueOf(1000))),
+										configuration.getParameter("literals-bnodes-id-cache-size", Integer.valueOf(50000)),
+										configuration.getParameter("literals-bnodes-value-cache-size", Integer.valueOf(50000)),
+										true))),
 					configuration.getParameter("known-uris-id-cache-size", Integer.valueOf(2000)),
 					configuration.getParameter("known-uris-value-cache-size", Integer.valueOf(2000)),
 					true);
@@ -202,11 +202,17 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 		session.execute("CREATE INDEX " + SPC_O_INDEX_PC + " ON " + SPC_O + "(pc_index)");						
 	}
 	
-	void createKeyspace(final String keyspaceName, final Configuration<Map<String, Object>> configuration) {
+	/**
+	 * Creates a keyspace with the given name and configuration.
+	 * 
+	 * @param name the keyspace name.
+	 * @param configuration the configuration.
+	 */
+	void createKeyspace(final String name, final Configuration<Map<String, Object>> configuration) {
 		session.execute(
 				new StringBuilder()
 					.append("CREATE KEYSPACE ")
-					.append(keyspaceName)
+					.append(name)
 					.append(" WITH replication = {'class': '")
 					.append(configuration.getParameter("replication-factor-strategy", "SimpleStrategy"))
 					.append("', 'replication_factor': ")
