@@ -21,6 +21,9 @@ import com.datastax.driver.core.Session;
 /**
  * Cassandra 2x (CQL-based) implementation of {@link TripleIndexDAO}.
  * 
+ * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
+ * 
+ * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
  * @since 1.0
  */
@@ -35,26 +38,23 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 		}
 	};
 	
-	private PreparedStatement _insertSPOCStatement;
-	private PreparedStatement _insertOSPCStatement;
-	private PreparedStatement _insertPOSCStatement;
+	private PreparedStatement insertSPOCStatement;
+	private PreparedStatement insertOSPCStatement;
+	private PreparedStatement insertPOSCStatement;
 
-	private PreparedStatement _deleteSPOCStatement;
-	private PreparedStatement _deleteOSPCStatement;
-	private PreparedStatement _deletePOSCStatement;
+	private PreparedStatement deleteSPOCStatement;
+	private PreparedStatement deleteOSPCStatement;
+	private PreparedStatement deletePOSCStatement;
 
-	private PreparedStatement _clearSPOCStatement;
-	private PreparedStatement _clearOSPCStatement;
-	private PreparedStatement _clearPOSCStatement;
-	private PreparedStatement _clearNSPOStatement;
-	private PreparedStatement _clearNPOSStatement;
-	private PreparedStatement _clearDSPOStatement;
-	private PreparedStatement _clearDPOSStatement;
+	private PreparedStatement clearSPOCStatement;
+	private PreparedStatement clearOSPCStatement;
+	private PreparedStatement clearPOSCStatement;
+	private PreparedStatement clearNSPOStatement;
+	private PreparedStatement clearNPOSStatement;
+	private PreparedStatement clearDSPOStatement;
+	private PreparedStatement clearDPOSStatement;
 
-	// Filled with the 8 query types used for the triple store.
-	// To calculate the position of a query in the array, convert the triple pattern to binary.
-	// If S is variable, add 4, if P is variable, add 2, if O is variable, add 1.
-	private PreparedStatement[] _queries;
+	private PreparedStatement[] queries;
 	
 	protected final TopLevelDictionary dictionary;
 	
@@ -70,14 +70,9 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 		prepareStatements();
 	}
 
-
-	/* (non-Javadoc)
-	 * @see org.gazzax.labs.jena.nosql.cassandra.dao.TripleIndexDAO#insertTriple(byte[][])
-	 */
 	@Override
 	public void insertTriple(final byte[][] ids) throws StorageLayerException {
-		// insert in CF_PO_SC
-		final BoundStatement poscStatement = _insertPOSCStatement.bind();
+		final BoundStatement poscStatement = insertPOSCStatement.bind();
 
 		poscStatement.setBytesUnsafe(0, ByteBuffer.wrap(ids[1]));
 		poscStatement.setBytesUnsafe(1, ByteBuffer.wrap(ids[2]));
@@ -93,8 +88,7 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 
 		batchStatements.get().add(poscStatement);
 
-		// insert in CF_S_POC
-		BoundStatement spocStatement = _insertSPOCStatement.bind();
+		final BoundStatement spocStatement = insertSPOCStatement.bind();
 
 		spocStatement.setBytesUnsafe(0, ByteBuffer.wrap(ids[0]));
 		spocStatement.setBytesUnsafe(1, ByteBuffer.wrap(ids[1]));
@@ -108,8 +102,7 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 
 		batchStatements.get().add(spocStatement);
 
-		// insert in CF_O_SPC
-		final BoundStatement ospcStatement = _insertOSPCStatement.bind();
+		final BoundStatement ospcStatement = insertOSPCStatement.bind();
 
 		ospcStatement.setBytesUnsafe(0, ByteBuffer.wrap(ids[2]));
 		ospcStatement.setBytesUnsafe(1, ByteBuffer.wrap(ids[0]));
@@ -124,19 +117,12 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 		batchStatements.get().add(ospcStatement);
 	}
 
-
-	/* (non-Javadoc)
-	 * @see org.gazzax.labs.jena.nosql.cassandra.dao.TripleIndexDAO#deleteTriple(byte[][])
-	 */
 	@Override
 	public void deleteTriple(final byte[][] ids) throws StorageLayerException {
 		internalDelete(ids);
 		executePendingMutations();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.gazzax.labs.jena.nosql.cassandra.dao.TripleIndexDAO#deleteTriples(java.util.Iterator, int)
-	 */
 	@Override
 	public List<byte[][]> deleteTriples(
 			final Iterator<byte[][]> nodes, 
@@ -174,92 +160,44 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 		}
 	}
 
-
-//	public Iterator<byte[][]> query(final byte[][] query, final int limit) throws StorageLayerException {
-//		final BoundStatement statement = _queries[getQueryIndex(query)].bind();
-//
-//		// Fill the query
-//		int queryVariableIndex = 0;
-//		for (int i = 0; i < 3; i++) {
-//			if (!isVariable(query[i])) {
-//				statement.setBytesUnsafe(queryVariableIndex++, ID_SERIALIZER.serialize(query[i]));
-//			}
-//		}
-//
-//		// Set the limit, it is always the last variable
-//		statement.setInt(queryVariableIndex, limit);
-//
-//		// Execute query and convert result set to ids
-//		return new SPOCResultIterator(_session.executeAsync(statement), true);
-//	}
-
-	/* (non-Javadoc)
-	 * @see org.gazzax.labs.jena.nosql.cassandra.dao.TripleIndexDAO#clear()
-	 */
 	@Override
 	public void clear() {
-		session.execute(_clearSPOCStatement.bind());
-		session.execute(_clearOSPCStatement.bind());
-		session.execute(_clearPOSCStatement.bind());
-		session.execute(_clearNSPOStatement.bind());
-		session.execute(_clearNPOSStatement.bind());
-		session.execute(_clearDSPOStatement.bind());
-		session.execute(_clearDPOSStatement.bind());
+		session.execute(clearSPOCStatement.bind());
+		session.execute(clearOSPCStatement.bind());
+		session.execute(clearPOSCStatement.bind());
+		session.execute(clearNSPOStatement.bind());
+		session.execute(clearNPOSStatement.bind());
+		session.execute(clearDSPOStatement.bind());
+		session.execute(clearDPOSStatement.bind());
 	}
 	
 	/**
-	 * Prepares statements.
+	 * Initializes PreparedStatements.
 	 */
 	protected void prepareStatements() {
-		final int ttl = -1;//_factory.getTtl();
 		
-		_insertSPOCStatement = session.prepare("INSERT INTO " + S_POC + "(s, p, o, c) VALUES (?, ?, ?, ?)");
-		_insertOSPCStatement = session.prepare("INSERT INTO " + O_SPC + "(o, s, p, c) VALUES (?, ?, ?, ?)");
-		_insertPOSCStatement = session.prepare("INSERT INTO " + PO_SC + "(p, o, s, c, p_index) VALUES (?, ?, ?, ?, ?)");
+		insertSPOCStatement = session.prepare("INSERT INTO " + S_POC + "(s, p, o, c) VALUES (?, ?, ?, ?)");
+		insertOSPCStatement = session.prepare("INSERT INTO " + O_SPC + "(o, s, p, c) VALUES (?, ?, ?, ?)");
+		insertPOSCStatement = session.prepare("INSERT INTO " + PO_SC + "(p, o, s, c, p_index) VALUES (?, ?, ?, ?, ?)");
 
-		_deleteSPOCStatement = session.prepare("DELETE FROM " + S_POC + " WHERE s = ? AND p = ? AND o = ? AND c = ?");
-		_deleteOSPCStatement = session.prepare("DELETE FROM " + O_SPC + " WHERE o = ? AND s = ? AND p = ? AND c = ?");
-		_deletePOSCStatement = session.prepare("DELETE FROM " + PO_SC + " WHERE p = ? AND o = ? AND s = ? AND c = ?");
+		deleteSPOCStatement = session.prepare("DELETE FROM " + S_POC + " WHERE s = ? AND p = ? AND o = ? AND c = ?");
+		deleteOSPCStatement = session.prepare("DELETE FROM " + O_SPC + " WHERE o = ? AND s = ? AND p = ? AND c = ?");
+		deletePOSCStatement = session.prepare("DELETE FROM " + PO_SC + " WHERE p = ? AND o = ? AND s = ? AND c = ?");
 
-		_clearSPOCStatement = session.prepare("TRUNCATE " + S_POC);
-		_clearOSPCStatement = session.prepare("TRUNCATE " + O_SPC);
-		_clearPOSCStatement = session.prepare("TRUNCATE " + PO_SC);
+		clearSPOCStatement = session.prepare("TRUNCATE " + S_POC);
+		clearOSPCStatement = session.prepare("TRUNCATE " + O_SPC);
+		clearPOSCStatement = session.prepare("TRUNCATE " + PO_SC);
 
-		// Querying
-		_queries = new PreparedStatement[8];
-		_queries[0] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? AND p = ? AND o = ? LIMIT ?"); // (s, p, o)
-		_queries[1] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? AND p = ?           LIMIT ?"); // (s, p, ?)
-		_queries[2] = session.prepare("SELECT s, p, o, c FROM " + O_SPC + " WHERE s = ?           AND o = ? LIMIT ?"); // (s, ?, o)
-		_queries[3] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ?                     LIMIT ?"); // (s, ?, ?)
-		_queries[4] = session.prepare("SELECT s, p, o, c FROM " + PO_SC + " WHERE           p = ? AND o = ? LIMIT ?"); // (?, p, o)
-		_queries[5] = session.prepare("SELECT s, p, o, c FROM " + PO_SC + " WHERE           p_index = ?     LIMIT ?"); // (?, p, ?)
-		_queries[6] = session.prepare("SELECT s, p, o, c FROM " + O_SPC + " WHERE                     o = ? LIMIT ?"); // (?, ?, o)
-		_queries[7] = session.prepare("SELECT s, p, o, c FROM " + S_POC + "                                 LIMIT ?"); // (?, ?, ?)
+		queries = new PreparedStatement[8];
+		queries[0] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? AND p = ? AND o = ? LIMIT ?");  
+		queries[1] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? AND p = ?           LIMIT ?");  
+		queries[2] = session.prepare("SELECT s, p, o, c FROM " + O_SPC + " WHERE s = ? AND o = ? LIMIT ?");  
+		queries[3] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? LIMIT ?");  
+		queries[4] = session.prepare("SELECT s, p, o, c FROM " + PO_SC + " WHERE p = ? AND o = ? LIMIT ?"); 
+		queries[5] = session.prepare("SELECT s, p, o, c FROM " + PO_SC + " WHERE p_index = ?     LIMIT ?"); 
+		queries[6] = session.prepare("SELECT s, p, o, c FROM " + O_SPC + " WHERE o = ? LIMIT ?"); 
+		queries[7] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " LIMIT ?");  
 	}	
-	
-//	/**
-//	 * Returns the index of the prepared statement to handle a given triple pattern query.
-//	 * 
-//	 * @param triplePattern The triple pattern query.
-//	 * @return The index of the prepared statement to handle a given triple pattern query.
-//	 */
-//	int getQueryIndex(final byte[][] triplePattern) {
-//		int index = 0;
-//
-//		if (isVariable(triplePattern[0])) {
-//			index += 4;
-//		}
-//
-//		if (isVariable(triplePattern[1])) {
-//			index += 2;
-//		}
-//
-//		if (isVariable(triplePattern[2])) {
-//			index += 1;
-//		}
-//
-//		return index;
-//	}	
 	
 	/**
 	 * Returns the index of the prepared statement to handle the range query with the given parameters.
@@ -310,8 +248,7 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	void internalDelete(final byte [][]ids) throws StorageLayerException {
-		// delete in CF_PO_SC
-		final BoundStatement poscStatement = _deletePOSCStatement.bind();
+		final BoundStatement poscStatement = deletePOSCStatement.bind();
 		poscStatement.setBytesUnsafe(0, ByteBuffer.wrap(ids[1]));
 		poscStatement.setBytesUnsafe(1, ByteBuffer.wrap(ids[2]));
 		poscStatement.setBytesUnsafe(2, ByteBuffer.wrap(ids[0]));
@@ -324,8 +261,7 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 
 		batchStatements.get().add(poscStatement);
 
-		// delete in CF_S_POC
-		final BoundStatement spocStatement = _deleteSPOCStatement.bind();
+		final BoundStatement spocStatement = deleteSPOCStatement.bind();
 		spocStatement.setBytesUnsafe(0, ByteBuffer.wrap(ids[0]));
 		spocStatement.setBytesUnsafe(1, ByteBuffer.wrap(ids[1]));
 		spocStatement.setBytesUnsafe(2, ByteBuffer.wrap(ids[2]));
@@ -337,9 +273,8 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 		}
 
 		batchStatements.get().add(spocStatement);
-
-		// delete in CF_O_SPC
-		final BoundStatement ospcStatement = _deleteOSPCStatement.bind();
+		
+		final BoundStatement ospcStatement = deleteOSPCStatement.bind();
 		ospcStatement.setBytesUnsafe(0, ByteBuffer.wrap(ids[2]));
 		ospcStatement.setBytesUnsafe(1, ByteBuffer.wrap(ids[0]));
 		ospcStatement.setBytesUnsafe(2, ByteBuffer.wrap(ids[1]));

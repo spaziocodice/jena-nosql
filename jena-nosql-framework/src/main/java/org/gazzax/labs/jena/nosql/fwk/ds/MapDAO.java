@@ -81,14 +81,6 @@ public interface MapDAO<K, V> {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	void set(final K key, final V value) throws StorageLayerException;
-
-	/**
-	 * Persists a set of given key/value pairs on the underlying storage.
-	 * 
-	 * @param pairs the key/value pairs to be persisted.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	void setAll(Map<K, V> pairs) throws StorageLayerException;
 	
 	/**
 	 * Injects the default value that will be used as result in case of empty search.

@@ -3,111 +3,65 @@ package org.gazzax.labs.jena.nosql.cassandra.dao;
 import static org.gazzax.labs.jena.nosql.fwk.util.Utility.murmurHash3;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
-import org.gazzax.labs.jena.nosql.cassandra.serializer.Serializer;
+import org.gazzax.labs.jena.nosql.cassandra.CoDec;
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
-import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
-import org.gazzax.labs.jena.nosql.fwk.log.Log;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
-import org.slf4j.LoggerFactory;
 
-import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.google.common.collect.AbstractIterator;
 
 /**
  * A DAO that is able to do bidirectional lookups with any value size.
  * This is a workaround for a limit of Cassandra. In Cassandra, anything that gets indexed must not be greater than 64KB.
  * 
+ * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
+ * 
+ * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
  * @since 1.0
  * 
  * @param <K> The key type.
  * @param <V> The value type.
  */
-public class Cassandra2xBidirectionalMapDAO<K, V> implements MapDAO<K, V> {
-
-	private static final Log LOG = new Log(LoggerFactory.getLogger(Cassandra2xBidirectionalMapDAO.class));
-
-	private final Session session;
-	private final String tableName;
-
-	private final Serializer<K> _keySerializer;
-	private final Serializer<V> _valueSerializer;
-
-	private V defaultValue;
-
-	private PreparedStatement _insertStatement;
-	private PreparedStatement _deleteStatement;
-	private PreparedStatement _getValueStatement;
-	private PreparedStatement _getKeyStatement;
-	private PreparedStatement _getAllStatement;
-	private PreparedStatement _checkHashStatement;
+public class Cassandra2xBidirectionalMapDAO<K, V> extends Cassandra2xMapDAO<K, V> {
+	private PreparedStatement checkHashStatement;
 
 	/**
-	 * Creates a new bidirectional DAO.
+	 * Creates a new {@link Cassandra2xBidirectionalMapDAO}.
 	 * 
 	 * @param session The connection to Cassandra.
-	 * @param tableName The name of the table that the DAO should operate on.
+	 * @param name The name of the table that the DAO should operate on.
 	 * @param ttl The TTL for the entries.
 	 * @param keySerializer The serializer for the keys.
 	 * @param valueSerializer The serializer for the values.
 	 */
 	public Cassandra2xBidirectionalMapDAO(
 			final Session session, 
-			final String tableName, 
-			final Serializer<K> keySerializer, 
-			final Serializer<V> valueSerializer) {
-		this.tableName = tableName;
-		this.session = session;
-		_keySerializer = keySerializer;
-		_valueSerializer = valueSerializer;
+			final String name, 
+			final CoDec<K> keySerializer, 
+			final CoDec<V> valueSerializer) {
+		super(session, name, true, keySerializer, valueSerializer);
 	}
 
 	@Override
 	public void createRequiredSchemaEntities() throws StorageLayerException {
-		session.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (key BLOB, valueHash LONG, value BLOB, PRIMARY KEY (key))"
+		session.execute(
+				"CREATE TABLE IF NOT EXISTS " + name + " (key BLOB, valueHash LONG, value BLOB, PRIMARY KEY (key))"
 				+ " WITH compaction = {'class': 'LeveledCompactionStrategy'}"
 				+ " AND compression = {'sstable_compression' : 'SnappyCompressor'}");
 
-		session.execute("CREATE INDEX IF NOT EXISTS " + tableName + "_value_index ON " + tableName + " (valueHash)");
+		session.execute("CREATE INDEX IF NOT EXISTS " + name + "_value_index ON " + name + " (valueHash)");
 
-		_insertStatement = session.prepare("INSERT INTO " + tableName + " (key, valueHash, value) VALUES (?, ?, ?)");
+		insertStatement = session.prepare("INSERT INTO " + name + " (key, valueHash, value) VALUES (?, ?, ?)");
 
-		_deleteStatement = session.prepare("DELETE FROM " + tableName + " WHERE key = ?");
-		_getValueStatement = session.prepare("SELECT value FROM " + tableName + " WHERE key = ?");
-		_getKeyStatement = session.prepare("SELECT key FROM " + tableName + " WHERE valueHash = ?");
-		_getAllStatement = session.prepare("SELECT key, value FROM " + tableName);
-		_checkHashStatement = session.prepare("SELECT value FROM " + tableName + " WHERE valueHash = ?");
-	}
-
-	@Override
-	public boolean contains(final K key) {
-		BoundStatement getValueStatement = _getValueStatement.bind();
-		getValueStatement.setBytesUnsafe(0, _keySerializer.serialize(key));
-
-		return session.execute(getValueStatement).getAvailableWithoutFetching() > 0;
-	}
-
-	@Override
-	public V get(final K key) {
-		BoundStatement getValueStatement = _getValueStatement.bind();
-		getValueStatement.setBytesUnsafe(0, _keySerializer.serialize(key));
-
-		ByteBuffer result = session.execute(getValueStatement).one().getBytesUnsafe(0);
-
-		if (result != null) {
-			return _valueSerializer.deserialize(result);
-		} else {
-			return null;
-		}
+		deleteStatement = session.prepare("DELETE FROM " + name + " WHERE key = ?");
+		getValueStatement = session.prepare("SELECT value FROM " + name + " WHERE key = ?");
+		getKeyStatement = session.prepare("SELECT key FROM " + name + " WHERE valueHash = ?");
+		getAllStatement = session.prepare("SELECT key, value FROM " + name);
+		this.checkHashStatement = session.prepare("SELECT value FROM " + name + " WHERE valueHash = ?");
 	}
 
 	@Override
@@ -115,45 +69,9 @@ public class Cassandra2xBidirectionalMapDAO<K, V> implements MapDAO<K, V> {
 		if (value == null) {
 			return null;
 		}
-
-		long valueHash = getValueHash(value);
-		BoundStatement getKeyStatement = _getKeyStatement.bind(valueHash);
-
-		ByteBuffer result = session.execute(getKeyStatement).one().getBytesUnsafe(0);
-
-		if (result != null) {
-			return _keySerializer.deserialize(result);
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public Iterator<K> keyIterator() {
-		BoundStatement getAllStatement = _getAllStatement.bind();
-		final Iterator<Row> rowIterator = session.execute(getAllStatement).iterator();
-
-		return new AbstractIterator<K>() {
-			@Override
-			protected K computeNext() {
-				if (rowIterator.hasNext()) {
-					return _keySerializer.deserialize(rowIterator.next().getBytesUnsafe(0));
-				} else {
-					return endOfData();
-				}
-			}
-		};
-	}
-
-	@Override
-	public Set<K> keySet() {
-		Set<K> keys = new HashSet<K>();
-
-		for (Iterator<K> iter = keyIterator(); iter.hasNext();) {
-			keys.add(iter.next());
-		}
-
-		return keys;
+		
+		final ByteBuffer result = session.execute(getKeyStatement.bind(getValueHash(value))).one().getBytesUnsafe(0);
+		return (result != null) ? keySerializer.deserialize(result) : null;
 	}
 
 	@Override
@@ -169,21 +87,20 @@ public class Cassandra2xBidirectionalMapDAO<K, V> implements MapDAO<K, V> {
 	 * @return A non-colliding hash of the value.
 	 */
 	private long getValueHash(final V value) {
-		byte[] serializedValue = _valueSerializer.serializeDirect(value);
+		final byte[] serializedValue = valueSerializer.serializeDirect(value);
 		long hash = murmurHash3(serializedValue).asLong();
 
 		boolean hashFound = false;
 
 		for (int iterations = 0; iterations < 100 && !hashFound; hash++, iterations++) {
-			BoundStatement checkHashStatement = _checkHashStatement.bind(hash);
-			Row result = session.execute(checkHashStatement).one();
+			final Row result = session.execute(checkHashStatement.bind(hash)).one();
 
 			if (result == null) {
 				hashFound = true;
 			} else {
-				V mappedValue = _valueSerializer.deserialize(result.getBytesUnsafe(0));
+				final V mappedValue = valueSerializer.deserialize(result.getBytesUnsafe(0));
 
-				if (_valueSerializer.isEqual(value, mappedValue)) {
+				if (valueSerializer.isEqual(value, mappedValue)) {
 					hashFound = true;
 				}
 			}
@@ -192,38 +109,13 @@ public class Cassandra2xBidirectionalMapDAO<K, V> implements MapDAO<K, V> {
 		if (hashFound) {
 			return hash;
 		} else {
-			LOG.error(MessageCatalog._00098_COULD_NOT_GET_HASH, value);
+			logger.error(MessageCatalog._00098_COULD_NOT_GET_HASH, value);
 			return -1;
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void delete(final K... keys) {
-		BatchStatement batchStatement = new BatchStatement();
-		
-		for (K key : keys) {
-			BoundStatement deleteStatement = _deleteStatement.bind();
-			deleteStatement.setBytesUnsafe(0, _keySerializer.serialize(key));
-			batchStatement.add(deleteStatement);
-		}
-		
-		session.execute(batchStatement);
-	}
-
-	@Override
-	public void set(final K key, final V value) {
-		BoundStatement insertStatement = _insertStatement.bind();
-		insertStatement.setBytesUnsafe(0, _keySerializer.serialize(key));
-		insertStatement.setLong(1, getValueHash(value));
-		insertStatement.setBytesUnsafe(2, _valueSerializer.serialize(value));
-		session.execute(insertStatement);
-	}
-
-	@Override
-	public void setAll(final Map<K, V> pairs) {
-		for (Map.Entry<K, V> e : pairs.entrySet()) {
-			set(e.getKey(), e.getValue());
-		}
+	protected BoundStatement insertStatement(final K key, final V value) {
+		return insertStatement.bind(keySerializer.serialize(key), getValueHash(value), valueSerializer.serialize(value));
 	}
 }

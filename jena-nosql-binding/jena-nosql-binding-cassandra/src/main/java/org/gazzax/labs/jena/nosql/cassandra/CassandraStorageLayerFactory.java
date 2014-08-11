@@ -16,8 +16,6 @@ import org.gazzax.labs.jena.nosql.cassandra.dao.Cassandra2xBidirectionalMapDAO;
 import org.gazzax.labs.jena.nosql.cassandra.dao.Cassandra2xMapDAO;
 import org.gazzax.labs.jena.nosql.cassandra.dao.CassandraTripleIndexDAO;
 import org.gazzax.labs.jena.nosql.cassandra.graph.CassandraGraph;
-import org.gazzax.labs.jena.nosql.cassandra.serializer.Serializer;
-import org.gazzax.labs.jena.nosql.cassandra.serializer.SerializerTypeInferer;
 import org.gazzax.labs.jena.nosql.fwk.InitialisationException;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
@@ -39,17 +37,22 @@ import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.ProtocolOptions.Compression;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SocketOptions;
-import com.datastax.driver.core.ProtocolOptions.Compression;
-import com.datastax.driver.core.VersionNumber;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.ReconnectionPolicy;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.hp.hpl.jena.graph.Graph;
 
+/**
+ * Concrete factory for creating Cassandra-backed domain and data access objects.
+ * 
+ * @author Andrea Gazzarini
+ * @since 1.0
+ */
 public class CassandraStorageLayerFactory extends StorageLayerFactory {
 
 	private Session session;
@@ -62,8 +65,8 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 			final boolean isBidirectional, 
 			final String name) {
 		
-		final Serializer<K> k = SerializerTypeInferer.getSerializer(keyClass);
-		final Serializer<V> v = SerializerTypeInferer.getSerializer(valueClass);
+		final CoDec<K> k = CoDec.get(keyClass);
+		final CoDec<V> v = CoDec.get(valueClass);
 		
 		return isBidirectional
 				? new Cassandra2xBidirectionalMapDAO<K, V>(

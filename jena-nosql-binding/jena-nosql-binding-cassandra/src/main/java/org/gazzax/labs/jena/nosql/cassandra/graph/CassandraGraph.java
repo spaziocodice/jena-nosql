@@ -7,6 +7,7 @@ import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
+import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
@@ -14,6 +15,14 @@ import com.hp.hpl.jena.graph.impl.GraphBase;
 import com.hp.hpl.jena.shared.AddDeniedException;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
+/**
+ * Cassandra {@link Graph} implementation.
+ * 
+ * FIXME: maybe this could be Storage unaware and therefore should fall within the framework module. 
+ * 
+ * @author Andrea Gazzarini
+ * @since 1.0
+ */
 public class CassandraGraph extends GraphBase {
 	
 	private final TripleIndexDAO dao;
