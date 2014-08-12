@@ -83,7 +83,7 @@ public class PersistentStringDictionaryTest {
 		assertEquals(PersistentStringDictionary.ID_LENGTH, result.length);
 
 		verify(_dummyIndex).get(aValue);
-		verify(_dummyIndex).putQuick(aValue, result);
+		verify(_dummyIndex).putEntry(aValue, result);
 	}
 
 	/**
@@ -129,7 +129,7 @@ public class PersistentStringDictionaryTest {
 
 		final String aValue = randomString();
 
-		when(_dummyIndex.getQuick(id)).thenReturn(aValue);
+		when(_dummyIndex.getValue(id)).thenReturn(aValue);
 
 		assertEquals(aValue, _cut.getValue(id, RANDOMIZER.nextBoolean()));
 	}

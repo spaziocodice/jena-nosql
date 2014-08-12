@@ -98,7 +98,7 @@ public class PersistentNodeDictionary extends TopLevelDictionaryBase {
 			if (id[0] == NOT_SET[0]) {
 				final BIndex index = p ? pIndex : soIndex;
 				id = newId(value, n3, index);
-				index.putQuick(n3, id);
+				index.putEntry(n3, id);
 			}
 		}
 		return id;
@@ -242,7 +242,7 @@ public class PersistentNodeDictionary extends TopLevelDictionaryBase {
 			return null;
 		}
 
-		final String n3 = p ? pIndex.getQuick(id) : soIndex.getQuick(id);
+		final String n3 = p ? pIndex.getValue(id) : soIndex.getValue(id);
 		if (n3 == null || n3.isEmpty()) {
 			log.error(MessageCatalog._00726_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
 		}

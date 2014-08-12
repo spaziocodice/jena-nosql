@@ -109,6 +109,13 @@ public abstract class StorageLayerFactory implements Configurable {
 	public abstract TopLevelDictionary getDictionary();
 	
 	/**
+	 * Returns the handler used for closing client connections.
+	 * 
+	 * @return the handler used for closing client connections.
+	 */
+	public abstract ClientShutdownHook getClientShutdownHook();
+	
+	/**
 	 * Each concrete factory should return here descriptive information about the underlying storage.
 	 * 
 	 * @return a descriptive info about the storage behind this factory.

@@ -27,6 +27,8 @@ public interface Configuration<E> {
 
 	/**
 	 * "Configurator" interface used for injecting and configuring things.
+	 * IMPORTANT: this method is supposed to be idempotent because the framework
+	 * could call it more than once on a given instance.
 	 * 
 	 * @param configurable the configuration target.
 	 */

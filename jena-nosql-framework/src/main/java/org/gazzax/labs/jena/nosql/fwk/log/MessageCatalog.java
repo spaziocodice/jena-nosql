@@ -8,7 +8,10 @@ package org.gazzax.labs.jena.nosql.fwk.log;
  * @since 1.0
  */
 public interface MessageCatalog {
-	String PREFIX = "<JENA-NOSQL";
+	String PREFIX = "<JNSQL";
+	String _00099_CLIENT_SHUTDOWN_FAILURE = PREFIX + "-00099> : Unable to properly execute the shutdown procedure for client connection. See below for further details.";
+	String _00100_UNABLE_TO_DELETE_TRIPLE = PREFIX + "-00100> : Unable to delete the following triple %s. See below for further details.";
+	String _00101_UNABLE_TO_ADD_TRIPLE = PREFIX + "-00101> : Unable to add the following triple %s. See below for further details.";
 	String _00102_UNABLE_TO_RESOLVE_COLLISION = PREFIX + "-00102> : Unable to resolve collision for node %s after %s tries.";
 	String _00726_NODE_NOT_FOUND_IN_DICTIONARY = PREFIX + "-00726> : Node %s not found in dictionary.";
 	String _00165_NULL_DECORATEE_DICT = PREFIX + "-00165> : Null dictionary decoratee.";

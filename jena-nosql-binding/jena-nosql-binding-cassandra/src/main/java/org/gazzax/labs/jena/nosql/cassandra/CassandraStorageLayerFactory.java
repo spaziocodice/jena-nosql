@@ -29,6 +29,7 @@ import org.gazzax.labs.jena.nosql.fwk.dictionary.string.PersistentStringDictiona
 import org.gazzax.labs.jena.nosql.fwk.dictionary.string.TransientStringDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
 import com.datastax.driver.core.Cluster;
@@ -56,6 +57,7 @@ import com.hp.hpl.jena.graph.Graph;
 public class CassandraStorageLayerFactory extends StorageLayerFactory {
 
 	private Session session;
+	private Cluster cluster;
 	private TopLevelDictionary dictionary;
 	
 	@Override
@@ -108,11 +110,11 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 		final String keyspaceName = configuration.getParameter("keyspace-name", "C2XDB");
 		final Boolean createSchema = configuration.getParameter("create-schema", Boolean.TRUE);
 				
-		final Cluster cluster = builder.build();
+		cluster = builder.build();
 		final Metadata metadata = cluster.getMetadata();
 		final KeyspaceMetadata keyspaceMetadata = metadata.getKeyspace(keyspaceName);
 
-		session = builder.build().connect();
+		session = cluster.connect();
 
 		if (keyspaceMetadata == null) {	
 			createKeyspace(keyspaceName, configuration);
@@ -166,6 +168,11 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 	public Graph getGraph() {
 		return new CassandraGraph(this);
 	}	
+	
+	@Override
+	public ClientShutdownHook getClientShutdownHook() {
+		return new CassandraClientShutdownHook(session);
+	}
 	
 	@Override
 	public String getInfo() {

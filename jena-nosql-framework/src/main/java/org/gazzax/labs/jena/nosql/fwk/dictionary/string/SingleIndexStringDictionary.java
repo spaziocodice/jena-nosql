@@ -74,7 +74,7 @@ public abstract class SingleIndexStringDictionary extends StringDictionaryBase {
 	 */
 	protected String getStringValue(final byte[] id, final boolean p) throws StorageLayerException {
 
-		final String value = index.getQuick(id);
+		final String value = index.getValue(id);
 		if (value == null || value.isEmpty()) {
 			log.error(MessageCatalog._00726_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
 		}

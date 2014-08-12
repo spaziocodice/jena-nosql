@@ -107,7 +107,7 @@ public class KnownURIsDictionary extends SingleIndexNodeDictionary implements Ma
 				id = getID(nt, p);
 				if (id[0] == NOT_SET[0]) {
 					id = newId(nt, index);
-					index.putQuick(nt, id);
+					index.putEntry(nt, id);
 				}
 			}
 			return id;

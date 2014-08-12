@@ -38,7 +38,7 @@ public class PersistentStringDictionary extends SingleIndexStringDictionary {
 			id = index.get(value);
 			if (id[0] == NOT_SET[0]) {
 				id = newId(value, index);
-				index.putQuick(value, id);
+				index.putEntry(value, id);
 			}
 		}
 		RUNTIME_CONTEXTS.get().isFirstLevelResult = true;
@@ -48,6 +48,6 @@ public class PersistentStringDictionary extends SingleIndexStringDictionary {
 	@Override
 	protected String getValueInternal(final byte[] id, final boolean p) throws StorageLayerException {
 		RUNTIME_CONTEXTS.get().isFirstLevelResult = true;
-		return index.getQuick(id);
+		return index.getValue(id);
 	}
 }

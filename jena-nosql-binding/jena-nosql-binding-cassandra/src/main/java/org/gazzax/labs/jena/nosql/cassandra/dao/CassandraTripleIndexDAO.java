@@ -29,6 +29,7 @@ import com.datastax.driver.core.Session;
  */
 public class CassandraTripleIndexDAO implements TripleIndexDAO {
 	protected static final byte[] EMPTY_VAL = new byte[0]; 
+	protected static final String SELECT_SPOC_FROM = "SELECT s, p, o, c FROM ";
 	
 	protected final Session session;
 	
@@ -187,14 +188,14 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 		clearPOSCStatement = session.prepare("TRUNCATE " + PO_SC);
 
 		queries = new PreparedStatement[8];
-		queries[0] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? AND p = ? AND o = ? LIMIT ?");  
-		queries[1] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? AND p = ?           LIMIT ?");  
-		queries[2] = session.prepare("SELECT s, p, o, c FROM " + O_SPC + " WHERE s = ? AND o = ? LIMIT ?");  
-		queries[3] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " WHERE s = ? LIMIT ?");  
-		queries[4] = session.prepare("SELECT s, p, o, c FROM " + PO_SC + " WHERE p = ? AND o = ? LIMIT ?"); 
-		queries[5] = session.prepare("SELECT s, p, o, c FROM " + PO_SC + " WHERE p_index = ?     LIMIT ?"); 
-		queries[6] = session.prepare("SELECT s, p, o, c FROM " + O_SPC + " WHERE o = ? LIMIT ?"); 
-		queries[7] = session.prepare("SELECT s, p, o, c FROM " + S_POC + " LIMIT ?");  
+		queries[0] = session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? AND p = ? AND o = ? LIMIT ?");  
+		queries[1] = session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? AND p = ?           LIMIT ?");  
+		queries[2] = session.prepare(SELECT_SPOC_FROM + O_SPC + " WHERE s = ? AND o = ? LIMIT ?");  
+		queries[3] = session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? LIMIT ?");  
+		queries[4] = session.prepare(SELECT_SPOC_FROM + PO_SC + " WHERE p = ? AND o = ? LIMIT ?"); 
+		queries[5] = session.prepare(SELECT_SPOC_FROM + PO_SC + " WHERE p_index = ?     LIMIT ?"); 
+		queries[6] = session.prepare(SELECT_SPOC_FROM + O_SPC + " WHERE o = ? LIMIT ?"); 
+		queries[7] = session.prepare(SELECT_SPOC_FROM + S_POC + " LIMIT ?");  
 	}	
 	
 	/**

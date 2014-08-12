@@ -13,9 +13,8 @@ import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
  * @since 1.0
  */
 public class BIndex implements Initialisable{
-
-	PersistentMap<byte[], String> byId;
-	PersistentMap<String, byte[]> byValue;
+	PersistentKeyValueMap<byte[], String> byId;
+	PersistentKeyValueMap<String, byte[]> byValue;
 
 	final String name;
 	
@@ -30,7 +29,7 @@ public class BIndex implements Initialisable{
 	
 	@Override
 	public void initialise(final StorageLayerFactory factory) throws InitialisationException {
-		byValue = new PersistentMap<String, byte[]>(
+		byValue = new PersistentKeyValueMap<String, byte[]>(
 				String.class, 
 				byte[].class,
 				name,
@@ -38,7 +37,7 @@ public class BIndex implements Initialisable{
 				TopLevelDictionaryBase.NOT_SET);
 		byValue.initialise(factory);
 
-		byId = new PersistentMap<byte[], String>(
+		byId = new PersistentKeyValueMap<byte[], String>(
 				byte[].class,
 				String.class,
 				name + "_REVERSE",
@@ -65,7 +64,7 @@ public class BIndex implements Initialisable{
 	 * @return the value associated with the given id.
 	 * @throws StorageLayerException in case of data access failure.
 	 */
-	public String getQuick(final byte[] id) throws StorageLayerException {
+	public String getValue(final byte[] id) throws StorageLayerException {
 		return byId.get(id);
 	}
 
@@ -76,7 +75,7 @@ public class BIndex implements Initialisable{
 	 * @param id the id associated with that resource.
 	 * @throws StorageLayerException in case of data access failure.
 	 */
-	public void putQuick(final String value, final byte[] id) throws StorageLayerException {
+	public void putEntry(final String value, final byte[] id) throws StorageLayerException {
 		byValue.put(value, id);
 		byId.put(id, value);
 	}

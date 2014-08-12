@@ -162,6 +162,6 @@ public abstract class CoDec<T> {
 		} else if (String.class.equals(clazz)) {
 			return (CoDec<T>) STRING_SERIALIZER;
 		}
-		throw new IllegalArgumentException("Cannot find Serializer for " + clazz);
+		throw new IllegalArgumentException("Cannot find CoDec for class " + clazz);
 	}
 }

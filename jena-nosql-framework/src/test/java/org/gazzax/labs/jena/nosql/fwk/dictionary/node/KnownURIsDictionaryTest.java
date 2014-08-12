@@ -194,7 +194,7 @@ public class KnownURIsDictionaryTest {
 
 			// 3. make sure the decoratee wasn't involved in identifier creation.
 			verify(decoratee, times(0)).getID(uri, isPredicate);
-			verify(dummyIndex).putQuick(n3, id);
+			verify(dummyIndex).putEntry(n3, id);
 
 			reset(decoratee, dummyIndex);
 		}
@@ -247,7 +247,7 @@ public class KnownURIsDictionaryTest {
 
 		final String n3 = NTriples.asNtURI(managedUri);
 
-		when(dummyIndex.getQuick(any(byte[].class))).thenReturn(n3);
+		when(dummyIndex.getValue(any(byte[].class))).thenReturn(n3);
 		when(dummyIndex.get(n3)).thenReturn(TopLevelDictionaryBase.NOT_SET);
 
 		byte[] id = cut.getID(managedUri, isPredicate);

@@ -115,7 +115,7 @@ public abstract class SingleIndexNodeDictionary extends TopLevelDictionaryBase {
 	 * @throws StorageLayerException in case of data access layer factory. 
 	 */
 	protected String getN3(final byte[] id, final boolean p) throws StorageLayerException {
-		final String n3 = index.getQuick(id);
+		final String n3 = index.getValue(id);
 		if (n3 == null || n3.isEmpty()) {
 			log.error(MessageCatalog._00726_NODE_NOT_FOUND_IN_DICTIONARY, Arrays.toString(id));
 		}
