@@ -83,7 +83,7 @@ public class PersistentNodeDictionary extends TopLevelDictionaryBase {
 	protected byte[] getID(final String n3, final boolean p) throws StorageLayerException {
 		return (n3 == null || n3.isEmpty() || n3.charAt(0) == '?')
 				? null
-				: p ? pIndex.get(n3) : soIndex.get(n3);
+				: p ? pIndex.getId(n3) : soIndex.getId(n3);
 	}
 
 	@Override

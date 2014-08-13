@@ -15,7 +15,6 @@ import java.util.Map;
 import org.gazzax.labs.jena.nosql.cassandra.dao.Cassandra2xBidirectionalMapDAO;
 import org.gazzax.labs.jena.nosql.cassandra.dao.Cassandra2xMapDAO;
 import org.gazzax.labs.jena.nosql.cassandra.dao.CassandraTripleIndexDAO;
-import org.gazzax.labs.jena.nosql.cassandra.graph.CassandraGraph;
 import org.gazzax.labs.jena.nosql.fwk.InitialisationException;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
@@ -46,7 +45,6 @@ import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.ReconnectionPolicy;
 import com.datastax.driver.core.policies.RetryPolicy;
-import com.hp.hpl.jena.graph.Graph;
 
 /**
  * Concrete factory for creating Cassandra-backed domain and data access objects.
@@ -162,12 +160,6 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 	public TopLevelDictionary getDictionary() {
 		return dictionary;
 	}
-	
-
-	@Override
-	public Graph getGraph() {
-		return new CassandraGraph(this);
-	}	
 	
 	@Override
 	public ClientShutdownHook getClientShutdownHook() {

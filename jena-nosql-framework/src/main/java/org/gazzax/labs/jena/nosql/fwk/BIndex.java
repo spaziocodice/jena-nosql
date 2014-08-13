@@ -53,7 +53,7 @@ public class BIndex implements Initialisable{
 	 * @return the id associated with the given value.
 	 * @throws StorageLayerException in case of data access failure.
 	 */
-	public byte[] get(final String value) throws StorageLayerException {
+	public byte[] getId(final String value) throws StorageLayerException {
 		return byValue.get(value);
 	}
 
@@ -95,11 +95,11 @@ public class BIndex implements Initialisable{
 	/**
 	 * Removes the given resource from this index.
 	 * 
-	 * @param n3 the n3 representation of the resource to be removed.
+	 * @param value the n3 representation of the resource to be removed.
 	 * @throws StorageLayerException in case of data access failure.
 	 */
-	public void remove(final String n3) throws StorageLayerException {
-		byId.remove(byValue.get(n3));
-		byValue.remove(n3);
+	public void remove(final String value) throws StorageLayerException {
+		byId.remove(byValue.get(value));
+		byValue.remove(value);
 	}
 }

@@ -11,6 +11,7 @@ import org.gazzax.labs.jena.nosql.fwk.configuration.DefaultConfigurator;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlGraph;
 
 import com.hp.hpl.jena.graph.Graph;
 
@@ -69,7 +70,9 @@ public abstract class StorageLayerFactory implements Configurable {
 	 * 
 	 * @return the {@link Graph} specific implementation associated with the underlying kind of storage.
 	 */
-	public abstract Graph getGraph();
+	public Graph getGraph() {
+		return new NoSqlGraph(this);
+	}	
 	
 	/**
 	 * Factory method for obtaining a concrete factory.

@@ -49,7 +49,7 @@ public abstract class SingleIndexNodeDictionary extends TopLevelDictionaryBase {
 	protected byte[] getID(final String n3, final boolean p) throws StorageLayerException {
 		return (n3 == null || n3.isEmpty() || n3.charAt(0) == '?')
 				? null
-				: index.get(n3);
+				: index.getId(n3);
 	}
 	
 	/**

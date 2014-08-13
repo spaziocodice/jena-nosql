@@ -35,7 +35,7 @@ public class PersistentStringDictionary extends SingleIndexStringDictionary {
 		byte[] id = null;
 
 		synchronized (this) {
-			id = index.get(value);
+			id = index.getId(value);
 			if (id[0] == NOT_SET[0]) {
 				id = newId(value, index);
 				index.putEntry(value, id);

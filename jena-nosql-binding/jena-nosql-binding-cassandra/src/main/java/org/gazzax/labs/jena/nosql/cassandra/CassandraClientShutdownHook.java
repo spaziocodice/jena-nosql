@@ -5,7 +5,6 @@ import org.gazzax.labs.jena.nosql.fwk.log.Log;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import org.slf4j.LoggerFactory;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 
 /**
@@ -18,6 +17,11 @@ public class CassandraClientShutdownHook implements ClientShutdownHook {
 	private final static Log LOGGER = new Log(LoggerFactory.getLogger(ClientShutdownHook.class));
 	private final Session session;
 	
+	/**
+	 * Builds a new Cassandra Client shutdown hook.
+	 * 
+	 * @param session the connection to Cassandra.
+	 */
 	public CassandraClientShutdownHook(final Session session) {
 		this.session = session;
 	}
