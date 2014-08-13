@@ -7,6 +7,9 @@ import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
 public class ExampleTest {
 	
@@ -22,9 +25,18 @@ public class ExampleTest {
 		// implementations of family members (Dictionary, Graph and so on)
 		final Graph graph = factory.getGraph(); // This is a CassandraGraph
 		final Model model = ModelFactory.createModelForGraph(graph); 
-		
-		model.read(new FileReader("/work/data/rdf/sample.nt"), "http://base.example.org", "N3");	
 
+		Statement st = model.createStatement(
+				model.createResource("http://rdf.gx.org/id/resources#me"),
+				FOAF.name,
+				model.createLiteral("Andrea Gazzarini"));
+		
+		model.add(st);
+		model.remove(st);
+
+		model.read(new FileReader("/work/data/rdf/sample.nt"), "http://base.example.org", "N3");	
+		model.removeAll();		
+	
 		factory.getClientShutdownHook().close(); // This is a CassandraClientShutdownHook
 	}
 }

@@ -1,5 +1,6 @@
 package org.gazzax.labs.jena.nosql.cassandra.graph;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
@@ -12,6 +13,7 @@ import org.gazzax.labs.jena.nosql.fwk.log.MessageFactory;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Graph;
+import com.hp.hpl.jena.graph.GraphEvents;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
@@ -30,6 +32,8 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
  */
 public class CassandraGraph extends GraphBase {
 	private final static Log LOGGER = new Log(LoggerFactory.getLogger(CassandraGraph.class));
+	
+	private final static Iterator<byte[][]> EMPTY_ITERATOR = new ArrayList<byte[][]>(0).iterator();
 	
 	private final TripleIndexDAO dao;
 	private final TopLevelDictionary dictionary;
@@ -105,12 +109,21 @@ public class CassandraGraph extends GraphBase {
 	}
 	
 	@Override
+    public void clear()
+	{
+	    dao.clear();
+        getEventManager().notifyEvent(this, GraphEvents.removeAll ) ;	
+	}
+	
+	@Override
 	protected ExtendedIterator<Triple> graphBaseFind(TripleMatch m) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
-	Iterator<byte[][]> query(final byte[][] query) {
-		return null;
+	Iterator<byte[][]> query(final byte[][] query) throws StorageLayerException {
+		return (query != null && query.length >= 3) 
+					? dao.query(query)
+					: EMPTY_ITERATOR;
 	}
 }

@@ -16,7 +16,10 @@ import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.utils.Bytes;
+import com.google.common.collect.AbstractIterator;
 
 /**
  * Cassandra 2x (CQL-based) implementation of {@link TripleIndexDAO}.
@@ -50,10 +53,6 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 	private PreparedStatement clearSPOCStatement;
 	private PreparedStatement clearOSPCStatement;
 	private PreparedStatement clearPOSCStatement;
-	private PreparedStatement clearNSPOStatement;
-	private PreparedStatement clearNPOSStatement;
-	private PreparedStatement clearDSPOStatement;
-	private PreparedStatement clearDPOSStatement;
 
 	private PreparedStatement[] queries;
 	
@@ -160,21 +159,49 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 	}
 
 	@Override
+	public Iterator<byte[][]> query(final byte[][] query) throws StorageLayerException {
+		int qindex = (query[0] == null) ? 4 : 0;
+		qindex += (query[1] == null) ? 2 : 0;
+		qindex += (query[2] == null) ? 1 : 0;
+		
+		final BoundStatement statement = queries[qindex].bind();			
+		int index = 0;
+		for (final byte[] binding : query) {
+			if (binding != null) {
+				statement.setBytesUnsafe(index++, ByteBuffer.wrap(binding));
+			}
+		}
+
+		final Iterator<Row> iterator = session.executeAsync(statement).getUninterruptibly().iterator();
+		return new AbstractIterator<byte[][]>() {
+			@Override
+			protected byte[][] computeNext() {
+				return iterator.hasNext()? asByteArray(iterator.next()) : endOfData();
+			}
+		};
+	}	
+	
+	private byte[][] asByteArray(final Row row) {
+		final byte[] s = Bytes.getArray(row.getBytesUnsafe(0));
+		final byte[] p = Bytes.getArray(row.getBytesUnsafe(1));
+		final byte[] o = Bytes.getArray(row.getBytesUnsafe(2));
+		final ByteBuffer c = row.getBytesUnsafe(3);
+		return (c != null)
+			? new byte[][] {s, p, o}
+			: new byte[][] {s, p, o, Bytes.getArray(c)};
+	}
+	
+	@Override
 	public void clear() {
 		session.execute(clearSPOCStatement.bind());
 		session.execute(clearOSPCStatement.bind());
 		session.execute(clearPOSCStatement.bind());
-		session.execute(clearNSPOStatement.bind());
-		session.execute(clearNPOSStatement.bind());
-		session.execute(clearDSPOStatement.bind());
-		session.execute(clearDPOSStatement.bind());
 	}
 	
 	/**
 	 * Initializes PreparedStatements.
 	 */
 	protected void prepareStatements() {
-		
 		insertSPOCStatement = session.prepare("INSERT INTO " + S_POC + "(s, p, o, c) VALUES (?, ?, ?, ?)");
 		insertOSPCStatement = session.prepare("INSERT INTO " + O_SPC + "(o, s, p, c) VALUES (?, ?, ?, ?)");
 		insertPOSCStatement = session.prepare("INSERT INTO " + PO_SC + "(p, o, s, c, p_index) VALUES (?, ?, ?, ?, ?)");
@@ -187,58 +214,18 @@ public class CassandraTripleIndexDAO implements TripleIndexDAO {
 		clearOSPCStatement = session.prepare("TRUNCATE " + O_SPC);
 		clearPOSCStatement = session.prepare("TRUNCATE " + PO_SC);
 
-		queries = new PreparedStatement[8];
-		queries[0] = session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? AND p = ? AND o = ? LIMIT ?");  
-		queries[1] = session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? AND p = ?           LIMIT ?");  
-		queries[2] = session.prepare(SELECT_SPOC_FROM + O_SPC + " WHERE s = ? AND o = ? LIMIT ?");  
-		queries[3] = session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? LIMIT ?");  
-		queries[4] = session.prepare(SELECT_SPOC_FROM + PO_SC + " WHERE p = ? AND o = ? LIMIT ?"); 
-		queries[5] = session.prepare(SELECT_SPOC_FROM + PO_SC + " WHERE p_index = ?     LIMIT ?"); 
-		queries[6] = session.prepare(SELECT_SPOC_FROM + O_SPC + " WHERE o = ? LIMIT ?"); 
-		queries[7] = session.prepare(SELECT_SPOC_FROM + S_POC + " LIMIT ?");  
-	}	
-	
-	/**
-	 * Returns the index of the prepared statement to handle the range query with the given parameters.
-	 * 
-	 * @param reverse True if the result should be returned reversed, false if it should be returned normally.
-	 * @param subjectIsVariable True if the subject of the query is variable, false if it is set.
-	 * @param typeIsDouble True if the type of the range is double, false if it is date.
-	 * @param upperBoundIsOpen True if the upper bound is smaller-than relation, false if it is a smaller-than-or-equal-to relation.
-	 * @param lowerBoundIsOpen True if the lower bound is greater-than relation, false if it is a greater-than-or-equal-to relation.
-	 * @return The index of the prepared statement.
-	 */
-	int getRangeQueryIndex(
-			final boolean reverse, 
-			final boolean subjectIsVariable, 
-			final boolean typeIsDouble, 
-			final boolean upperBoundIsOpen,
-			final boolean lowerBoundIsOpen) {
-		int index = 0;
-
-		if (reverse) {
-			index += 16;
-		}
-
-		if (subjectIsVariable) {
-			index += 8;
-		}
-
-		if (typeIsDouble) {
-			index += 4;
-		}
-
-		if (upperBoundIsOpen) {
-			index += 2;
-		}
-
-		if (lowerBoundIsOpen) {
-			index += 1;
-		}
-
-		return index;
-	}	
-	
+		queries = new PreparedStatement[] {
+				session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? AND p = ? AND o = ?"),
+				session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ? AND p = ?"),
+				session.prepare(SELECT_SPOC_FROM + O_SPC + " WHERE s = ? AND o = ?"),  
+				session.prepare(SELECT_SPOC_FROM + S_POC + " WHERE s = ?"),
+				session.prepare(SELECT_SPOC_FROM + PO_SC + " WHERE p = ? AND o = ?"),
+				session.prepare(SELECT_SPOC_FROM + PO_SC + " WHERE p_index = ?"),
+				session.prepare(SELECT_SPOC_FROM + O_SPC + " WHERE o = ?"),
+				session.prepare(SELECT_SPOC_FROM + S_POC)
+		};
+	}
+		
 	/**
 	 * Internal method used for reuse delete stuff.
 	 * 

@@ -53,4 +53,6 @@ public interface TripleIndexDAO {
 	 * Clears the storage (i.e. remove all triples from the storage).
 	 */
 	void clear();
+
+	Iterator<byte[][]> query(byte[][] query) throws StorageLayerException;
 }
