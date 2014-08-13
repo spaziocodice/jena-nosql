@@ -11,7 +11,7 @@ import org.junit.Test;
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
-public class StringDictionaryBaseTest {
+public class StringDictionaryBaseTestCase {
 	/**
 	 * The dictionary must own a dictionary runtime context.
 	 */

@@ -1,4 +1,4 @@
-package org.gazzax.labs.jena.nosql.fwk.dictionary.node;
+package org.gazzax.labs.jena.nosql.fwk.dictionary.string;
 
 import static org.gazzax.labs.jena.nosql.fwk.TestUtility.STORAGE_LAYER_FACTORY;
 import static org.gazzax.labs.jena.nosql.fwk.TestUtility.randomString;
@@ -9,52 +9,47 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.nio.ByteBuffer;
+import java.util.Date;
 
-import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
+import org.gazzax.labs.jena.nosql.fwk.dictionary.Dictionary;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-
 /**
- * Test case for {@link CacheNodectionary}.
+ * Test case for {@link CacheStringDictionary}.
  * 
- * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
- * 
- * @see https://code.google.com/p/cumulusrdf
  * @author Andrea Gazzarini
- * @since 1.0
+ * @since 1.1.0
  */
-public class CacheValueDictionaryTest {
+public class CacheStringDictionaryTestCase {
 
-	private CacheNodectionary cut;
-	private TopLevelDictionary decoratee;
+	private CacheStringDictionary cut;
+	private Dictionary<String> decoratee;
 
 	byte[] id = { 4, 5, 3, 2, 6, 3, 2, 1 };
-	final Node aValue = NodeFactory.createLiteral(randomString());
+	final String aValue = String.valueOf(new Date());
 
 	/**
 	 * Setup fixture for this test.
 	 * 
 	 * @throws Exception never, otherwise the corresponding test will fail.
 	 */ 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
-
-		decoratee = mock(TopLevelDictionary.class);
-		cut = new CacheNodectionary(
+		decoratee = mock(Dictionary.class);
+		cut = new CacheStringDictionary(
 				randomString(), 
 				decoratee, 
-				CacheNodectionary.DEFAULT_CACHE_SIZE, 
-				CacheNodectionary.DEFAULT_CACHE_SIZE, 
+				CacheStringDictionary.DEFAULT_CACHE_SIZE, 
+				CacheStringDictionary.DEFAULT_CACHE_SIZE, 
 				false);
 
 		cut.initialise(STORAGE_LAYER_FACTORY);
+
 		verify(decoratee).initialise(STORAGE_LAYER_FACTORY);
 	}
 
@@ -63,8 +58,8 @@ public class CacheValueDictionaryTest {
 	 */
 	@Test
 	public void defaultCacheSize() {
-		assertEquals(CacheNodectionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-0));
-		assertEquals(CacheNodectionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-12));
+		assertEquals(CacheStringDictionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-0));
+		assertEquals(CacheStringDictionary.DEFAULT_CACHE_SIZE, cut.cacheSize(-12));
 		assertEquals(12345, cut.cacheSize(12345));
 	}
 	
@@ -74,11 +69,11 @@ public class CacheValueDictionaryTest {
 	@Test
 	public void decorateeIsNull() {
 		try {
-			cut = new CacheNodectionary(
+			cut = new CacheStringDictionary(
 					randomString(), 
 					null, 
-					CacheNodectionary.DEFAULT_CACHE_SIZE, 
-					CacheNodectionary.DEFAULT_CACHE_SIZE, 
+					CacheStringDictionary.DEFAULT_CACHE_SIZE, 
+					CacheStringDictionary.DEFAULT_CACHE_SIZE, 
 					false);
 			fail();
 		} catch (final IllegalArgumentException expected) {
@@ -96,27 +91,6 @@ public class CacheValueDictionaryTest {
 		assertEquals(0, cut.id2node_cache.size());
 		assertEquals(0, cut.node2id_cache.size());
 		verify(decoratee).close();
-	}
-
-	/**
-	 * compose() must invoke compose() on decoratee.
-	 */
-	@Test
-	public void compose() {
-		cut.compose(id, id, id);
-		verify(decoratee).compose(id, id, id);
-
-		cut.compose(id, id);
-		verify(decoratee).compose(id, id);
-	}
-
-	/**
-	 * decompose() must invoke compose() on decoratee.
-	 */
-	@Test
-	public void decompose() {
-		cut.decompose(id);
-		verify(decoratee).decompose(id);
 	}
 
 	/**
@@ -174,69 +148,5 @@ public class CacheValueDictionaryTest {
 	public void getIdWithNullValue() throws Exception {
 		assertNull(cut.getID(null, false));
 		assertNull(cut.getID(null, true));
-	}
-
-	/**
-	 * The remove() method with a null argument has no effect.
-	 * 
-	 * @throws Exception never otherwise the test fails.
-	 */
-	@Test
-	public void removeValueWithNullValue() throws Exception {
-		assertTrue(cut.node2id_cache.isEmpty());
-
-		cut.removeValue(null, false);
-
-		assertTrue(cut.node2id_cache.isEmpty());
-		verifyNoMoreInteractions(decoratee);
-	}
-
-	/**
-	 * The remove() method must remove the value from cache and call remove() on decoratee.
-	 * 
-	 * @throws Exception never otherwise the test fails.
-	 */
-	@Test
-	public void removeValue() throws Exception {
-		when(decoratee.getID(aValue, false)).thenReturn(id);
-
-		assertTrue(cut.node2id_cache.isEmpty());
-		assertArrayEquals(id, cut.getID(aValue, false));
-
-		assertEquals(id, cut.node2id_cache.get(aValue));
-		assertArrayEquals(id, cut.getID(aValue, false));
-
-		cut.removeValue(aValue, false);
-
-		assertTrue(cut.node2id_cache.isEmpty());
-		assertTrue(cut.id2node_cache.isEmpty());
-		verify(decoratee).removeValue(aValue, false);
-	}
-
-	/**
-	 * The isBNode request must be forwarded to the decoratee. 
-	 */
-	@Test
-	public void isBNode() {
-		cut.isBNode(id);
-		verify(decoratee).isBNode(id);
-	}
-
-	/**
-	 * The isLiteral request must be forwarded to the decoratee. 
-	 */
-	@Test
-	public void isLiteral() {
-		cut.isLiteral(id);
-		verify(decoratee).isLiteral(id);
-	}
-
-	/**
-	 * The isResource request must be forwarded to the decoratee. 
-	 */
-	@Test
-	public void isResource() {
-		cut.isResource(id);
-		verify(decoratee).isResource(id);
 	}
 }

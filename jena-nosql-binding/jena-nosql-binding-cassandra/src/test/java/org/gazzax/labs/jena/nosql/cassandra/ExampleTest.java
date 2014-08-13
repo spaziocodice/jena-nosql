@@ -1,12 +1,12 @@
 package org.gazzax.labs.jena.nosql.cassandra;
 
-import java.io.FileReader;
-
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.NodeIterator;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
@@ -23,20 +23,39 @@ public class ExampleTest {
 		
 		// Once obtained a concrete StorageLayerFactory, as the name suggests, it acts as a factory for all storage-specific
 		// implementations of family members (Dictionary, Graph and so on)
-		final Graph graph = factory.getGraph(); // This is a CassandraGraph
+		final Graph graph = factory.getGraph(); 
 		final Model model = ModelFactory.createModelForGraph(graph); 
 
 		Statement st = model.createStatement(
 				model.createResource("http://rdf.gx.org/id/resources#me"),
 				FOAF.name,
 				model.createLiteral("Andrea Gazzarini"));
+
+		Statement st1 = model.createStatement(
+				model.createResource("http://rdf.gx.org/id/resources#him"),
+				FOAF.name,
+				model.createLiteral("Gazzax"));
 		
 		model.add(st);
-		model.remove(st);
+		model.add(st1);
 
-		model.read(new FileReader("/work/data/rdf/sample.nt"), "http://base.example.org", "N3");	
+		NodeIterator iterator = model.listObjects();
+		while (iterator.hasNext()) {
+			System.out.println(iterator.next());
+		}
+		
+		StmtIterator stiterator = model.listStatements(null, FOAF.name, (RDFNode)null);
+		while (stiterator.hasNext()) {
+			System.out.println(stiterator.next());
+		}
+			
 		model.removeAll();		
-	
+
+		stiterator = model.listStatements();
+		while (stiterator.hasNext()) {
+			System.out.println(stiterator.next());
+		}
+		
 		factory.getClientShutdownHook().close(); // This is a CassandraClientShutdownHook
 	}
 }

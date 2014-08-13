@@ -26,7 +26,7 @@ import com.hp.hpl.jena.graph.NodeFactory;
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
-public class CacheModeTest {
+public class CacheModeTestCase {
 
 	private CacheNodectionary frontendDictionary;
 	private CacheNodectionary firstLevelCache2;

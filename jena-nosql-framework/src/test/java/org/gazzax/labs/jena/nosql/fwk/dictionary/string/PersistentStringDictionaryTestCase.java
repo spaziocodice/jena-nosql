@@ -22,7 +22,7 @@ import org.junit.Test;
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
-public class PersistentStringDictionaryTest {
+public class PersistentStringDictionaryTestCase {
 	
 	private PersistentStringDictionary _cut;
 
@@ -77,12 +77,12 @@ public class PersistentStringDictionaryTest {
 		when(_dummyIndex.contains(any(byte[].class))).thenReturn(false);
 		
 		final String aValue = randomString();
-		when(_dummyIndex.get(aValue)).thenReturn(Dictionary.NOT_SET);
+		when(_dummyIndex.getId(aValue)).thenReturn(Dictionary.NOT_SET);
 		
 		byte[] result = _cut.getID(aValue, RANDOMIZER.nextBoolean());
 		assertEquals(PersistentStringDictionary.ID_LENGTH, result.length);
 
-		verify(_dummyIndex).get(aValue);
+		verify(_dummyIndex).getId(aValue);
 		verify(_dummyIndex).putEntry(aValue, result);
 	}
 
@@ -99,12 +99,12 @@ public class PersistentStringDictionaryTest {
 
 		id[0] = (byte) (Dictionary.NOT_SET[0] + 1);
 
-		when(_dummyIndex.get(aValue)).thenReturn(id);
+		when(_dummyIndex.getId(aValue)).thenReturn(id);
 
 		byte[] result = _cut.getID(aValue, RANDOMIZER.nextBoolean());
 		assertArrayEquals(id, result);
 
-		verify(_dummyIndex).get(aValue);
+		verify(_dummyIndex).getId(aValue);
 	}
 
 	/**

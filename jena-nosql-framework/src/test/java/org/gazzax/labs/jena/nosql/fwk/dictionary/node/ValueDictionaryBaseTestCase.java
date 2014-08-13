@@ -25,7 +25,7 @@ import com.hp.hpl.jena.graph.Node;
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
-public class ValueDictionaryBaseTest {
+public class ValueDictionaryBaseTestCase {
 
 	private TopLevelDictionaryBase _cut;
 

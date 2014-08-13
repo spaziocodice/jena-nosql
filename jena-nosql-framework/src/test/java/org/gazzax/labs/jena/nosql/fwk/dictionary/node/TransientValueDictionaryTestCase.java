@@ -41,7 +41,7 @@ import com.hp.hpl.jena.graph.Node;
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
-public class TransientValueDictionaryTest {
+public class TransientValueDictionaryTestCase {
 
 	final Node firstMember = buildResource("http://pippo.pluto.paperino#first");
 	final Node secondMember = buildResource("http://pippo.pluto.paperino#second");

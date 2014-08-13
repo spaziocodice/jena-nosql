@@ -44,7 +44,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
-public class KnownURIsDictionaryTest {
+public class KnownURIsDictionaryTestCase {
 
 	private KnownURIsDictionary cut;
 	private TopLevelDictionary decoratee;
@@ -182,7 +182,7 @@ public class KnownURIsDictionaryTest {
 			final String n3 = NTriples.asNtURI(uri);
 
 			// Make sure the mock index returns "Sorry, we don't have such value".
-			when(dummyIndex.get(n3)).thenReturn(TopLevelDictionaryBase.NOT_SET);
+			when(dummyIndex.getId(n3)).thenReturn(TopLevelDictionaryBase.NOT_SET);
 
 			// 1. ask for uri.
 			byte[] id = cut.getID(uri, isPredicate);
@@ -248,7 +248,7 @@ public class KnownURIsDictionaryTest {
 		final String n3 = NTriples.asNtURI(managedUri);
 
 		when(dummyIndex.getValue(any(byte[].class))).thenReturn(n3);
-		when(dummyIndex.get(n3)).thenReturn(TopLevelDictionaryBase.NOT_SET);
+		when(dummyIndex.getId(n3)).thenReturn(TopLevelDictionaryBase.NOT_SET);
 
 		byte[] id = cut.getID(managedUri, isPredicate);
 

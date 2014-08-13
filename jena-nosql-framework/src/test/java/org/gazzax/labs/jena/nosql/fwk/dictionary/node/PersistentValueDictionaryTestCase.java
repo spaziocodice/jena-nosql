@@ -18,7 +18,7 @@ import org.junit.Test;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class PersistentValueDictionaryTest {
+public class PersistentValueDictionaryTestCase {
 
 	private PersistentNodeDictionary cut;
 

@@ -32,7 +32,7 @@ import com.hp.hpl.jena.graph.Node;
  * @author Andrea Gazzarini
  * @since 1.1.0
  */
-public class ThreeTieredValueDictionaryTest {
+public class ThreeTieredValueDictionaryTestCase {
 
 	final Node aURI = buildResource("http://pippo.pluto.paperino#first");
 	final Node aLiteral = buildLiteral("Hello there! It's Gazza!");
