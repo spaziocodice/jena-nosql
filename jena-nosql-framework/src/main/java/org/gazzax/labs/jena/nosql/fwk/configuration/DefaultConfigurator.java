@@ -7,9 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Objects;
 
 import org.gazzax.labs.jena.nosql.fwk.log.Log;
+import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
@@ -36,7 +36,6 @@ import org.yaml.snakeyaml.Yaml;
  * @since 1.0
  */
 public class DefaultConfigurator implements Configuration<Map<String, Object>> {
-	
 	/**
 	 * A configuration state.
 	 * It represents a concrete state of the internal Finite State Machine.
@@ -68,22 +67,32 @@ public class DefaultConfigurator implements Configuration<Map<String, Object>> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void configure(final Configurable configurable) {
+			logger.info(MessageCatalog._00031_TRYING_ST_1, CONFIGURATION_FILE_SYSTEM_PROPERTY);
+			final File file = new File(System.getProperty(CONFIGURATION_FILE_SYSTEM_PROPERTY, EMPTY_STRING));
 			try {
-				final File file = new File(System.getProperty(CONFIGURATION_FILE_SYSTEM_PROPERTY, EMPTY_STRING));
 				if (file.canRead()) {
 					parameters = (Map<String, Object>) new Yaml().load(new FileReader(file));
-
-//					logger.info(MessageCatalog._00101_USING_CONFIG_FILE, file);
-					DefaultConfigurator.this.configure(configurable);
+					logger.info(
+							MessageCatalog._00097_CONFIGURATION_FILE_STRATEGY, 
+							CONFIGURATION_FILE_SYSTEM_PROPERTY, 
+							file.getAbsolutePath());
+					transitionTo(configurationHasBeenLoaded, configurable);
 				} else {
-//					logger.error(MessageCatalog._00100_CONFIG_FILE_NOT_READABLE, configFilePath);
+					logger.error(
+							MessageCatalog._00096_CONFIGURATION_FILE_STRATEGY_FAILURE, 
+							CONFIGURATION_FILE_SYSTEM_PROPERTY);
 					transitionTo(switchToConfigurationDirectory, configurable);
 				}
 			} catch (final FileNotFoundException exception) {
-//				logger.error(MessageCatalog._00099_CONFIG_FILE_NOT_FOUND, configFilePath);
+				logger.error(
+						MessageCatalog._00032_CONFIGURATION_FILE_NOT_FOUND, 
+						CONFIGURATION_FILE_SYSTEM_PROPERTY, 
+						file.getAbsolutePath());
 				transitionTo(switchToConfigurationDirectory, configurable);
 			} catch (final Exception exception) {
-//				logger.error(MessageCatalog., configFilePath);
+				logger.error(
+						MessageCatalog._00096_CONFIGURATION_FILE_STRATEGY_FAILURE, 
+						CONFIGURATION_FILE_SYSTEM_PROPERTY);
 				transitionTo(switchToConfigurationDirectory, configurable);
 			}
 		}
@@ -97,23 +106,31 @@ public class DefaultConfigurator implements Configuration<Map<String, Object>> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void configure(final Configurable configurable) {
-			final File configFile = new File(System.getProperty(ETC_DIR_SYSTEM_PROPERTY, EMPTY_STRING), CONFIGURATION_FILENAME);
+			logger.info(MessageCatalog._00033_TRYING_ST_2, ETC_DIR_SYSTEM_PROPERTY);
+			final File configFile = new File(
+					System.getProperty(ETC_DIR_SYSTEM_PROPERTY, EMPTY_STRING), 
+					CONFIGURATION_FILENAME);
 			try {
 				if (configFile.canRead()) {
 					final Yaml loader = new Yaml();
 					parameters = (Map<String, Object>) loader.load(new FileReader(configFile));
 
-//					logger.info(MessageCatalog._00101_USING_CONFIG_FILE, configFile);
-					DefaultConfigurator.this.configure(configurable);
+					logger.info(MessageCatalog._00034_CONFIGURATION_DIR_STRATEGY, configFile);
+					transitionTo(configurationHasBeenLoaded, configurable);
 				} else {
-//					logger.error(MessageCatalog._00100_CONFIG_FILE_NOT_READABLE, configFile);
+					logger.error(MessageCatalog._00035_CONFIGURATION_DIR_FILE_CANNOT_BE_READ, ETC_DIR_SYSTEM_PROPERTY);
 					transitionTo(switchToClasspathResource, configurable);
 				}
 			} catch (final FileNotFoundException exception) {
-//				logger.error(MessageCatalog._00099_CONFIG_FILE_NOT_FOUND, configFile);
+				logger.error(
+						MessageCatalog._00036_CONFIGURATION_FILE_NOT_FOUND, 
+						ETC_DIR_SYSTEM_PROPERTY, 
+						configFile.getAbsolutePath());
 				transitionTo(switchToClasspathResource, configurable);
 			} catch (final Exception exception) {
-//				logger.error(MessageCatalog., configFilePath);
+				logger.error(
+						MessageCatalog._00035_CONFIGURATION_DIR_FILE_CANNOT_BE_READ, 
+						ETC_DIR_SYSTEM_PROPERTY);
 				transitionTo(switchToClasspathResource, configurable);
 			}
 		}
@@ -126,19 +143,20 @@ public class DefaultConfigurator implements Configuration<Map<String, Object>> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void configure(final Configurable configurable) {
+			logger.info(MessageCatalog._00037_TRYING_ST_3, CONFIGURATION_FILENAME);
 			try {
-				
 				final InputStream stream = getClass().getResourceAsStream("/" + CONFIGURATION_FILENAME);
 				if (stream != null) {
 					parameters = (Map<String, Object>) new Yaml().load(stream);
-	
-//					logger.info(MessageCatalog._00102_USING_CLASSPATH_RESOURCE, CONFIGURATION_FILENAME);
-					DefaultConfigurator.this.configure(configurable);
+
+					logger.info(MessageCatalog._00038_USING_CLASSPATH_RESOURCE, CONFIGURATION_FILENAME);
+					
+					transitionTo(configurationHasBeenLoaded, configurable);
 				} else {
 					transitionTo(switchToEmbeddedConfiguration, configurable);
 				}
 			} catch (final Exception exception) {
-//				logger.error(MessageCatalog.);
+				logger.error(MessageCatalog._00039_CLASSPATH_STRATEGY_FAILURE);
 				transitionTo(switchToEmbeddedConfiguration, configurable);
 			}
 		}
@@ -154,23 +172,21 @@ public class DefaultConfigurator implements Configuration<Map<String, Object>> {
 		public void configure(final Configurable configurable) {
 			parameters = (Map<String, Object>) new Yaml().load(getClass().getResourceAsStream("/" + DEFAULT_CONFIGURATION_FILE_NAME));
 
-//			logger.info(MessageCatalog._00103_USING_EMBEDDED_CONFIGURATION, DEFAULT_CONFIGURATION_FILE_NAME);
+			logger.info(MessageCatalog._00040_USING_ST_4, DEFAULT_CONFIGURATION_FILE_NAME);
 
-			configurable.accept(DefaultConfigurator.this);
-			currentState = configurationHasBeenLoaded;
+			transitionTo(configurationHasBeenLoaded, configurable);
 		}
 	};
 
 	final ConfigurationState configurationHasBeenLoaded = new ConfigurationState() {
-
 		@Override
 		public void configure(final Configurable configurable) {
-			DefaultConfigurator.this.configure(configurable);
+			configurable.accept(DefaultConfigurator.this);
 		}
 	};
 
 	protected Map<String, Object> parameters;
-	protected ConfigurationState currentState = tryWithConfigurationFile;
+	ConfigurationState currentState = tryWithConfigurationFile;
 
 	@Override
 	public void configure(final Configurable configurable) {
@@ -180,10 +196,8 @@ public class DefaultConfigurator implements Configuration<Map<String, Object>> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getParameter(final String name, final T defaultValue) {
-		Objects.requireNonNull(name, "'name' must not be null.");
-		
 		if (parameters == null) {
-			throw new IllegalStateException("Method called before configuration initialisation.");
+			throw new IllegalStateException(MessageCatalog._00030_INVALID_CONFIGURATION_STATE);
 		}
 		
 		T value = (T) parameters.get(name);
