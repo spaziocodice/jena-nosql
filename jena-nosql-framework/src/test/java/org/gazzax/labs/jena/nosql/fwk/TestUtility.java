@@ -1,5 +1,11 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
+import static org.mockito.Mockito.mock;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -13,8 +19,6 @@ import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.rdf.model.AnonId;
-
-import static org.mockito.Mockito.*;
 
 /**
  * A bunch of test utilities.
@@ -125,4 +129,25 @@ public class TestUtility {
 	public static Node buildBNode(final String id) {
 		return NodeFactory.createAnon(AnonId.create(id));
 	}	
+	
+	public static Map<String, Object> createSampleConfiguration(final File file) throws Exception {
+		final Map<String, Object> configuration = new HashMap<String, Object>();
+		
+		BufferedWriter writer = null;
+		try {
+			writer = new BufferedWriter(new FileWriter(file));
+			for (int i = 0; i < RANDOMIZER.nextInt(10) + 2; i++) {
+				final String key = String.valueOf(i);
+				final String value = randomString();
+				
+				configuration.put(key, value);
+				writer.write(key + ": \"" + value + "\"");
+				writer.newLine();
+			}
+		} finally {
+			writer.flush();
+			writer.close();
+		}
+		return configuration;
+	}
 }
