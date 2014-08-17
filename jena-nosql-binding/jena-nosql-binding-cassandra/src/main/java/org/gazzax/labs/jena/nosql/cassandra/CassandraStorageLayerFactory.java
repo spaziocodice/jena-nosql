@@ -124,31 +124,32 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 			session.execute("USE " + keyspaceName);
 		}
 		
-		dictionary = new CacheNodectionary(
-					"TopLevelCacheDictionary",
-					new KnownURIsDictionary(
-						"KnownURIsDictionary",
-						new ThreeTieredNodeDictionary(
-								"ThreeTieredDictionary",
-								new CacheStringDictionary(
-										"NamespacesCacheDictionary",
-										new PersistentStringDictionary("NamespacesDictionary", "DICT_NAMESPACES"),
-										configuration.getParameter("namespaces-id-cache-size", Integer.valueOf(1000)),
-										configuration.getParameter("namespaces-value-cache-size", Integer.valueOf(1000)),
-										false),
-								new TransientStringDictionary("LocalNamesDictionary"),
-								new CacheNodectionary(
-										"LiteralsAndBNodesCacheDictionary",
-										new TransientNodeDictionary(
-												"LiteralAndBNodesDictionary",
-												new PersistentNodeDictionary("LongLiteralsDictionary"),
-												configuration.getParameter("long-literals-threshold", Integer.valueOf(1000))),
-										configuration.getParameter("literals-bnodes-id-cache-size", Integer.valueOf(50000)),
-										configuration.getParameter("literals-bnodes-value-cache-size", Integer.valueOf(50000)),
-										true))),
-					configuration.getParameter("known-uris-id-cache-size", Integer.valueOf(2000)),
-					configuration.getParameter("known-uris-value-cache-size", Integer.valueOf(2000)),
-					true);
+		dictionary = new TransientNodeDictionary("TEST_DICTIONARY", new TransientNodeDictionary("NEVER_USED"), 1000000);
+//				new CacheNodectionary(
+//					"TopLevelCacheDictionary",
+//					new KnownURIsDictionary(
+//						"KnownURIsDictionary",
+//						new ThreeTieredNodeDictionary(
+//								"ThreeTieredDictionary",
+//								new CacheStringDictionary(
+//										"NamespacesCacheDictionary",
+//										new PersistentStringDictionary("NamespacesDictionary", "DICT_NAMESPACES"),
+//										configuration.getParameter("namespaces-id-cache-size", Integer.valueOf(1000)),
+//										configuration.getParameter("namespaces-value-cache-size", Integer.valueOf(1000)),
+//										false),
+//								new TransientStringDictionary("LocalNamesDictionary"),
+//								new CacheNodectionary(
+//										"LiteralsAndBNodesCacheDictionary",
+//										new TransientNodeDictionary(
+//												"LiteralAndBNodesDictionary",
+//												new PersistentNodeDictionary("LongLiteralsDictionary"),
+//												configuration.getParameter("long-literals-threshold", Integer.valueOf(1000))),
+//										configuration.getParameter("literals-bnodes-id-cache-size", Integer.valueOf(50000)),
+//										configuration.getParameter("literals-bnodes-value-cache-size", Integer.valueOf(50000)),
+//										true))),
+//					configuration.getParameter("known-uris-id-cache-size", Integer.valueOf(2000)),
+//					configuration.getParameter("known-uris-value-cache-size", Integer.valueOf(2000)),
+//					true);
 		try {
 			dictionary.initialise(this);
 		} catch (InitialisationException e) {

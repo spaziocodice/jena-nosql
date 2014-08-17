@@ -1,8 +1,5 @@
 package org.gazzax.labs.jena.nosql.fwk.ds;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 
 /**
@@ -55,22 +52,6 @@ public interface MapDAO<K, V> {
 	 * @throws StorageLayerException in case of data access failure.
 	 */
 	K getKey(V value) throws StorageLayerException;
-	
-	/**
-	 * Returns an iterator over all keys managed by this data access object.
-	 * 
-	 * @return an iterator over all keys managed by this data access object.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	Iterator<K> keyIterator() throws StorageLayerException;
-	
-	/**
-	 * Returns a set containing all keys managed by this data access object.
-	 * 
-	 * @return a set containing all keys managed by this data access object.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	Set<K> keySet() throws StorageLayerException;
 	
 	/**
 	 * Persists a new key/value pair on the underlying storage.

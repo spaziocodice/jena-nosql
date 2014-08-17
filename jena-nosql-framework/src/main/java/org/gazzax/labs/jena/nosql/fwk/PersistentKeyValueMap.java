@@ -48,6 +48,10 @@ class PersistentKeyValueMap<K, V> implements Initialisable {
 			final String name, 
 			final boolean bidirectional,
 			final V defaultValue) {
+		assert(k != null);
+		assert(v != null);
+		assert(name != null);
+		
 		this.k = k;
 		this.v = v;
 		this.name = name;

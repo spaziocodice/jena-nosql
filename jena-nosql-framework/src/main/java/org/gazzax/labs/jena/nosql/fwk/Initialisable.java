@@ -12,7 +12,6 @@ import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
  * @since 1.0
  */
 public interface Initialisable {
-	
 	/** 
 	 * Initializes this dictionary.
 	 * This is a callback method that the owner of this instance uses for inform 

@@ -1,9 +1,6 @@
 package org.gazzax.labs.jena.nosql.cassandra.dao;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 import org.gazzax.labs.jena.nosql.cassandra.CoDec;
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
@@ -16,7 +13,6 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.google.common.collect.AbstractIterator;
 
 /**
  * A map DAO that operates on a Cassandra table.
@@ -125,31 +121,6 @@ public class Cassandra2xMapDAO<K, V> implements MapDAO<K, V> {
 		final ByteBuffer serializedValue = valueSerializer.serialize(value);
 		final Row result = session.execute(getKeyStatement.bind(serializedValue)).one();
 		return result != null ? keySerializer.deserialize(result.getBytesUnsafe(0)) : defaultKey;
-	}
-	
-	@Override
-	public Iterator<K> keyIterator() {
-		final Iterator<Row> resultIterator = session.execute(getAllStatement.bind()).iterator();
-
-		return new AbstractIterator<K>() {
-			@Override
-			protected K computeNext() {
-				return resultIterator.hasNext() 
-						? keySerializer.deserialize(resultIterator.next().getBytesUnsafe(0)) 
-						: endOfData();
-			}
-		};
-	}
-	
-	@Override
-	public Set<K> keySet() {
-		final Set<K> keys = new HashSet<K>();
-
-		for (final Iterator<K> iterator = keyIterator(); iterator.hasNext();) {
-			keys.add(iterator.next());
-		}
-
-		return keys;
 	}
 	
 	@SuppressWarnings("unchecked")
