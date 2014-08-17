@@ -1,6 +1,5 @@
 package org.gazzax.labs.jena.nosql.fwk.dictionary.node;
 
-import static org.gazzax.labs.jena.nosql.fwk.TestUtility.STORAGE_LAYER_FACTORY;
 import static org.gazzax.labs.jena.nosql.fwk.TestUtility.randomString;
 import static org.gazzax.labs.jena.nosql.fwk.util.Bytes.subarray;
 import static org.junit.Assert.assertEquals;
@@ -11,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
+import org.gazzax.labs.jena.nosql.fwk.TestUtility.TestStorageLayerFactory;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.junit.Test;
 
@@ -65,7 +65,7 @@ public class CacheModeTestCase {
 				CacheNodectionary.DEFAULT_CACHE_SIZE, 
 				true);
 
-		frontendDictionary.initialise(STORAGE_LAYER_FACTORY);
+		frontendDictionary.initialise(new TestStorageLayerFactory());
 		
 		final Node uri = NodeFactory.createURI("http://example.org#it");
 		final byte [] id = frontendDictionary.getID(uri, false);

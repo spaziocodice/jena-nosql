@@ -1,12 +1,20 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
+import java.util.Map;
 import java.util.Random;
 
+import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
+import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
+import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.rdf.model.AnonId;
+
+import static org.mockito.Mockito.*;
 
 /**
  * A bunch of test utilities.
@@ -15,7 +23,42 @@ import com.hp.hpl.jena.rdf.model.AnonId;
  * @since 1.0
  */
 public class TestUtility {
-	public final static StorageLayerFactory STORAGE_LAYER_FACTORY = null;
+	public static class TestStorageLayerFactory extends StorageLayerFactory {
+		
+		@Override
+		public void accept(Configuration<Map<String, Object>> configuration) {
+			// Nothing
+		}
+		
+		@Override
+		public TripleIndexDAO getTripleIndexDAO() {
+			return mock(TripleIndexDAO.class);
+		}
+		
+		@Override
+		@SuppressWarnings("unchecked")
+		public <K, V> MapDAO<K, V> getMapDAO(Class<K> keyClass, Class<V> valueClass, boolean isBidirectional, String name) {
+			return mock(MapDAO.class);
+		}
+		
+		@Override
+		public String getInfo() {
+			return randomString();
+		}
+		
+		@Override
+		public TopLevelDictionary getDictionary() {
+			return mock(TopLevelDictionary.class);
+		}
+		
+		@Override
+		public ClientShutdownHook getClientShutdownHook() {
+			return mock(ClientShutdownHook.class);
+		}
+	};
+	
+	public final static StorageLayerFactory STORAGE_LAYER_FACTORY = new TestStorageLayerFactory();
+	
 	public final static Random RANDOMIZER = new Random();
 	
 	/**
@@ -26,6 +69,15 @@ public class TestUtility {
 	public static String randomString() {
 		final long value = RANDOMIZER.nextLong();
 		return String.valueOf(value < 0 ? value * -1 : value);
+	}
+	
+	/**
+	 * Produces a random boolean.
+	 * 
+	 * @return a random boolean.
+	 */
+	public static boolean randomBoolean() {
+		return RANDOMIZER.nextBoolean();
 	}
 	
 	/**

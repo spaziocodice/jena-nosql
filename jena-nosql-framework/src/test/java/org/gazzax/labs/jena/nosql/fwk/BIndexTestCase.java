@@ -1,12 +1,25 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
+import static org.gazzax.labs.jena.nosql.fwk.TestUtility.STORAGE_LAYER_FACTORY;
+import static org.gazzax.labs.jena.nosql.fwk.TestUtility.randomBytes;
+import static org.gazzax.labs.jena.nosql.fwk.TestUtility.randomString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import org.gazzax.labs.jena.nosql.fwk.TestUtility.TestStorageLayerFactory;
+import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
+import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.hp.hpl.jena.graph.Node;
-
-import static org.gazzax.labs.jena.nosql.fwk.TestUtility.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test case for {@link BIndex}.
@@ -16,6 +29,7 @@ import static org.mockito.Mockito.*;
  */
 public class BIndexTestCase {
 	private BIndex cut;
+	private String name;
 	private PersistentKeyValueMap<String, byte[]> byValue;
 	private PersistentKeyValueMap<byte[], String> byId;
 	
@@ -25,7 +39,8 @@ public class BIndexTestCase {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setUp() {
-		cut = new BIndex(randomString());
+		name = randomString();
+		cut = new BIndex(name);
 		byValue = mock(PersistentKeyValueMap.class);
 		byId = mock(PersistentKeyValueMap.class);
 		cut.byId = byId;
@@ -115,4 +130,50 @@ public class BIndexTestCase {
 		verifyNoMoreInteractions(byId);
 		verifyZeroInteractions(byValue);
 	}		
+	
+	/**
+	 * In case the initialisation fails an exception must be thrown.
+	 */
+	@Test
+	public void initialisationFailure() {
+		try {
+			cut.initialise(new TestStorageLayerFactory() {
+				@SuppressWarnings({ "rawtypes", "unchecked" })
+				@Override
+				public <K, V> MapDAO<K, V> getMapDAO(Class<K> keyClass,
+						Class<V> valueClass, boolean isBidirectional, String name) {
+					final MapDAO dao = mock(MapDAO.class);
+					try {
+						doThrow(StorageLayerException.class).when(dao).setDefaultValue(any());
+					} catch (final StorageLayerException exception) {
+						fail();
+					}
+					return dao;
+				}
+			});		
+		} catch (InitialisationException expected) {
+			// Nothing, this is the expected behaviour.
+		}
+	}
+
+	/**
+	 * Checks the correctness of the state after initialisation.
+	 * 
+	 * @throws Exception never otherwise the test fails.
+	 */
+	@Test
+	public void stateAfterInitialisation() throws Exception {
+		cut.initialise(STORAGE_LAYER_FACTORY);
+		
+		assertTrue(cut.byId != null);
+		assertTrue(cut.byValue != null);
+		
+		assertEquals(name, cut.byValue.name);
+		assertEquals(TopLevelDictionary.NOT_SET, cut.byValue.defaultValue);
+		assertFalse(cut.byValue.isBidirectional);
+
+		assertEquals(name + "_REVERSE", cut.byId.name);
+		assertEquals(Constants.EMPTY_STRING, cut.byId.defaultValue);
+		assertFalse(cut.byId.isBidirectional);
+	}
 }

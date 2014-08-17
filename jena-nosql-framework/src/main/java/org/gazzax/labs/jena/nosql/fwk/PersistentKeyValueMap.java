@@ -4,6 +4,10 @@ import java.util.Map;
 
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
+import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
+import org.gazzax.labs.jena.nosql.fwk.log.MessageFactory;
+
+import static org.gazzax.labs.jena.nosql.fwk.util.Strings.*;
 
 /**
  * A map implementations that read and write key/value pairs from a persistent storage.
@@ -24,14 +28,14 @@ import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
  * @param <V> the value kind / type managed by the underlying map structure.
  */
 class PersistentKeyValueMap<K, V> implements Initialisable {
-	private Class<K> k;
-	private Class<V> v;
+	Class<K> k;
+	Class<V> v;
 
-	private MapDAO<K, V> dao;
+	MapDAO<K, V> dao;
 
-	private final boolean isBidirectional;
-	private final String name;
-	private final V defaultValue;
+	final boolean isBidirectional;
+	final String name;
+	final V defaultValue;
 
 	/**
 	 * Builds a new persistent map with a given name.
@@ -48,9 +52,23 @@ class PersistentKeyValueMap<K, V> implements Initialisable {
 			final String name, 
 			final boolean bidirectional,
 			final V defaultValue) {
-		assert(k != null);
-		assert(v != null);
-		assert(name != null);
+		if (k == null) {
+			throw new IllegalArgumentException(
+				MessageFactory.createMessage(
+						MessageCatalog._00098_INVALID_PMAP_ATTRIBUTE, "Class<K>", null));
+		}
+		
+		if (v == null) {
+			throw new IllegalArgumentException(
+				MessageFactory.createMessage(
+						MessageCatalog._00098_INVALID_PMAP_ATTRIBUTE, "Class<V>", null));
+		}
+
+		if (isNullOrEmptyString(name)) {
+			throw new IllegalArgumentException(
+					MessageFactory.createMessage(
+							MessageCatalog._00098_INVALID_PMAP_ATTRIBUTE, "name", name));
+		}
 		
 		this.k = k;
 		this.v = v;
@@ -89,20 +107,6 @@ class PersistentKeyValueMap<K, V> implements Initialisable {
 			dao.createRequiredSchemaEntities();
 		} catch (final StorageLayerException exception) {
 			throw new InitialisationException(exception);
-		}
-	}
-
-	/**
-	 * Puts the given entries into this map. If a mapping already exists for a
-	 * key, it will be replaced with the new value.
-	 * 
-	 * @param m the entries to insert.
-	 * @throws StorageLayerException in case of data access failure.
-	 */
-	public void putAll(final Map<? extends K, ? extends V> m) throws StorageLayerException {
-
-		for (final Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
-			put(entry.getKey(), entry.getValue());
 		}
 	}
 

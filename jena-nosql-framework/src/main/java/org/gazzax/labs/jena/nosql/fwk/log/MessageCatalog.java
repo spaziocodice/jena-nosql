@@ -9,6 +9,7 @@ package org.gazzax.labs.jena.nosql.fwk.log;
  */
 public interface MessageCatalog {
 	String PREFIX = "<JNSQL";
+	String _00098_INVALID_PMAP_ATTRIBUTE = PREFIX + "-00098> : Cannot build a valid instance of PersistentKeyValueMap: attribute %s is mandatory (was >%s<).";
 	String _00099_CLIENT_SHUTDOWN_FAILURE = PREFIX + "-00099> : Unable to properly execute the shutdown procedure for client connection. See below for further details.";
 	String _00100_UNABLE_TO_DELETE_TRIPLE = PREFIX + "-00100> : Unable to delete the following triple %s. See below for further details.";
 	String _00101_UNABLE_TO_ADD_TRIPLE = PREFIX + "-00101> : Unable to add the following triple %s. See below for further details.";
