@@ -55,7 +55,7 @@ public class TestDefaultConfigurator {
 	@Test
 	public void callInInvalidState() {
 		try {
-			cut.getParameter(anyString(), anyString());
+			cut.getParameter(randomString(), randomString());
 			fail();
 		} catch (final IllegalStateException expected) {
 			// Nothing, this is the expected behaviour.

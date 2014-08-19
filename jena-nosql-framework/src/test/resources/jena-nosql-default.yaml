@@ -1,0 +1,46 @@
+--- 
+##########################################
+##	JENA-NOSQL default configuration	##
+##########################################
+
+# Cassandra nodes (comma seperated) actings as initial contact points
+cassandra-contact-points: "localhost"
+cassandra-keyspace: "C2XDB"
+
+cassandra-connect-timeout-millis: 5000
+cassandra-read-timeout-millis: 12000
+#cassandra-keep-alive: true
+#cassandra-reuse-address: true
+#cassandra-receive-buffer-size: 1000
+#cassandra-so-linger: 1000
+#cassandra-tcp-no-delay: false
+
+#cassandra-consistency-level: "ONE"
+#cassandra-serial-consistency-level: "SERIAL"
+#cassandra-fetch-size: 100
+
+# Datastax driver retry policy
+#cassandra-retry-policy: "<class name>"
+
+# Datastax driver load balancing policy
+#cassandra-load-balancing-policy: "<class name>"
+
+# Datastax driver reconnection policy
+#cassandra-reconnection-policy: "<class name>"
+
+# Datastax driver compression to use for the transport
+#cassandra-transport-compression: "NONE"
+
+# Datastac pooling connection options
+#cassandra-local-core-connections-per-host: 10
+#cassandra-local-max-connections-per-host: 10
+#cassandra-local-max-simultaneous-request-per-connection-threshold: 10
+#cassandra-local-min-simultaneous-request-per-connection-threshold: 10
+#cassandra-remote-core-connections-per-host: 10
+#cassandra-remote-max-connections-per-host: 10
+#cassandra-remote-max-simultaneous-request-per-connection-threshold: 10
+#cassandra-remote-min-simultaneous-request-per-connection-threshold: 10
+
+cassandra-replication-factor: 1
+cassandra-read-consistency: "ONE"
+cassandra-write-consistency: "ONE"

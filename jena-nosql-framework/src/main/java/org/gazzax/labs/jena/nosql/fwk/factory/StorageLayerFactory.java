@@ -11,9 +11,11 @@ import org.gazzax.labs.jena.nosql.fwk.configuration.DefaultConfigurator;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlDatasetGraph;
 import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlGraph;
 
 import com.hp.hpl.jena.graph.Graph;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 
 /**
  * Main entry / extension point of the jena-nosql framework.
@@ -72,6 +74,15 @@ public abstract class StorageLayerFactory implements Configurable {
 	 */
 	public Graph getGraph() {
 		return new NoSqlGraph(this);
+	}	
+	
+	/**
+	 * Returns the {@link DatasetGraph} associated with the underlying kind of storage.
+	 * 
+	 * @return the {@link DatasetGraph} associated with the underlying kind of storage.
+	 */
+	public DatasetGraph getDatasetGraph() {
+		return new NoSqlDatasetGraph(this);
 	}	
 	
 	/**

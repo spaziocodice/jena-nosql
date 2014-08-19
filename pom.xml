@@ -71,6 +71,7 @@
 	<modules>
 		<module>jena-nosql-framework</module>
 		<module>jena-nosql-binding</module>
+		<module>jena-nosql-integration-tests</module>
 	</modules>
 	<name>Jena-NoSQL</name>
 	<url>https://github.com/agazzarini/jena-nosql</url>
