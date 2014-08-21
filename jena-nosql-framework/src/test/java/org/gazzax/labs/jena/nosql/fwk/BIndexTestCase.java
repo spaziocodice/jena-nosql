@@ -140,8 +140,11 @@ public class BIndexTestCase {
 			cut.initialise(new TestStorageLayerFactory() {
 				@SuppressWarnings({ "rawtypes", "unchecked" })
 				@Override
-				public <K, V> MapDAO<K, V> getMapDAO(Class<K> keyClass,
-						Class<V> valueClass, boolean isBidirectional, String name) {
+				public <K, V> MapDAO<K, V> getMapDAO(
+						final Class<K> keyClass,
+						final Class<V> valueClass, 
+						final boolean isBidirectional, 
+						final String name) {
 					final MapDAO dao = mock(MapDAO.class);
 					try {
 						doThrow(StorageLayerException.class).when(dao).setDefaultValue(any());

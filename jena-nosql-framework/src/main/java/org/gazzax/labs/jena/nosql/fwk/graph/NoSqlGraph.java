@@ -12,7 +12,6 @@ import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageFactory;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.GraphEvents;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -24,7 +23,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.WrappedIterator;
 
 /**
- * NoSQL {@link Graph} implementation.
+ * NoSQL Graph implementation.
  * 
  * @author Andrea Gazzarini
  * @since 1.0

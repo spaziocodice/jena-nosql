@@ -4,7 +4,7 @@ import org.gazzax.labs.jena.nosql.fwk.SparqlIntegrationTestCase;
 import org.junit.Test;
 
 /**
- * SPARQL Integration test with examples taken from http://www.w3.org/TR/sparql11-query
+ * SPARQL Integration test with examples taken from http://www.w3.org/TR/sparql11-query.
  * 
  * @see http://www.w3.org/TR/sparql11-query/#matchingRDFLiterals
  * @author Andrea Gazzarini

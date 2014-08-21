@@ -6,7 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -59,6 +59,8 @@ public class PersistentKeyValueMapTestCase {
 	
 	/**
 	 * In case the initialise raises a failure, an appropriate expection must be thrown.
+	 * 
+	 * @throws Exception never, otherwise the test fails.
 	 */
 	@Test
 	public void initialisationFailure() throws Exception {
@@ -66,7 +68,11 @@ public class PersistentKeyValueMapTestCase {
 			map.initialise(new TestStorageLayerFactory() {
 				@Override
 				@SuppressWarnings({ "unchecked", "rawtypes" })
-				public <K, V> MapDAO<K, V> getMapDAO(Class<K> keyClass, Class<V> valueClass, boolean isBidirectional, String name) {
+				public <K, V> MapDAO<K, V> getMapDAO(
+						final Class<K> keyClass, 
+						final Class<V> valueClass, 
+						final boolean isBidirectional, 
+						final String name) {
 					final MapDAO dao = mock(MapDAO.class);
 					try {
 						doThrow(StorageLayerException.class).when(dao).setDefaultValue(defaultValue);
@@ -210,6 +216,8 @@ public class PersistentKeyValueMapTestCase {
 	 * @param k the key class.
 	 * @param v the value class.
 	 * @param name the map name. 
+	 * @param <K> the key kind.
+	 * @param <V> the value kind.
 	 */
 	private <K, V> void expectConstructionTimeException(final Class<K> k, final Class<V> v, final String name) {
 		try {

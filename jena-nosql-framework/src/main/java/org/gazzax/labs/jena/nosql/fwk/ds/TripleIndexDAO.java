@@ -54,5 +54,12 @@ public interface TripleIndexDAO {
 	 */
 	void clear();
 
+	/**
+	 * Executes a given query (expressed as identifiers).
+	 * 
+	 * @param query the pattern query.
+	 * @return an iterator over query results.
+	 * @throws StorageLayerException in case of storage access failure.
+	 */
 	Iterator<byte[][]> query(byte[][] query) throws StorageLayerException;
 }

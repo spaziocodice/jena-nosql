@@ -10,10 +10,21 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.DatasetGraphCaching;
 import com.hp.hpl.jena.sparql.core.Quad;
 
+/**
+ * NoSQL implementation of Jena Dataset.
+ * 
+ * @author Andrea Gazzarini
+ * @since 1.0
+ */
 public class NoSqlDatasetGraph extends DatasetGraphCaching {
 
 	private final StorageLayerFactory factory;
 	
+	/**
+	 * Builds a new Dataset graph with the given factory.
+	 * 
+	 * @param factory the storage layer (abstract) factory.
+	 */
 	public NoSqlDatasetGraph(final StorageLayerFactory factory) {
 		this.factory = factory;
 	}

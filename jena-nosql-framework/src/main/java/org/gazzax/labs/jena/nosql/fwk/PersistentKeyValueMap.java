@@ -1,13 +1,11 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
-import java.util.Map;
+import static org.gazzax.labs.jena.nosql.fwk.util.Strings.isNullOrEmptyString;
 
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageFactory;
-
-import static org.gazzax.labs.jena.nosql.fwk.util.Strings.*;
 
 /**
  * A map implementations that read and write key/value pairs from a persistent storage.
@@ -16,7 +14,7 @@ import static org.gazzax.labs.jena.nosql.fwk.util.Strings.*;
  * 
  * <ul>
  * 	<li>we don't need such complexity.</li>
- * 	<li>we don't need polymorphism between this map and the standard {@link Map}s found in the java API</li>
+ * 	<li>we don't need polymorphism between this map and the standard Maps found in the java API</li>
  * </ul>
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.

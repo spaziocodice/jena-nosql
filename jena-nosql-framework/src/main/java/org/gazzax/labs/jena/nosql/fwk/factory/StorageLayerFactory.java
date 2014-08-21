@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.gazzax.labs.jena.nosql.fwk.BIndex;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configurable;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.configuration.DefaultConfigurator;
@@ -44,7 +43,7 @@ public abstract class StorageLayerFactory implements Configurable {
 	
 	/**
 	 * Returns the {@link MapDAO}.
-	 * A {@link MapDAO} instance is required in order to manage the persistent logic of a {@link BIndex}.
+	 * A {@link MapDAO} instance is required in order to manage the persistent logic of a BIndex.
 	 * 
 	 * @param <K> the key class.
 	 * @param <V> the value class.

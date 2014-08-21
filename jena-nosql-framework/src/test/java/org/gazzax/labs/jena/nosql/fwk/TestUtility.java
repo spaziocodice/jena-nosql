@@ -26,11 +26,18 @@ import com.hp.hpl.jena.rdf.model.AnonId;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class TestUtility {
+public abstract class TestUtility {
+	/**
+	 * {@link StorageLayerFactory} implementation for tests.
+	 * 
+	 * @author Andrea Gazzarini
+	 * @since 1.0
+	 *
+	 */
 	public static class TestStorageLayerFactory extends StorageLayerFactory {
 		
 		@Override
-		public void accept(Configuration<Map<String, Object>> configuration) {
+		public void accept(final Configuration<Map<String, Object>> configuration) {
 			// Nothing
 		}
 		
@@ -41,7 +48,7 @@ public class TestUtility {
 		
 		@Override
 		@SuppressWarnings("unchecked")
-		public <K, V> MapDAO<K, V> getMapDAO(Class<K> keyClass, Class<V> valueClass, boolean isBidirectional, String name) {
+		public <K, V> MapDAO<K, V> getMapDAO(final Class<K> keyClass, final Class<V> valueClass, final boolean isBidirectional, final String name) {
 			return mock(MapDAO.class);
 		}
 		

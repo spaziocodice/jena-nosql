@@ -36,6 +36,9 @@ public abstract class SparqlIntegrationTestCase {
 	private Dataset dataset;
 	private StorageLayerFactory factory;
 	
+	/**
+	 * Setup fixture for this test.
+	 */
 	@Before
 	public final void setUp() {
 		factory = StorageLayerFactory.getFactory();
@@ -62,6 +65,9 @@ public abstract class SparqlIntegrationTestCase {
 		executeTestWithFile(testFilename());
 	}
 	
+	/**
+	 * Shutdown procedure for this test.
+	 */
 	@After
 	public void tearDown() {
 		factory.getTripleIndexDAO().clear();
@@ -83,6 +89,7 @@ public abstract class SparqlIntegrationTestCase {
 	/**
 	 * Builds a string (from the file associated with this test) with the expected query results.
 	 * 
+	 * @param resultsFileName the results filename.
 	 * @return a string (from the file associated with this test) with the expected query results.
 	 * @throws IOException in case of I/O failure while reading the file.
 	 */
@@ -128,7 +135,7 @@ public abstract class SparqlIntegrationTestCase {
 		final ResultSet rs = execution.execSelect();
 		
 		final String s = ResultSetFormatter.asText(rs, query).trim();
-		System.out.println(s);
+
 		assertEquals(
 				results(filename + ".rs").trim(),
 				s.trim());
