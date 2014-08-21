@@ -142,4 +142,10 @@ public class NoSqlGraph extends GraphBase {
 					? dao.query(query)
 					: EMPTY_IDS_ITERATOR;
 	}
+	
+	@Override
+	public void close() {
+		dictionary.close();
+		closed = true;
+	}
 }

@@ -1,12 +1,13 @@
-package org.gazzax.labs.jena.nosql.fwk.w3c;
+package org.gazzax.labs.jena.nosql.fwk;
 
 import static org.gazzax.labs.jena.nosql.fwk.TestUtility.DUMMY_BASE_URI;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import org.junit.After;
@@ -23,90 +24,114 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 
-public class Ex1ITCase {
+/**
+ * Supertype layer for all SPARQL integration tests.
+ * 
+ * @author Andrea Gazzarini
+ * @since 1.0
+ */
+public abstract class SparqlIntegrationTestCase {
 	protected static final String EXAMPLES_DIR = "src/test/resources/w3c/";
 	
 	private Dataset dataset;
 	private StorageLayerFactory factory;
 	
 	@Before
-	public void setUp() {
+	public final void setUp() {
 		factory = StorageLayerFactory.getFactory();
 		dataset = DatasetFactory.create(factory.getDatasetGraph());
 		
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(new File(EXAMPLES_DIR, "chapter_2.1_ex1.ttl")));
-			final Model model = dataset.getDefaultModel().read(reader, DUMMY_BASE_URI, "TTL");
-			assertEquals(1, model.size());
-		} catch (final Exception exception) {
-			// TODO: handle exception
-		}
+		load(testFilename() + ".ttl");
 	}
 	
+	/**
+	 * In case the conctete test consists in just 1 example, this method returns the filename associated with that example.
+	 * 
+	 * @return the name of the file associated with the example.
+	 */
+	protected abstract String testFilename();
+	
+	
+	/**
+	 * Executes the test.
+	 * 
+	 * @throws Exception hopefully never, otherwise the test fails.
+	 */
 	@Test
-	public void test() {
-		final Query query = QueryFactory.create(query("chapter_2.1_ex1.rq"));
-		final QueryExecution execution = QueryExecutionFactory.create(query, dataset);
-		final ResultSet rs = execution.execSelect();
-		assertEquals(ResultSetFormatter.asText(rs, query).trim(), results("chapter_2.1_ex1.rs").trim());
-		execution.close();
+	public void example1() throws Exception {
+		executeTestWithFile(testFilename());
 	}
 	
 	@After
 	public void tearDown() {
+		factory.getTripleIndexDAO().clear();
+		dataset.close();
 		factory.getClientShutdownHook().close();
 	}
 	
-	private String query(final String sourcefileName) {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(new File(EXAMPLES_DIR, sourcefileName)));
-			String actLine = null;
-			final StringBuilder builder = new StringBuilder();
-			while ( (actLine = reader.readLine()) != null) {
-				builder.append(actLine);
-			}
-			return builder.toString();
-		} catch (final Exception exception) { 
-			throw new RuntimeException(exception);
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	/**
+	 * Reads a query from the file associated with this test and builds a query string.
+	 * 
+	 * @param filename the filename.
+	 * @return the query string associated with this test.
+	 * @throws IOException in case of I/O failure while reading the file.
+	 */
+	private String queryString(final String filename) throws IOException {
+		return readFile(filename);
 	}
 	
-	private String results(final String resultsFileName) {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(new File(EXAMPLES_DIR, resultsFileName)));
-			String actLine = null;
-			final StringBuilder builder = new StringBuilder();
-			int i = 0;
-			while ( (actLine = reader.readLine()) != null) {
-				if (i > 0) {
-					builder.append(System.getProperty("line.separator"));
-				}
-				builder.append(actLine);
-				i++;
-			}
-			
-			System.out.println(builder);
-			
-			return builder.toString();
-		} catch (final Exception exception) { 
-			throw new RuntimeException(exception);
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}		
+	/**
+	 * Builds a string (from the file associated with this test) with the expected query results.
+	 * 
+	 * @return a string (from the file associated with this test) with the expected query results.
+	 * @throws IOException in case of I/O failure while reading the file.
+	 */
+	private String results(final String resultsFileName) throws IOException {
+		return readFile(resultsFileName);
 	}
+	
+	/**
+	 * Builds a string from a given file.
+	 * 
+	 * @param filename the filename (without path).
+	 * @return a string with the file content.
+	 * @throws IOException in case of I/O failure while reading the file.
+	 */
+	private String readFile(final String filename) throws IOException {
+		return new String(Files.readAllBytes(Paths.get(new File(EXAMPLES_DIR, filename).toURI())));
+	}
+	
+	/**
+	 * Loads all triples found in the datafile associated with the given name.
+	 * 
+	 * @param datafileName the name of the datafile.
+	 */
+	private void load(final String datafileName) {
+		final Model model = dataset.getDefaultModel().read(new File(EXAMPLES_DIR, datafileName).toURI().toString(), DUMMY_BASE_URI, "TTL");
+		assertFalse(model.isEmpty());
+	}
+	
+	/**
+	 * Internal method used to execute a query and assert corresponding results.
+	 * In case the test has just one method, there's nothing to do, the subclass already inherits 
+	 * the predefined {@link #executeTest()}. 
+	 * 
+	 * Otherwise, if a test case includes more than one test, then that concrete subclass needs to define test methods 
+	 * and call this method to execute and check queries.
+	 * 
+	 * @param filename the filename.
+	 * @throws Exception hopefully never otherwise the test fails.
+	 */
+	protected void executeTestWithFile(final String filename) throws Exception {
+		final Query query = QueryFactory.create(queryString(filename + ".rq"));
+		final QueryExecution execution = QueryExecutionFactory.create(query, dataset);
+		final ResultSet rs = execution.execSelect();
+		
+		final String s = ResultSetFormatter.asText(rs, query).trim();
+		System.out.println(s);
+		assertEquals(
+				results(filename + ".rs").trim(),
+				s.trim());
+		execution.close();
+	}	
 }

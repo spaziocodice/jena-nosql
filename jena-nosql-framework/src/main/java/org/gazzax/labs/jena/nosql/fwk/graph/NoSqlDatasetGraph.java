@@ -25,7 +25,7 @@ public class NoSqlDatasetGraph extends DatasetGraphCaching {
 
 	@Override
 	protected void _close() {
-		// TODO Auto-generated method stub
+		factory.getDictionary().close();
 	}
 
 	@Override
