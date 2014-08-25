@@ -1,7 +1,6 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
 import static org.gazzax.labs.jena.nosql.fwk.TestUtility.DUMMY_BASE_URI;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
@@ -16,12 +15,6 @@ import org.junit.Test;
 
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 
 /**
@@ -33,8 +26,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 public abstract class SparqlIntegrationTestCase {
 	protected static final String EXAMPLES_DIR = "src/test/resources/w3c/";
 	
-	private Dataset dataset;
-	private StorageLayerFactory factory;
+	protected Dataset dataset;
+	protected StorageLayerFactory factory;
 	
 	/**
 	 * Setup fixture for this test.
@@ -44,25 +37,48 @@ public abstract class SparqlIntegrationTestCase {
 		factory = StorageLayerFactory.getFactory();
 		dataset = DatasetFactory.create(factory.getDatasetGraph());
 		
-		load(testFilename() + ".ttl");
+		load("data.ttl");
 	}
 	
 	/**
-	 * In case the conctete test consists in just 1 example, this method returns the filename associated with that example.
+	 * Returns the chapter the test refers to (e.g. 2.1, 2.2, 3.2).
 	 * 
-	 * @return the name of the file associated with the example.
+	 * @return the chapter the test refers to.
 	 */
-	protected abstract String testFilename();
-	
+	protected abstract String chapter();
 	
 	/**
-	 * Executes the test.
+	 * Executes the first test.
 	 * 
 	 * @throws Exception hopefully never, otherwise the test fails.
 	 */
 	@Test
-	public void example1() throws Exception {
-		executeTestWithFile(testFilename());
+	public void test() throws Exception {
+		for (int i = 1; i < howManyExamples() + 1; i++) {
+			executeTestWithFile("ex" + i);			
+		}
+	}
+	
+	/**
+	 * Internal method used to execute a query and assert corresponding results.
+	 * In case the test has just one method, there's nothing to do, the subclass already inherits 
+	 * the predefined {@link #executeTest()}. 
+	 * 
+	 * Otherwise, if a test case includes more than one test, then that concrete subclass needs to define test methods 
+	 * and call this method to execute and check queries.
+	 * 
+	 * @param filename the filename.
+	 * @throws Exception hopefully never otherwise the test fails.
+	 */
+	protected abstract void executeTestWithFile(final String filename) throws Exception;
+	
+	/**
+	 * Returns how many examples belong to this test.
+	 * 
+	 * @return how many examples belong to this test.
+	 */
+	protected int howManyExamples() {
+		return 1;
 	}
 	
 	/**
@@ -82,19 +98,8 @@ public abstract class SparqlIntegrationTestCase {
 	 * @return the query string associated with this test.
 	 * @throws IOException in case of I/O failure while reading the file.
 	 */
-	private String queryString(final String filename) throws IOException {
+	protected String queryString(final String filename) throws IOException {
 		return readFile(filename);
-	}
-	
-	/**
-	 * Builds a string (from the file associated with this test) with the expected query results.
-	 * 
-	 * @param resultsFileName the results filename.
-	 * @return a string (from the file associated with this test) with the expected query results.
-	 * @throws IOException in case of I/O failure while reading the file.
-	 */
-	private String results(final String resultsFileName) throws IOException {
-		return readFile(resultsFileName);
 	}
 	
 	/**
@@ -104,8 +109,8 @@ public abstract class SparqlIntegrationTestCase {
 	 * @return a string with the file content.
 	 * @throws IOException in case of I/O failure while reading the file.
 	 */
-	private String readFile(final String filename) throws IOException {
-		return new String(Files.readAllBytes(Paths.get(new File(EXAMPLES_DIR, filename).toURI())));
+	protected String readFile(final String filename) throws IOException {
+		return new String(Files.readAllBytes(Paths.get(new File(EXAMPLES_DIR + File.separator + chapter() + File.separator, filename).toURI())));
 	}
 	
 	/**
@@ -113,32 +118,8 @@ public abstract class SparqlIntegrationTestCase {
 	 * 
 	 * @param datafileName the name of the datafile.
 	 */
-	private void load(final String datafileName) {
-		final Model model = dataset.getDefaultModel().read(new File(EXAMPLES_DIR, datafileName).toURI().toString(), DUMMY_BASE_URI, "TTL");
+	protected void load(final String datafileName) {
+		final Model model = dataset.getDefaultModel().read(new File(EXAMPLES_DIR + File.separator + chapter() + File.separator, datafileName).toURI().toString(), DUMMY_BASE_URI, "TTL");
 		assertFalse(model.isEmpty());
 	}
-	
-	/**
-	 * Internal method used to execute a query and assert corresponding results.
-	 * In case the test has just one method, there's nothing to do, the subclass already inherits 
-	 * the predefined {@link #executeTest()}. 
-	 * 
-	 * Otherwise, if a test case includes more than one test, then that concrete subclass needs to define test methods 
-	 * and call this method to execute and check queries.
-	 * 
-	 * @param filename the filename.
-	 * @throws Exception hopefully never otherwise the test fails.
-	 */
-	protected void executeTestWithFile(final String filename) throws Exception {
-		final Query query = QueryFactory.create(queryString(filename + ".rq"));
-		final QueryExecution execution = QueryExecutionFactory.create(query, dataset);
-		final ResultSet rs = execution.execSelect();
-		
-		final String s = ResultSetFormatter.asText(rs, query).trim();
-
-		assertEquals(
-				results(filename + ".rs").trim(),
-				s.trim());
-		execution.close();
-	}	
 }

@@ -1,7 +1,6 @@
 package org.gazzax.labs.jena.nosql.fwk.w3c;
 
-import org.gazzax.labs.jena.nosql.fwk.SparqlIntegrationTestCase;
-import org.junit.Test;
+import org.gazzax.labs.jena.nosql.fwk.SparqlSelectIntegrationTestCase;
 
 /**
  * SPARQL Integration test with examples taken from http://www.w3.org/TR/sparql11-query.
@@ -10,19 +9,15 @@ import org.junit.Test;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class Ch2_3_MatchingRDFLiterals_ITCase extends SparqlIntegrationTestCase {
+public class Ch2_3_MatchingRDFLiterals_ITCase extends SparqlSelectIntegrationTestCase {
+
 	@Override
-	protected String testFilename() {
-		return "chapter_2.3_ex1";
+	protected String chapter() {
+		return "2.3";
 	}
 	
-	/**
-	 * Executes the 2nd test of the chapter.
-	 * 
-	 * @throws Exception hopefully never, otherwise the test fails.
-	 */
-	@Test
-	public void example2() throws Exception {
-		executeTestWithFile("chapter_2.3_ex2");
+	@Override
+	protected int howManyExamples() {
+		return 3;
 	}
 }
