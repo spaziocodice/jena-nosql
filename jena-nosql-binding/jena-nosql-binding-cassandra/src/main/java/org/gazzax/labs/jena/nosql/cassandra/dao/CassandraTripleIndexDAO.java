@@ -30,7 +30,7 @@ import com.google.common.collect.AbstractIterator;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class CassandraTripleIndexDAO implements TripleIndexDAO<byte[][]> {
+public class CassandraTripleIndexDAO implements TripleIndexDAO<byte[][], byte[][]> {
 	protected static final byte[] EMPTY_VAL = new byte[0]; 
 	protected static final String SELECT_SPOC_FROM = "SELECT s, p, o, c FROM ";
 	

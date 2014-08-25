@@ -14,6 +14,7 @@ import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlDatasetGraph;
 import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlGraph;
 
 import com.hp.hpl.jena.graph.Graph;
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 
 /**
@@ -67,13 +68,22 @@ public abstract class StorageLayerFactory implements Configurable {
 	public abstract TripleIndexDAO getTripleIndexDAO();
 
 	/**
-	 * Returns the {@link Graph} specific implementation associated with the underlying kind of storage.
+	 * Returns an unnamed {@link Graph} specific implementation associated with the underlying kind of storage.
 	 * 
-	 * @return the {@link Graph} specific implementation associated with the underlying kind of storage.
+	 * @return an unnamed {@link Graph} specific implementation associated with the underlying kind of storage.
 	 */
 	public Graph getGraph() {
 		return new NoSqlGraph(this);
 	}	
+	
+	/**
+	 * Returns a named {@link Graph} specific implementation associated with the underlying kind of storage.
+	 * 
+	 * @return a named {@link Graph} specific implementation associated with the underlying kind of storage.
+	 */
+	public Graph getGraph(Node graphNode) {
+		return new NoSqlGraph(graphNode, this);
+	}
 	
 	/**
 	 * Returns the {@link DatasetGraph} associated with the underlying kind of storage.

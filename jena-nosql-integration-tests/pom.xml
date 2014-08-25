@@ -26,6 +26,10 @@
 	</build>
 	<profiles>
 		<profile>
+			<id>solr-4x</id>
+			
+		</profile>	
+		<profile>
 			<id>cassandra-2x</id>
 			<dependencies>
 				<dependency>

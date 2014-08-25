@@ -12,34 +12,35 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
  * @author Andrea Gazzarini
  * @since 1.0
  * @param <T> how this DAO represents a triple.
+ * @param <P> how this DAO represents a triple pattern.
  */
-public interface TripleIndexDAO<T> {
+public interface TripleIndexDAO<T,P> {
 	/**
 	 * Inserts a triple.
 	 * 
-	 * @param identifiers the incoming triple.
+	 * @param triple the incoming triple.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	void insertTriple(final T identifiers) throws StorageLayerException;
+	void insertTriple(final T triple) throws StorageLayerException;
 
 	/**
 	 * Removes a triple from the storage.
 	 * 
-	 * @param identifiers the incoming triple.
+	 * @param triple the incoming triple.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	void deleteTriple(final T identifiers) throws StorageLayerException;
+	void deleteTriple(final T triple) throws StorageLayerException;
 
 	/**
 	 * Removes the given triples from the storage.
 	 * 
-	 * @param identifiers the incoming triples.
+	 * @param triples the incoming triples.
 	 * @param batchSize how many delete will be grouped in a single chunks in order to optimize the command execution.
 	 * @return the triples that have been removed.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
 	List<T> deleteTriples(
-			final Iterator<T> identifiers, 
+			final Iterator<T> triples, 
 			final int batchSize) throws StorageLayerException;
 
 	/**
@@ -62,5 +63,5 @@ public interface TripleIndexDAO<T> {
 	 * @return an iterator over query results.
 	 * @throws StorageLayerException in case of storage access failure.
 	 */
-	Iterator<T> query(T query) throws StorageLayerException;
+	Iterator<T> query(P query) throws StorageLayerException;
 }

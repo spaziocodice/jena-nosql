@@ -1,10 +1,9 @@
-package org.gazzax.labs.jena.nosql.fwk.graph;
+package org.gazzax.labs.jena.nosql.solr.graph;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
-import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import org.gazzax.labs.jena.nosql.fwk.log.Log;
@@ -23,19 +22,17 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.WrappedIterator;
 
 /**
- * NoSQL Graph implementation.
+ * SOLR Graph implementation.
  * 
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class NoSqlGraph extends GraphBase {
-	private final static Log LOGGER = new Log(LoggerFactory.getLogger(NoSqlGraph.class));
-	
-	private final static Iterator<byte[][]> EMPTY_IDS_ITERATOR = new ArrayList<byte[][]>(0).iterator();
+public class SolrGraph extends GraphBase {
+	private final static Log LOGGER = new Log(LoggerFactory.getLogger(SolrGraph.class));
+
 	private final static ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
 	
-	private final TripleIndexDAO<byte[][], byte[][]> dao;
-	private final TopLevelDictionary dictionary;
+	private final TripleIndexDAO<Triple, TripleMatch> dao;
 	private final Node name;
 	
 	/**
@@ -43,7 +40,7 @@ public class NoSqlGraph extends GraphBase {
 	 * 
 	 * @param factory the storage layer factory.
 	 */
-	public NoSqlGraph(final StorageLayerFactory factory) {
+	public SolrGraph(final StorageLayerFactory factory) {
 		this(null, factory);
 	}
 	
@@ -54,20 +51,15 @@ public class NoSqlGraph extends GraphBase {
 	 * @param factory the storage layer factory.
 	 */	
 	@SuppressWarnings("unchecked")
-	public NoSqlGraph(final Node name, final StorageLayerFactory factory) {
+	public SolrGraph(final Node name, final StorageLayerFactory factory) {
 		this.name = name;
 		this.dao = factory.getTripleIndexDAO();
-		this.dictionary = factory.getDictionary();
 	}
 	
 	@Override
 	public void performAdd(final Triple triple) {
 		try {
-			final byte [][] ids = 
-				(name == null)
-				 	? dictionary.asIdentifiers(triple.getSubject(), triple.getPredicate(), triple.getObject())
-				 	: dictionary.asIdentifiers(triple.getSubject(), triple.getPredicate(), triple.getObject(), name);		
-			dao.insertTriple(ids);
+			dao.insertTriple(triple);
 			dao.executePendingMutations();
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00101_UNABLE_TO_ADD_TRIPLE, triple);
@@ -79,27 +71,15 @@ public class NoSqlGraph extends GraphBase {
 	@Override
 	public void performDelete(final Triple triple) {
 		try {
-			final byte [][] identifiers = 
-				(name == null)
-					? dictionary.asIdentifiers(
-							triple.getSubject(), 
-							triple.getPredicate(), 
-							triple.getObject())
-					: dictionary.asIdentifiers(
-							triple.getSubject(), 
-							triple.getPredicate(), 
-							triple.getObject(), 
-							name);			
-
 			if (triple.isConcrete()) {
-				dao.deleteTriple(identifiers);
+				dao.deleteTriple(triple);
 			} else if (triple.getSubject().isConcrete() && 
 					triple.getPredicate().isConcrete() && 
 					triple.getObject().isConcrete()){
 				clear();
 			} else {
 				// TODO: batch size must be configurable
-				dao.deleteTriples(query(identifiers), 1000);
+				dao.deleteTriples(query(triple), 1000);
 			}	
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00100_UNABLE_TO_DELETE_TRIPLE, triple);
@@ -119,33 +99,14 @@ public class NoSqlGraph extends GraphBase {
 	protected ExtendedIterator<Triple> graphBaseFind(final TripleMatch pattern) {
 		try 
 		{
-			final byte [][] identifiers = 
-				(name == null)
-					? dictionary.asIdentifiers(
-							pattern.getMatchSubject(), 
-							pattern.getMatchPredicate(), 
-							pattern.getMatchObject())
-					: dictionary.asIdentifiers(
-							pattern.getMatchSubject(), 
-							pattern.getMatchPredicate(), 
-							pattern.getMatchObject(), 
-							name);		
-			return WrappedIterator.createNoRemove(dictionary.asTripleIterator(query(identifiers)));
+			return WrappedIterator.createNoRemove(query(pattern));
 		} catch (StorageLayerException exception) {
 			LOGGER.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);
 			return EMPTY_TRIPLES_ITERATOR;
 		}
 	}
 	
-	Iterator<byte[][]> query(final byte[][] query) throws StorageLayerException {
-		return (query != null && query.length >= 3) 
-					? dao.query(query)
-					: EMPTY_IDS_ITERATOR;
-	}
-	
-	@Override
-	public void close() {
-		dictionary.close();
-		closed = true;
+	Iterator<Triple> query(final TripleMatch query) throws StorageLayerException {
+		return dao.query(query);
 	}
 }

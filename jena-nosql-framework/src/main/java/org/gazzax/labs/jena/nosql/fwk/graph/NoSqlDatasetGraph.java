@@ -41,12 +41,12 @@ public class NoSqlDatasetGraph extends DatasetGraphCaching {
 
 	@Override
 	protected Graph _createNamedGraph(final Node graphNode) {
-		return new NoSqlGraph(graphNode, factory);
+		return factory.getGraph(graphNode);
 	}
 
 	@Override
 	protected Graph _createDefaultGraph() {
-		return new NoSqlGraph(factory);
+		return factory.getGraph();
 	}
 
 	@Override

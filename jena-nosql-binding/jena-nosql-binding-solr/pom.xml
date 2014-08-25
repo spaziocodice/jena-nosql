@@ -7,13 +7,18 @@
 		<version>1.0</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>jena-nosql-binding-cassandra</artifactId>
-	<name>Jena Cassandra binding implementation.</name>
+	<artifactId>jena-nosql-binding-solr</artifactId>
+	<name>Apache SOLR binding module</name>
+	<description>https://github.com/agazzarini/jena-nosql/issues/14</description>
+	<properties>
+		<solr.version>4.8.0</solr.version>
+	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>com.datastax.cassandra</groupId>
-			<artifactId>cassandra-driver-core</artifactId>
-			<version>2.0.4</version>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			<version>${solr.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>
