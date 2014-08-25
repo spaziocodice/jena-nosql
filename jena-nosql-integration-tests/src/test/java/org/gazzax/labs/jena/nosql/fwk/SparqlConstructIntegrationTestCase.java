@@ -13,7 +13,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 /**
- * Supertype layer for all SPARQL integration tests.
+ * Supertype layer for SPARQL CONSTRUCT tests.
  * 
  * @author Andrea Gazzarini
  * @since 1.0

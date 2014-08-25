@@ -12,7 +12,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 
 /**
- * Supertype layer for all SPARQL integration tests.
+ * Supertype layer for SPARQL SELECT integration tests.
  * 
  * @author Andrea Gazzarini
  * @since 1.0

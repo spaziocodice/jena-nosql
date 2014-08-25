@@ -18,7 +18,7 @@ import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
 /**
- * Supertype layer for all SPARQL integration tests.
+ * Supertype layer for SPARQL integration tests.
  * 
  * @author Andrea Gazzarini
  * @since 1.0
