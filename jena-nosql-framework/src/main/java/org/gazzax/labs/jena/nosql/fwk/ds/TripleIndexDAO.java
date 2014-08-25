@@ -11,34 +11,35 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
  * 
  * @author Andrea Gazzarini
  * @since 1.0
+ * @param <T> how this DAO represents a triple.
  */
-public interface TripleIndexDAO {
+public interface TripleIndexDAO<T> {
 	/**
 	 * Inserts a triple.
 	 * 
-	 * @param identifiers the incoming triple as an array of identifiers (s,p,o or s,p,o,c)
+	 * @param identifiers the incoming triple.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	void insertTriple(final byte[][] identifiers) throws StorageLayerException;
+	void insertTriple(final T identifiers) throws StorageLayerException;
 
 	/**
 	 * Removes a triple from the storage.
 	 * 
-	 * @param identifiers the incoming triple as an array of identifiers (s,p,o or s,p,o,c)
+	 * @param identifiers the incoming triple.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	void deleteTriple(final byte[][] identifiers) throws StorageLayerException;
+	void deleteTriple(final T identifiers) throws StorageLayerException;
 
 	/**
 	 * Removes the given triples from the storage.
 	 * 
-	 * @param identifiers the incoming triples. Each triple is an array of identifiers (s,p,o or s,p,o,c)
+	 * @param identifiers the incoming triples.
 	 * @param batchSize how many delete will be grouped in a single chunks in order to optimize the command execution.
 	 * @return the triples that have been removed.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	List<byte[][]> deleteTriples(
-			final Iterator<byte[][]> identifiers, 
+	List<T> deleteTriples(
+			final Iterator<T> identifiers, 
 			final int batchSize) throws StorageLayerException;
 
 	/**
@@ -55,11 +56,11 @@ public interface TripleIndexDAO {
 	void clear();
 
 	/**
-	 * Executes a given query (expressed as identifiers).
+	 * Executes a given query.
 	 * 
 	 * @param query the pattern query.
 	 * @return an iterator over query results.
 	 * @throws StorageLayerException in case of storage access failure.
 	 */
-	Iterator<byte[][]> query(byte[][] query) throws StorageLayerException;
+	Iterator<T> query(T query) throws StorageLayerException;
 }

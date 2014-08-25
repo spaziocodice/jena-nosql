@@ -34,7 +34,7 @@ public class NoSqlGraph extends GraphBase {
 	private final static Iterator<byte[][]> EMPTY_IDS_ITERATOR = new ArrayList<byte[][]>(0).iterator();
 	private final static ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
 	
-	private final TripleIndexDAO dao;
+	private final TripleIndexDAO<byte[][]> dao;
 	private final TopLevelDictionary dictionary;
 	private final Node name;
 	
@@ -53,6 +53,7 @@ public class NoSqlGraph extends GraphBase {
 	 * @param name the graph name.
 	 * @param factory the storage layer factory.
 	 */	
+	@SuppressWarnings("unchecked")
 	public NoSqlGraph(final Node name, final StorageLayerFactory factory) {
 		this.name = name;
 		this.dao = factory.getTripleIndexDAO();
