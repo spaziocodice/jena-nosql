@@ -9,7 +9,7 @@
 	<category name="org.gazzax">
 		<priority value="DEBUG"/>	
    	</category>
-   	<category name="org.apache.cassandra.service">
+   	<category name="org">
    	    <priority value="ERROR"/>
    	</category>     
    	   	<category name="com">
