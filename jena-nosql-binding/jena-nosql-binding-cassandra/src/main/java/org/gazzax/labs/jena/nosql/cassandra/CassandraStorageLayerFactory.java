@@ -75,7 +75,7 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 	}
 
 	@Override
-	public TripleIndexDAO getTripleIndexDAO() {
+	public TripleIndexDAO<byte[][], byte[][]> getTripleIndexDAO() {
 		return new CassandraTripleIndexDAO(session, dictionary);
 	}
 
@@ -162,7 +162,7 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 	
 	@Override
 	public String getInfo() {
-		return "Cassandra binding v1.0";
+		return "Jena-nosql Apache Cassandra binding";
 	}			
 	
 	/**

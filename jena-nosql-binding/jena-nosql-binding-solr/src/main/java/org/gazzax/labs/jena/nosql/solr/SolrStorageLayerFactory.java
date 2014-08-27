@@ -3,18 +3,20 @@ package org.gazzax.labs.jena.nosql.solr;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
-import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlGraph;
 import org.gazzax.labs.jena.nosql.solr.dao.SolrTripleIndexDAO;
 import org.gazzax.labs.jena.nosql.solr.graph.SolrGraph;
 
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.graph.TripleMatch;
 
 /**
  * Concrete factory for creating SOLR-based domain and data access objects.
@@ -27,7 +29,14 @@ public class SolrStorageLayerFactory extends StorageLayerFactory {
 	
 	@Override
 	public void accept(final Configuration<Map<String, Object>> configuration) {
-		// TODO Auto-generated method stub
+		final String address = configuration.getParameter("solr-address", "http://127.0.0.1:8080/solr/store");
+		try {
+			solr = (SolrServer) Class.forName(configuration.getParameter("solr-server-class", HttpSolrServer.class.getName()))
+					.getConstructor(String.class)
+					.newInstance(address);
+		} catch (final Exception exception) {
+			throw new IllegalArgumentException(exception);
+		}
 	}
 
 	@Override
@@ -36,7 +45,7 @@ public class SolrStorageLayerFactory extends StorageLayerFactory {
 			final Class<V> valueClass, 
 			final boolean isBidirectional, 
 			final String name) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -50,22 +59,22 @@ public class SolrStorageLayerFactory extends StorageLayerFactory {
 	}	
 	
 	@Override
-	public TripleIndexDAO getTripleIndexDAO() {
+	public TripleIndexDAO<Triple, TripleMatch> getTripleIndexDAO() {
 		return new SolrTripleIndexDAO(solr);
 	}
 
 	@Override
 	public TopLevelDictionary getDictionary() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ClientShutdownHook getClientShutdownHook() {
-		return null;
+		return new SolrClientShutdownHook(solr);
 	}
 
 	@Override
 	public String getInfo() {
-		return null;
+		return "Jena-nosql Apache SOLR binding";
 	}
 }

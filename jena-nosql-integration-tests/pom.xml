@@ -159,4 +159,5 @@
 			<version>1.0</version>
 		</dependency>
 	</dependencies>
+	<name>Jena NoSQL Integration Tests</name>
 </project>

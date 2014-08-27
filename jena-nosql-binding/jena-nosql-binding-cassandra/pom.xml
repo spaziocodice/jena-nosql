@@ -8,7 +8,7 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>jena-nosql-binding-cassandra</artifactId>
-	<name>Jena Cassandra binding implementation.</name>
+	<name>Jena NoSQL Apache Cassandra binding module</name>
 	<dependencies>
 		<dependency>
 			<groupId>com.datastax.cassandra</groupId>

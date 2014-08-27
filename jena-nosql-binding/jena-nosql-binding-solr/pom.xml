@@ -8,7 +8,7 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>jena-nosql-binding-solr</artifactId>
-	<name>Apache SOLR binding module</name>
+	<name>Jena NoSQL Apache SOLR binding module</name>
 	<description>https://github.com/agazzarini/jena-nosql/issues/14</description>
 	<dependencies>
 		<dependency>

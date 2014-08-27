@@ -5,7 +5,7 @@
 		<field name="s" type="string" indexed="true" stored="true" required="true" />
 		<field name="p" type="string" indexed="true" stored="true" required="true" />
 		<field name="o" type="string" indexed="true" stored="true" required="true" />
-		<field name="c" type="string" indexed="true" stored="true" required="true" />
+		<field name="c" type="string" indexed="true" stored="true" />
 		<field name="_version_" type="long" indexed="true" stored="true" />
 	</fields>
 	<uniqueKey>id</uniqueKey>
