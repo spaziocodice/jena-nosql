@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="jena-nosql SOLR simple binding Schema" version="1.5">
+	<fields>
+		<field name="id" type="string" indexed="true" stored="true" required="true" />
+		<field name="s" type="string" indexed="true" stored="true" required="true" />
+		<field name="p" type="string" indexed="true" stored="true" required="true" />
+		<field name="o" type="string" indexed="true" stored="true" required="true" />
+		<field name="c" type="string" indexed="true" stored="true" required="true" />
+		<field name="_version_" type="long" indexed="true" stored="true" />
+	</fields>
+	<uniqueKey>id</uniqueKey>
+	<types>
+		<fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+		<fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>		
+	</types>
+</schema>

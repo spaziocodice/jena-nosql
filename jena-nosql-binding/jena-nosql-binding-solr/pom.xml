@@ -10,9 +10,6 @@
 	<artifactId>jena-nosql-binding-solr</artifactId>
 	<name>Apache SOLR binding module</name>
 	<description>https://github.com/agazzarini/jena-nosql/issues/14</description>
-	<properties>
-		<solr.version>4.8.0</solr.version>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.solr</groupId>
