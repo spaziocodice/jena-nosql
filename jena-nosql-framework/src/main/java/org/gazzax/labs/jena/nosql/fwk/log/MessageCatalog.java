@@ -39,4 +39,5 @@ public interface MessageCatalog {
 	String _00166_MBEAN_ALREADY_REGISTERED = PREFIX + "-00166> : A Management Interface with ID #%s already exists on Management Server.";
 	String _00167_MBEAN_UNREGISTERED = PREFIX + "-00167> : Management Interface with ID #%s has been unregistered from Management Server.";
 	String _00168_UNABLE_TO_UNREGISTER_MBEAN = PREFIX + "-00168> : Unable to unregister the management interface with name #%s.";
+	String _00170_UNABLE_TO_CLEAR = PREFIX + "-00101> : Unable to run a clear command against a graph. See below for further details.";
 }

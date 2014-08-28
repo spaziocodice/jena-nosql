@@ -25,6 +25,7 @@ import com.hp.hpl.jena.graph.TripleMatch;
  * @since 1.0
  */
 public class SolrStorageLayerFactory extends StorageLayerFactory {
+	private final TopLevelDictionary dictionary = new NoOpDictionary();
 	private SolrServer solr;
 	
 	@Override
@@ -65,7 +66,7 @@ public class SolrStorageLayerFactory extends StorageLayerFactory {
 
 	@Override
 	public TopLevelDictionary getDictionary() {
-		throw new UnsupportedOperationException();
+		return dictionary;
 	}
 
 	@Override

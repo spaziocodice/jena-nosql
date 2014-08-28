@@ -8,26 +8,24 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
-import org.gazzax.labs.jena.nosql.fwk.util.NTriples;
+import org.gazzax.labs.jena.nosql.fwk.log.Log;
+import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import org.gazzax.labs.jena.nosql.solr.Field;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.AbstractIterator;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
 
 public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
-
-	private final static Iterator<Triple> EMPTY_TRIPLES_ITERATOR = new ArrayList<Triple>(0).iterator();
+	protected final Log logger = new Log(LoggerFactory.getLogger(SolrTripleIndexDAO.class));
 	
 	private final SolrServer solr;
 	
@@ -45,7 +43,7 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 		final SolrInputDocument document = new SolrInputDocument();
 		document.setField(Field.S, asNt(triple.getSubject()));
 		document.setField(Field.P, asNtURI(triple.getPredicate()));
-		document.setField(Field.O, asNt(triple.getSubject()));
+		document.setField(Field.O, asNt(triple.getObject()));
 		
 		try {
 			solr.add(document);
@@ -70,10 +68,11 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 	 * @return a delete query starting from a given triple.
 	 */
 	private String deleteQuery(final Triple triple) {
+		
 		return new StringBuilder()
-			.append(Field.S).append(":\"").append(asNt(triple.getSubject())).append("\" AND ")
-			.append(Field.P).append(":\"").append(asNt(triple.getPredicate())).append("\" AND ")
-			.append(Field.O).append(":\"").append(asNt(triple.getObject())).append("\"")
+			.append(Field.S).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getSubject()))).append("\" AND ")
+			.append(Field.P).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getPredicate()))).append("\" AND ")
+			.append(Field.O).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getObject()))).append("\"")
 			.toString();
 	} 
 	
@@ -111,89 +110,50 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 	@Override
 	public void clear() {
 		try {
-			solr.deleteByQuery("*;*");
+			solr.deleteByQuery("*:*");
 		} catch (final Exception exception) {
-			// TODO: log
-			exception.printStackTrace();
+			logger.error(MessageCatalog._00170_UNABLE_TO_CLEAR, exception);
 		}
 	}
 
 	@Override
 	public Iterator<Triple> query(final TripleMatch query) throws StorageLayerException {
-		final SolrQuery q = new SolrQuery("*:*");
-		q.setStart(0);
+		final SolrQuery q = new SolrQuery();
+		q.addSort(Field.ID, ORDER.asc);	
+		q.setRows(10);
 		final Node s = query.getMatchSubject();
 		final Node p = query.getMatchPredicate();
 		final Node o = query.getMatchObject();
 		
 		if (s != null) {
-			q.addFilterQuery(
-					new StringBuilder()
-						.append(Field.S)
-						.append(":\"")
-						.append(asNt(s))
-						.append("\"")
-						.toString());
+			q.addFilterQuery(newFilterQuery(Field.S, ClientUtils.escapeQueryChars(asNt(s))));
 		}
 		
 		if (p != null) {
-			q.addFilterQuery(
-					new StringBuilder()
-						.append(Field.P)
-						.append(":\"")
-						.append(asNtURI(p))
-						.append("\"")
-						.toString());
+			q.addFilterQuery(newFilterQuery(Field.P, ClientUtils.escapeQueryChars(asNtURI(p))));
 		}
 		
 		if (o != null) {
-			q.addFilterQuery(
-					new StringBuilder()
-						.append(Field.O)
-						.append(":\"")
-						.append(asNt(o))
-						.append("\"")
-						.toString());
+			q.addFilterQuery(newFilterQuery(Field.O, ClientUtils.escapeQueryChars(asNt(o))));
 		}
 		
-		try {
-			final QueryResponse response = solr.query(q);
-		
-			if (response.getResults().getNumFound() == 0) {
-				return EMPTY_TRIPLES_ITERATOR;
-			}
-
-			return new AbstractIterator<Triple>() {
-				
-				int rowId;
-				SolrDocumentList page = response.getResults();
-				
-				@Override
-				protected Triple computeNext() {
-					
-					if (page.getStart() + page.size() == page.getNumFound()) {
-						return endOfData();
-					}					
-					
-					if (rowId == page.size() - 1) {
-						rowId = 0;
-						q.setStart(q.getStart() + page.size());
-						try {
-							page = solr.query(q).getResults();
-						} catch (final SolrServerException exception) {
-							throw new RuntimeException(exception);
-						}
-					}
-					
-					final SolrDocument document = page.get(rowId);
-					return Triple.create(
-							NTriples.asURIorBlankNode((String) document.getFieldValue(Field.S)), 
-							NTriples.asURI((String) document.getFieldValue(Field.P)),
-							NTriples.asNode((String) document.getFieldValue(Field.P)));
-				}
-			};
-		} catch (final Exception exception) {
-			throw new StorageLayerException(exception);
-		}
+		return new SolrDeepPagingIterator(solr, q);
 	}
+	
+	/**
+	 * Builds a filter query with the given data.
+	 * 
+	 * @param fieldName the field name.
+	 * @param value the field value.
+	 * @return a filter query with the given data.
+	 */
+	String newFilterQuery(final String fieldName, final String value) {
+		return new StringBuilder()
+			.append(fieldName)
+			.append(":\"")
+			.append(ClientUtils.escapeQueryChars(value))
+			.append("\"")
+			.toString();
+	}
+	
 }

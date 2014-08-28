@@ -1,7 +1,7 @@
 --- 
-##########################################
-##	JENA-NOSQL default configuration	##
-##########################################
+###########################################
+## JENA-NOSQL default configuration      ##
+###########################################
 
 # SorlServer implementation
 solr-server-class: "org.apache.solr.client.solrj.impl.HttpSolrServer"

@@ -65,6 +65,7 @@ public abstract class StorageLayerFactory implements Configurable {
 	 * 
 	 * @return the Data Access Object for interacting with the triple index.
 	 */
+	@SuppressWarnings("rawtypes")
 	public abstract TripleIndexDAO getTripleIndexDAO();
 
 	/**

@@ -9,8 +9,8 @@
 	<category name="org.gazzax">
 		<priority value="DEBUG"/>	
    	</category>
-   	<category name="org">
-   	    <priority value="ERROR"/>
+   	<category name="org.apache.solr">
+   	    <priority value="INFO"/>
    	</category>     
    	   	<category name="com">
    	    <priority value="ERROR"/>
