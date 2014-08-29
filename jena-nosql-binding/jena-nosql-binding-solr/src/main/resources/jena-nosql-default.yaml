@@ -3,6 +3,6 @@
 ## JENA-NOSQL default configuration      ##
 ###########################################
 
-# SorlServer implementation
 solr-server-class: "org.apache.solr.client.solrj.impl.HttpSolrServer"
 solr-address: "http://127.0.0.1:8080/solr/store"
+delete-batch-size: 1000

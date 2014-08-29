@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import org.gazzax.labs.jena.nosql.fwk.log.Log;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
@@ -29,38 +29,40 @@ import com.hp.hpl.jena.util.iterator.WrappedIterator;
  */
 public class SolrGraph extends GraphBase {
 	private final static Log LOGGER = new Log(LoggerFactory.getLogger(SolrGraph.class));
-
 	private final static ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
+
+	private final int deletionBatchSize;
 	
-	private final TripleIndexDAO<Triple, TripleMatch> dao;
-	private final Node name;
-	
+	private final GraphDAO<Triple, TripleMatch> dao;
+				
 	/**
 	 * Builds a new unnamed graph with the given factory.
 	 * 
 	 * @param factory the storage layer factory.
+	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 */
-	public SolrGraph(final StorageLayerFactory factory) {
-		this(null, factory);
+	public SolrGraph(final StorageLayerFactory factory, final int deletionBatchSize) {
+		this(null, factory, deletionBatchSize);
 	}
-	
+
 	/**
 	 * Builds a new named graph with the given data.
 	 * 
 	 * @param name the graph name.
 	 * @param factory the storage layer factory.
+	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 */	
-	@SuppressWarnings("unchecked")
-	public SolrGraph(final Node name, final StorageLayerFactory factory) {
-		this.name = name;
-		this.dao = factory.getTripleIndexDAO();
+	@SuppressWarnings("unchecked")	
+	public SolrGraph(final Node name, final StorageLayerFactory factory, final int deletionBatchSize) {
+		this.deletionBatchSize = deletionBatchSize;
+		this.dao = name != null ? factory.getGraphDAO(name) : factory.getGraphDAO();
 	}
 	
 	@Override
 	public void performAdd(final Triple triple) {
 		try {
 			dao.insertTriple(triple);
-			dao.executePendingMutations();
+//			dao.executePendingMutations();
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00101_UNABLE_TO_ADD_TRIPLE, triple);
 			LOGGER.error(message, exception);
@@ -73,13 +75,10 @@ public class SolrGraph extends GraphBase {
 		try {
 			if (triple.isConcrete()) {
 				dao.deleteTriple(triple);
-			} else if (triple.getSubject().isConcrete() && 
-					triple.getPredicate().isConcrete() && 
-					triple.getObject().isConcrete()){
+			} else if ( !triple.getSubject().isConcrete() &&  !triple.getPredicate().isConcrete() &&  !triple.getObject().isConcrete()){
 				clear();
 			} else {
-				// TODO: batch size must be configurable
-				dao.deleteTriples(query(triple), 1000);
+				dao.deleteTriples(query(triple), deletionBatchSize);
 			}	
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00100_UNABLE_TO_DELETE_TRIPLE, triple);
@@ -89,16 +88,14 @@ public class SolrGraph extends GraphBase {
 	}
 	
 	@Override
-    public void clear()
-	{
+    public void clear() {
 	    dao.clear();
         getEventManager().notifyEvent(this, GraphEvents.removeAll ) ;	
 	}
 	
 	@Override
-	protected ExtendedIterator<Triple> graphBaseFind(final TripleMatch pattern) {
-		try 
-		{
+	public ExtendedIterator<Triple> graphBaseFind(final TripleMatch pattern) {
+		try  {
 			return WrappedIterator.createNoRemove(query(pattern));
 		} catch (StorageLayerException exception) {
 			LOGGER.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);

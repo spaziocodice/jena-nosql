@@ -10,7 +10,7 @@
 		<priority value="DEBUG"/>	
    	</category>
    	<category name="org.apache.solr">
-   	    <priority value="INFO"/>
+   	    <priority value="ERROR"/>
    	</category>     
    	   	<category name="com">
    	    <priority value="ERROR"/>

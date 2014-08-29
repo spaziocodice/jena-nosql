@@ -14,7 +14,7 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.log.Log;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
 import org.gazzax.labs.jena.nosql.solr.Field;
@@ -24,18 +24,36 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
 
-public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
-	protected final Log logger = new Log(LoggerFactory.getLogger(SolrTripleIndexDAO.class));
+/**
+ * {@link GraphDAO} implementation for Apache SOLR.
+ * 
+ * @see http://lucene.apache.org/solr
+ * @author Andrea Gazzarini
+ * @since 1.0
+ */
+public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
+	protected final Log logger = new Log(LoggerFactory.getLogger(SolrGraphDAO.class));
 	
 	private final SolrServer solr;
+	private final Node name;
 	
 	/**
-	 * Builds a new {@link TripleIndexDAO} with the given SOLR client.
+	 * Builds a new {@link GraphDAO} with the given SOLR client.
 	 * 
 	 * @param solr the SOLR client.
 	 */
-	public SolrTripleIndexDAO(final SolrServer solr) {
+	public SolrGraphDAO(final SolrServer solr) {
+		this(solr, null);
+	}
+	
+	/**
+	 * Builds a new {@link GraphDAO} with the given SOLR client.
+	 * 
+	 * @param solr the SOLR client.
+	 */
+	public SolrGraphDAO(final SolrServer solr, final Node name) {
 		this.solr = solr;
+		this.name = name;
 	}
 
 	@Override
@@ -44,6 +62,9 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 		document.setField(Field.S, asNt(triple.getSubject()));
 		document.setField(Field.P, asNtURI(triple.getPredicate()));
 		document.setField(Field.O, asNt(triple.getObject()));
+		
+		// TODO : with a state pattern I could avoid this conditional logic.
+		document.setField(Field.C, name != null ? asNtURI(name) : null);
 		
 		try {
 			solr.add(document);
@@ -60,21 +81,6 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 			throw new StorageLayerException(exception);
 		}
 	}
-	
-	/**
-	 * Builds a delete query starting from a given triple.
-	 * 
-	 * @param triple the triple.
-	 * @return a delete query starting from a given triple.
-	 */
-	private String deleteQuery(final Triple triple) {
-		
-		return new StringBuilder()
-			.append(Field.S).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getSubject()))).append("\" AND ")
-			.append(Field.P).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getPredicate()))).append("\" AND ")
-			.append(Field.O).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getObject()))).append("\"")
-			.toString();
-	} 
 	
 	// TODO: To be optimized...with this implementation wildcard queries are not supported
 	// so if I need to delete 5 triples then 5 commands should be issued.
@@ -100,17 +106,14 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 
 	@Override
 	public void executePendingMutations() throws StorageLayerException {
-		try {
-			solr.commit();
-		} catch (final Exception exception) {
-			throw new StorageLayerException(exception);
-		}
+		// Do nothing here...
 	}
 	
+	// TODO: delete without name deletes all??
 	@Override
 	public void clear() {
 		try {
-			solr.deleteByQuery("*:*");
+			solr.deleteByQuery(name != null ? "*:*" : Field.C + ":\"" + ClientUtils.escapeQueryChars(asNtURI(name)) + "\"");
 		} catch (final Exception exception) {
 			logger.error(MessageCatalog._00170_UNABLE_TO_CLEAR, exception);
 		}
@@ -126,15 +129,19 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 		final Node o = query.getMatchObject();
 		
 		if (s != null) {
-			q.addFilterQuery(newFilterQuery(Field.S, ClientUtils.escapeQueryChars(asNt(s))));
+			q.addFilterQuery(newFilterQuery(Field.S, asNt(s)));
 		}
 		
 		if (p != null) {
-			q.addFilterQuery(newFilterQuery(Field.P, ClientUtils.escapeQueryChars(asNtURI(p))));
+			q.addFilterQuery(newFilterQuery(Field.P, asNtURI(p)));
 		}
 		
 		if (o != null) {
-			q.addFilterQuery(newFilterQuery(Field.O, ClientUtils.escapeQueryChars(asNt(o))));
+			q.addFilterQuery(newFilterQuery(Field.O, asNt(o)));
+		}
+		
+		if (name != null) {
+			q.addFilterQuery(newFilterQuery(Field.C, asNtURI(name)));			
 		}
 		
 		return new SolrDeepPagingIterator(solr, q);
@@ -156,4 +163,23 @@ public class SolrTripleIndexDAO implements TripleIndexDAO<Triple, TripleMatch> {
 			.toString();
 	}
 	
+	/**
+	 * Builds a delete query starting from a given triple.
+	 * 
+	 * @param triple the triple.
+	 * @return a delete query starting from a given triple.
+	 */
+	String deleteQuery(final Triple triple) {
+		
+		final StringBuilder builder = new StringBuilder()
+			.append(Field.S).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getSubject()))).append("\" AND ")
+			.append(Field.P).append(":\"").append(ClientUtils.escapeQueryChars(asNtURI(triple.getPredicate()))).append("\" AND ")
+			.append(Field.O).append(":\"").append(ClientUtils.escapeQueryChars(asNt(triple.getObject()))).append("\"");
+		
+		if (name != null) {
+			builder.append(" AND ").append(Field.C).append(":\"").append(ClientUtils.escapeQueryChars(asNtURI(name))).append("\"");
+		}
+		
+		return builder.toString();
+	} 	
 }

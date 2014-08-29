@@ -86,7 +86,7 @@ public abstract class SparqlIntegrationTestCase {
 	 */
 	@After
 	public void tearDown() {
-		factory.getTripleIndexDAO().clear();
+		factory.getGraphDAO().clear();
 		dataset.close();
 		factory.getClientShutdownHook().close();
 	}
@@ -119,7 +119,7 @@ public abstract class SparqlIntegrationTestCase {
 	 * @param datafileName the name of the datafile.
 	 */
 	protected void load(final String datafileName) {
-		final Model model = dataset.getDefaultModel().read(new File(EXAMPLES_DIR + File.separator + chapter() + File.separator, datafileName).toURI().toString(), DUMMY_BASE_URI, "TTL");
+		final Model model = dataset.getDefaultModel().read(new File("/work/data/jena-nosql/triples_gridpedia.nt").toURI().toString(), DUMMY_BASE_URI, "TTL");
 		assertFalse(model.isEmpty());
 	}
 }

@@ -20,7 +20,7 @@ import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.node.TransientNodeDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
@@ -38,6 +38,7 @@ import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.ReconnectionPolicy;
 import com.datastax.driver.core.policies.RetryPolicy;
+import com.hp.hpl.jena.graph.Node;
 
 /**
  * Concrete factory for creating Cassandra-backed domain and data access objects.
@@ -75,12 +76,19 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 	}
 
 	@Override
-	public TripleIndexDAO<byte[][], byte[][]> getTripleIndexDAO() {
+	public GraphDAO<byte[][], byte[][]> getGraphDAO(final Node name) {
+		return new CassandraTripleIndexDAO(session, dictionary);
+	}
+
+	@Override
+	public GraphDAO<byte[][], byte[][]> getGraphDAO() {
 		return new CassandraTripleIndexDAO(session, dictionary);
 	}
 
 	@Override
 	public void accept(final Configuration<Map<String, Object>> configuration) {
+		deletionBatchSize = configuration.getParameter("delete-batch-size", Integer.valueOf(1000));
+		
 		final String hosts = configuration.getParameter("cassandra-contact-points", "localhost");
 
 		final Cluster.Builder builder = Cluster.builder()

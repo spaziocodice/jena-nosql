@@ -117,7 +117,7 @@ public class SolrDeepPagingIterator extends UnmodifiableIterator<Triple> {
 	 * @param solr the SOLR facade.
 	 * @param query the query that will be submitted.
 	 */
-	public SolrDeepPagingIterator(final SolrServer solr, final SolrQuery query) {
+	SolrDeepPagingIterator(final SolrServer solr, final SolrQuery query) {
 		this.solr = solr;
 		this.query = query;
 		this.sentCursorMark = CursorMarkParams.CURSOR_MARK_START;

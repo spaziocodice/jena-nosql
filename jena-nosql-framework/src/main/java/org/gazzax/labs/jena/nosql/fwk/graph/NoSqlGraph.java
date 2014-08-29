@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import org.gazzax.labs.jena.nosql.fwk.log.Log;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
@@ -34,30 +34,35 @@ public class NoSqlGraph extends GraphBase {
 	private final static Iterator<byte[][]> EMPTY_IDS_ITERATOR = new ArrayList<byte[][]>(0).iterator();
 	private final static ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
 	
-	private final TripleIndexDAO<byte[][], byte[][]> dao;
+	private final int deletionBatchSize;
+	
+	private final GraphDAO<byte[][], byte[][]> dao;
 	private final TopLevelDictionary dictionary;
 	private final Node name;
 	
 	/**
 	 * Builds a new unnamed graph with the given factory.
 	 * 
+	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 * @param factory the storage layer factory.
 	 */
-	public NoSqlGraph(final StorageLayerFactory factory) {
-		this(null, factory);
+	public NoSqlGraph(final StorageLayerFactory factory, final int deletionBatchSize) {
+		this(null, factory, deletionBatchSize);
 	}
 	
 	/**
 	 * Builds a new named graph with the given data.
 	 * 
+	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 * @param name the graph name.
 	 * @param factory the storage layer factory.
 	 */	
 	@SuppressWarnings("unchecked")
-	public NoSqlGraph(final Node name, final StorageLayerFactory factory) {
+	public NoSqlGraph(final Node name, final StorageLayerFactory factory, final int deletionBatchSize) {
 		this.name = name;
-		this.dao = factory.getTripleIndexDAO();
+		this.dao = name != null ? factory.getGraphDAO(name) : factory.getGraphDAO();
 		this.dictionary = factory.getDictionary();
+		this.deletionBatchSize = deletionBatchSize;
 	}
 	
 	@Override
@@ -93,13 +98,10 @@ public class NoSqlGraph extends GraphBase {
 
 			if (triple.isConcrete()) {
 				dao.deleteTriple(identifiers);
-			} else if (triple.getSubject().isConcrete() && 
-					triple.getPredicate().isConcrete() && 
-					triple.getObject().isConcrete()){
+			} else if (!triple.getSubject().isConcrete() && !triple.getPredicate().isConcrete() && !triple.getObject().isConcrete()) {
 				clear();
 			} else {
-				// TODO: batch size must be configurable
-				dao.deleteTriples(query(identifiers), 1000);
+				dao.deleteTriples(query(identifiers), deletionBatchSize);
 			}	
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00100_UNABLE_TO_DELETE_TRIPLE, triple);

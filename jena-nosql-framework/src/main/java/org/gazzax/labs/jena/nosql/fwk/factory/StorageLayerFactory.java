@@ -9,7 +9,7 @@ import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.configuration.DefaultConfigurator;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlDatasetGraph;
 import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlGraph;
 
@@ -42,6 +42,8 @@ public abstract class StorageLayerFactory implements Configurable {
 		default_factory = iterator.hasNext() ? iterator.next() : null;
 	}
 	
+	protected int deletionBatchSize;
+	
 	/**
 	 * Returns the {@link MapDAO}.
 	 * A {@link MapDAO} instance is required in order to manage the persistent logic of a BIndex.
@@ -61,20 +63,32 @@ public abstract class StorageLayerFactory implements Configurable {
 			String name);
 	
 	/**
-	 * Returns the Data Access Object for interacting with the triple index.
+	 * Returns the Data Access Object for interacting with a (named) graph.
+	 * If the given name is null, then the dao is supposed to be associated with an unnamed graph. 
+	 * In this case, please consider the appropriate method, which should have the same contract but with a meaningful interface.
 	 * 
+	 * @param name the name of the graph that will be associated with the resulting dao (null in case of unnamed graph).
 	 * @return the Data Access Object for interacting with the triple index.
 	 */
 	@SuppressWarnings("rawtypes")
-	public abstract TripleIndexDAO getTripleIndexDAO();
-
+	public abstract GraphDAO getGraphDAO(Node name);
+	
+	/**
+	 * Returns the Data Access Object for interacting with an unnamed graph.
+	 * 
+	 * @param name the name of the graph that will be associated with the resulting dao.
+	 * @return the Data Access Object for interacting with the triple index.
+	 */
+	@SuppressWarnings("rawtypes")
+	public abstract GraphDAO getGraphDAO();
+	
 	/**
 	 * Returns an unnamed {@link Graph} specific implementation associated with the underlying kind of storage.
 	 * 
 	 * @return an unnamed {@link Graph} specific implementation associated with the underlying kind of storage.
 	 */
 	public Graph getGraph() {
-		return new NoSqlGraph(this);
+		return new NoSqlGraph(this, deletionBatchSize);
 	}	
 	
 	/**
@@ -83,7 +97,7 @@ public abstract class StorageLayerFactory implements Configurable {
 	 * @return a named {@link Graph} specific implementation associated with the underlying kind of storage.
 	 */
 	public Graph getGraph(Node graphNode) {
-		return new NoSqlGraph(graphNode, this);
+		return new NoSqlGraph(graphNode, this, deletionBatchSize);
 	}
 	
 	/**

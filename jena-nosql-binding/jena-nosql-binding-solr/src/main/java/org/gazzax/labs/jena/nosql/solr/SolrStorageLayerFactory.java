@@ -7,10 +7,10 @@ import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
-import org.gazzax.labs.jena.nosql.solr.dao.SolrTripleIndexDAO;
+import org.gazzax.labs.jena.nosql.solr.dao.SolrGraphDAO;
 import org.gazzax.labs.jena.nosql.solr.graph.SolrGraph;
 
 import com.hp.hpl.jena.graph.Graph;
@@ -30,11 +30,14 @@ public class SolrStorageLayerFactory extends StorageLayerFactory {
 	
 	@Override
 	public void accept(final Configuration<Map<String, Object>> configuration) {
+		deletionBatchSize = configuration.getParameter("delete-batch-size", Integer.valueOf(1000));
+		
 		final String address = configuration.getParameter("solr-address", "http://127.0.0.1:8080/solr/store");
 		try {
 			solr = (SolrServer) Class.forName(configuration.getParameter("solr-server-class", HttpSolrServer.class.getName()))
 					.getConstructor(String.class)
 					.newInstance(address);
+			
 		} catch (final Exception exception) {
 			throw new IllegalArgumentException(exception);
 		}
@@ -51,19 +54,24 @@ public class SolrStorageLayerFactory extends StorageLayerFactory {
 
 	@Override
 	public Graph getGraph() {
-		return new SolrGraph(this);
+		return new SolrGraph(this, deletionBatchSize);
 	}	
 	
 	@Override
 	public Graph getGraph(Node graphNode) {
-		return new SolrGraph(graphNode, this);
+		return new SolrGraph(graphNode, this, deletionBatchSize);
 	}	
 	
 	@Override
-	public TripleIndexDAO<Triple, TripleMatch> getTripleIndexDAO() {
-		return new SolrTripleIndexDAO(solr);
+	public GraphDAO<Triple, TripleMatch> getGraphDAO(final Node name) {
+		return new SolrGraphDAO(solr, name);
 	}
-
+	
+	@Override
+	public GraphDAO<Triple, TripleMatch> getGraphDAO() {
+		return new SolrGraphDAO(solr);
+	}
+	
 	@Override
 	public TopLevelDictionary getDictionary() {
 		return dictionary;

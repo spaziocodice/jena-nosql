@@ -6,7 +6,7 @@ import java.util.List;
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 
 /**
- * Data Access Object that encapsulates the interaction with a triple index.
+ * Data Access Object that encapsulates the persistence of a graph.
  * Each concrete storage implementation must define here how to perform basic triple operations.
  * 
  * @author Andrea Gazzarini
@@ -14,7 +14,7 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
  * @param <T> how this DAO represents a triple.
  * @param <P> how this DAO represents a triple pattern.
  */
-public interface TripleIndexDAO<T,P> {
+public interface GraphDAO<T,P> {
 	/**
 	 * Inserts a triple.
 	 * 

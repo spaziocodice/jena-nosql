@@ -12,7 +12,7 @@ import java.util.Random;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
@@ -42,8 +42,15 @@ public abstract class TestUtility {
 		}
 		
 		@Override
-		public TripleIndexDAO getTripleIndexDAO() {
-			return mock(TripleIndexDAO.class);
+		@SuppressWarnings("rawtypes")
+		public GraphDAO getGraphDAO(final Node name) {
+			return mock(GraphDAO.class);
+		}
+		
+		@Override
+		@SuppressWarnings("rawtypes")
+		public GraphDAO getGraphDAO() {
+			return mock(GraphDAO.class);
 		}
 		
 		@Override

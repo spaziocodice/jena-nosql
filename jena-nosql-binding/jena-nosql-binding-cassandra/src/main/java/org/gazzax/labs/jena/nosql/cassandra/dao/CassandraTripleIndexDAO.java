@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
-import org.gazzax.labs.jena.nosql.fwk.ds.TripleIndexDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
@@ -22,7 +22,7 @@ import com.datastax.driver.core.utils.Bytes;
 import com.google.common.collect.AbstractIterator;
 
 /**
- * Cassandra 2x (CQL-based) implementation of {@link TripleIndexDAO}.
+ * Cassandra 2x (CQL-based) implementation of {@link GraphDAO}.
  * 
  * This class has been derived from CumulusRDF code, with many thanks to CumulusRDF team for allowing this.
  * 
@@ -30,7 +30,7 @@ import com.google.common.collect.AbstractIterator;
  * @author Andrea Gazzarini
  * @since 1.0
  */
-public class CassandraTripleIndexDAO implements TripleIndexDAO<byte[][], byte[][]> {
+public class CassandraTripleIndexDAO implements GraphDAO<byte[][], byte[][]> {
 	protected static final byte[] EMPTY_VAL = new byte[0]; 
 	protected static final String SELECT_SPOC_FROM = "SELECT s, p, o, c FROM ";
 	

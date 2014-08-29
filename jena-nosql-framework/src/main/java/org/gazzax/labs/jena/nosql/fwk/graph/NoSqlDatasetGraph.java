@@ -19,7 +19,6 @@ import com.hp.hpl.jena.sparql.core.Quad;
 public class NoSqlDatasetGraph extends DatasetGraphCaching {
 
 	private final StorageLayerFactory factory;
-	
 	/**
 	 * Builds a new Dataset graph with the given factory.
 	 * 
