@@ -51,7 +51,11 @@
 		<module name="StaticVariableName">
 			<property name="format" value="^[a-z]([a-z_A-Z0-9]+)*$" />
 		</module>
-		<module name="TypeName" />
+		<module name="TypeName">
+		    <property name="format" value="^[A-Z]([a-z_A-Z0-9])*$"/>
+		    <property name="tokens"
+		              value="INTERFACE_DEF"/>
+		</module>
 
 		<module name="AvoidStarImport" />
 		<module name="IllegalImport" /> <!-- defaults to sun.* packages -->
@@ -109,7 +113,6 @@
 		<module name="EmptyStatement" />
 		<module name="EqualsHashCode" />
 		<module name="IllegalInstantiation" />
-		<module name="InnerAssignment" />
 		<module name="MissingSwitchDefault" />
 		<module name="RedundantThrows" />
 		<module name="SimplifyBooleanExpression" />
