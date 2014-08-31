@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * @since 1.0
  */
 public class SolrClientShutdownHook implements ClientShutdownHook {
-	private final static Log LOGGER = new Log(LoggerFactory.getLogger(ClientShutdownHook.class));
+	private static final Log LOGGER = new Log(LoggerFactory.getLogger(ClientShutdownHook.class));
 	private final SolrServer connection;
 	
 	/**

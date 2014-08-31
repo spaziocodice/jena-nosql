@@ -19,8 +19,8 @@ import org.gazzax.labs.jena.nosql.fwk.InitialisationException;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.node.TransientNodeDictionary;
-import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
@@ -51,7 +51,8 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 	private Session session;
 	private Cluster cluster;
 	private TopLevelDictionary dictionary;
-	
+	private int deletionBatchSize;
+
 	@Override
 	public <K, V> MapDAO<K, V> getMapDAO(
 			final Class<K> keyClass, 
@@ -77,12 +78,12 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 
 	@Override
 	public GraphDAO<byte[][], byte[][]> getGraphDAO(final Node name) {
-		return new CassandraTripleIndexDAO(session, dictionary);
+		return new CassandraTripleIndexDAO(session, deletionBatchSize);
 	}
 
 	@Override
 	public GraphDAO<byte[][], byte[][]> getGraphDAO() {
-		return new CassandraTripleIndexDAO(session, dictionary);
+		return new CassandraTripleIndexDAO(session, deletionBatchSize);
 	}
 
 	@Override

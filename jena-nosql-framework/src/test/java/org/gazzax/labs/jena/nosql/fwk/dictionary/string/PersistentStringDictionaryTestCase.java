@@ -1,8 +1,8 @@
 package org.gazzax.labs.jena.nosql.fwk.dictionary.string;
 
+import static org.gazzax.labs.jena.nosql.fwk.TestUtility.RANDOMIZER;
 import static org.gazzax.labs.jena.nosql.fwk.TestUtility.STORAGE_LAYER_FACTORY;
-import static org.gazzax.labs.jena.nosql.fwk.TestUtility.*;
-
+import static org.gazzax.labs.jena.nosql.fwk.TestUtility.randomString;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

@@ -3,6 +3,14 @@
 ## JENA-NOSQL default configuration      ##
 ###########################################
 
+# The SolrServer implementation that will be used as SOLR client.
 solr-server-class: "org.apache.solr.client.solrj.impl.HttpSolrServer"
+
+# The SOLR listening URL 
 solr-address: "http://127.0.0.1:8080/solr/store"
-delete-batch-size: 1000
+
+# max time (in ms) before a commit will happen when inserting triples.
+add-commit-within-msecs: 1
+
+# max time (in ms) before a commit will happen when deleting triples.
+delete-commit-within-msecs: 1

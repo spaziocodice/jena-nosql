@@ -1,7 +1,6 @@
 package org.gazzax.labs.jena.nosql.solr.graph;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
@@ -28,21 +27,18 @@ import com.hp.hpl.jena.util.iterator.WrappedIterator;
  * @since 1.0
  */
 public class SolrGraph extends GraphBase {
-	private final static Log LOGGER = new Log(LoggerFactory.getLogger(SolrGraph.class));
-	private final static ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
+	private static final Log LOGGER = new Log(LoggerFactory.getLogger(SolrGraph.class));
+	private static final ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
 
-	private final int deletionBatchSize;
-	
 	private final GraphDAO<Triple, TripleMatch> dao;
 				
 	/**
 	 * Builds a new unnamed graph with the given factory.
 	 * 
 	 * @param factory the storage layer factory.
-	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 */
-	public SolrGraph(final StorageLayerFactory factory, final int deletionBatchSize) {
-		this(null, factory, deletionBatchSize);
+	public SolrGraph(final StorageLayerFactory factory) {
+		this(null, factory);
 	}
 
 	/**
@@ -50,11 +46,9 @@ public class SolrGraph extends GraphBase {
 	 * 
 	 * @param name the graph name.
 	 * @param factory the storage layer factory.
-	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 */	
 	@SuppressWarnings("unchecked")	
-	public SolrGraph(final Node name, final StorageLayerFactory factory, final int deletionBatchSize) {
-		this.deletionBatchSize = deletionBatchSize;
+	public SolrGraph(final Node name, final StorageLayerFactory factory) {
 		this.dao = name != null ? factory.getGraphDAO(name) : factory.getGraphDAO();
 	}
 	
@@ -62,7 +56,6 @@ public class SolrGraph extends GraphBase {
 	public void performAdd(final Triple triple) {
 		try {
 			dao.insertTriple(triple);
-//			dao.executePendingMutations();
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00101_UNABLE_TO_ADD_TRIPLE, triple);
 			LOGGER.error(message, exception);
@@ -75,11 +68,12 @@ public class SolrGraph extends GraphBase {
 		try {
 			if (triple.isConcrete()) {
 				dao.deleteTriple(triple);
-			} else if ( !triple.getSubject().isConcrete() &&  !triple.getPredicate().isConcrete() &&  !triple.getObject().isConcrete()){
+			} else if (!triple.getSubject().isConcrete() &&  !triple.getPredicate().isConcrete() &&  !triple.getObject().isConcrete()) {
 				clear();
 			} else {
-				dao.deleteTriples(query(triple), deletionBatchSize);
+				dao.deleteTriple(triple);
 			}	
+			dao.executePendingMutations();
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00100_UNABLE_TO_DELETE_TRIPLE, triple);
 			LOGGER.error(message, exception);
@@ -88,22 +82,28 @@ public class SolrGraph extends GraphBase {
 	}
 	
 	@Override
+	protected int graphBaseSize() {
+		try {
+			return (int) dao.countTriples();
+		} catch (StorageLayerException exception) {
+			LOGGER.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);		
+			throw new RuntimeException(exception);
+		}
+	}
+	
+	@Override
     public void clear() {
 	    dao.clear();
-        getEventManager().notifyEvent(this, GraphEvents.removeAll ) ;	
+        getEventManager().notifyEvent(this, GraphEvents.removeAll);
 	}
 	
 	@Override
 	public ExtendedIterator<Triple> graphBaseFind(final TripleMatch pattern) {
 		try  {
-			return WrappedIterator.createNoRemove(query(pattern));
+			return WrappedIterator.createNoRemove(dao.query(pattern));
 		} catch (StorageLayerException exception) {
 			LOGGER.error(MessageCatalog._00010_DATA_ACCESS_LAYER_FAILURE, exception);
 			return EMPTY_TRIPLES_ITERATOR;
 		}
-	}
-	
-	Iterator<Triple> query(final TripleMatch query) throws StorageLayerException {
-		return dao.query(query);
 	}
 }

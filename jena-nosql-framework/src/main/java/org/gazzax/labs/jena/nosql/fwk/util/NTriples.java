@@ -1,5 +1,7 @@
 package org.gazzax.labs.jena.nosql.fwk.util;
 
+import static org.gazzax.labs.jena.nosql.fwk.util.Strings.isNotNullOrEmptyString;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.rdf.model.AnonId;
@@ -39,14 +41,12 @@ public abstract class NTriples {
 	}
 	
 	/**
-	 * Tries to parse the given input as a (nt) resource.
+	 * Returns a {@link Node} representation of a given resource.
 	 * 
-	 * @param nt
-	 * @return
-	 * @throws IllegalArgumentException
+	 * @param nt the resource (as string in NT format).
+	 * @return a {@link Node} representation of a given resource.
 	 */
-	// FIXME: bad sequential logic
-	public static Node asNode(final String nt) throws IllegalArgumentException {
+	public static Node asNode(final String nt) {
 		if (isURI(nt)) {
 			return internalAsURI(nt);
 		} else if (isBlankNode(nt)) {
@@ -55,11 +55,23 @@ public abstract class NTriples {
 		return asLiteral(nt);
 	}
 
-	public static Node asURIorBlankNode(final String nt) throws IllegalArgumentException {
+	/**
+	 * Returns a {@link Node} representation of a given URI or blank node.
+	 * 
+	 * @param nt the resource (as string in NT format).
+	 * @return a {@link Node} representation of a given URI or blank node.
+	 */	
+	public static Node asURIorBlankNode(final String nt) {
 		return (isURI(nt)) ? internalAsURI(nt) : internalAsBlankNode(nt);
 	}
 
-	public static Node asURI(final String nt) throws IllegalArgumentException {
+	/**
+	 * Returns a {@link Node} representation of a given URI.
+	 * 
+	 * @param nt the resource (as string in NT format).
+	 * @return a {@link Node} representation of a given URI.
+	 */	
+	public static Node asURI(final String nt) {
 		if (isURI(nt)) {
 			return internalAsURI(nt);
 		} 
@@ -69,67 +81,83 @@ public abstract class NTriples {
 	/**
 	 * Parses the given input as URI.
 	 * 
-	 * @param nt the URI string value.
+	 * @param uriAsString the URI string value.
 	 * @return the {@link Node} URI representation of the given value.
 	 */
-	private static Node internalAsURI(final String nt) {
-		final String uri = unescape(nt.substring(1, nt.length() - 1));
+	private static Node internalAsURI(final String uriAsString) {
+		final String uri = unescape(uriAsString.substring(1, uriAsString.length() - 1));
 		return NodeFactory.createURI(uri);		
 	}
 	
 	/**
 	 * Parses the given input as a blank node.
 	 * 
-	 * @param nt the blank node string value.
+	 * @param blankNodeAsString the blank node string value.
 	 * @return the {@link Node} Blank node representation of the given value.
 	 */
-	private static Node internalAsBlankNode(final String nt) {
-		return NodeFactory.createAnon(AnonId.create(nt.substring(2)));	
+	private static Node internalAsBlankNode(final String blankNodeAsString) {
+		return NodeFactory.createAnon(AnonId.create(blankNodeAsString.substring(2)));	
 	}
 	
-	
-	public static Node asBlankNode(String nt) throws IllegalArgumentException {
-		if (isBlankNode(nt)) {
-			return internalAsBlankNode(nt);
+	/**
+	 * Returns a {@link Node} representation of a blank node.
+	 * 
+	 * @param blankNodeAsString the resource (as string in NT format).
+	 * @return a {@link Node} representation of a blank node
+	 */		
+	public static Node asBlankNode(final String blankNodeAsString) {
+		if (isBlankNode(blankNodeAsString)) {
+			return internalAsBlankNode(blankNodeAsString);
 		}
-		throw new IllegalArgumentException(nt);
+		throw new IllegalArgumentException(blankNodeAsString);
 	}
 	
-	public static Node asLiteral(final String nt) throws IllegalArgumentException
-	{
-		if (nt.startsWith(START_LITERAL_CHAR)) {
-			int endIndexOfValue = endIndexOfValue(nt);
+	/**
+	 * Returns a {@link Node} representation of a literal.
+	 * 
+	 * @param literal the resource (as string in NT format).
+	 * @return a {@link Node} representation of a literal.
+	 */		
+	public static Node asLiteral(final String literal) {
+		if (literal.startsWith(START_LITERAL_CHAR)) {
+			int endIndexOfValue = endIndexOfValue(literal);
 
 			if (endIndexOfValue != -1) {
-				final String literalValue = unescape(nt.substring(1, endIndexOfValue));
+				final String literalValue = unescape(literal.substring(1, endIndexOfValue));
 
-				final int startIndexOfLanguage = nt.indexOf(LANGUAGE_MARKER, endIndexOfValue);
-				final int startIndexOfDatatype = nt.indexOf(DATATYPE_MARKER, endIndexOfValue);
+				final int startIndexOfLanguage = literal.indexOf(LANGUAGE_MARKER, endIndexOfValue);
+				final int startIndexOfDatatype = literal.indexOf(DATATYPE_MARKER, endIndexOfValue);
 
 				if (startIndexOfLanguage != -1) {
 					return NodeFactory.createLiteral(
 							literalValue, 
-							nt.substring(startIndexOfLanguage + LANGUAGE_MARKER.length()), 
+							literal.substring(startIndexOfLanguage + LANGUAGE_MARKER.length()), 
 							null);
 				} else if (startIndexOfDatatype != -1) {
 					return NodeFactory.createLiteral(
 							literalValue, 
 							null, 
-							NodeFactory.getType(nt.substring(startIndexOfDatatype + DATATYPE_MARKER.length())));
+							NodeFactory.getType(literal.substring(startIndexOfDatatype + DATATYPE_MARKER.length())));
 				} else {
 					return NodeFactory.createLiteral(literalValue);
 				}
 			}
 		}
 
-		throw new IllegalArgumentException(nt);
+		throw new IllegalArgumentException(literal);
 	}
 
-	private static int endIndexOfValue(String nTriplesLiteral) {
+	/**
+	 * Returns the end index of a literal value.
+	 * 
+	 * @param literalValue the literal value.
+	 * @return the end index of a literal value, -1 if that cannot be determined.
+	 */
+	private static int endIndexOfValue(final String literalValue) {
 		boolean previousWasBackslash = false;
 
-		for (int i = 1; i < nTriplesLiteral.length(); i++) {
-			char c = nTriplesLiteral.charAt(i);
+		for (int i = 1; i < literalValue.length(); i++) {
+			char c = literalValue.charAt(i);
 
 			if (c == '"' && !previousWasBackslash) {
 				return i;
@@ -144,51 +172,77 @@ public abstract class NTriples {
 	}
 
 	/**
-	 * Creates an N-Triples string for the supplied value.
+	 * Returns a {@link String} representation of the given {@link Node}.
+	 * 
+	 * @param node the node.
+	 * @return a {@link String} representation of the given {@link Node}.
 	 */
-	public static String asNt(Node value) {
-		if (value.isURI()) {
-			return asNtURI(value);
-		} else if (value.isBlank()) {
-			return asNtBlankNode(value);		
-		} else if (value.isLiteral()) {
-			return asNtLiteral(value);
+	public static String asNt(final Node node) {
+		if (node.isURI()) {
+			return asNtURI(node);
+		} else if (node.isBlank()) {
+			return asNtBlankNode(node);		
+		} else if (node.isLiteral()) {
+			return asNtLiteral(node);
 		}
-		throw new IllegalArgumentException(value.getClass().getName());
+		throw new IllegalArgumentException(node.getClass().getName());
 	}
 
-	public static String asNtURI(Node uri) {
+	/**
+	 * Returns a {@link String} representation of the given URI.
+	 * 
+	 * @param uri the URI node.
+	 * @return a {@link String} representation of the given URI.
+	 */
+	public static String asNtURI(final Node uri) {
 		final StringBuilder buffer = new StringBuilder("<");
 		escapeAndAppend(uri.getURI(), buffer);
 		return buffer.append(">").toString();
 	}
 	
+	/**
+	 * Returns a {@link String} representation of the given blank node.
+	 * 
+	 * @param blankNode the blank node.
+	 * @return a {@link String} representation of the given blank node.
+	 */
 	public static String asNtBlankNode(final Node blankNode) {
 		return new StringBuilder("_:")
 			.append(blankNode.getBlankNodeLabel())
 			.toString();
 	}
-
+	
+	/**
+	 * Returns a {@link String} representation of the given literal.
+	 * 
+	 * @param literal the literal node.
+	 * @return a {@link String} representation of the given literal.
+	 */
 	public static String asNtLiteral(final Node literal) {
 		final StringBuilder buffer = new StringBuilder("\"");
-		escapeAndAppend(String.valueOf(literal.getLiteralValue()), buffer);
+		escapeAndAppend(String.valueOf(literal.getLiteral().getLexicalForm()), buffer);
 		buffer.append("\"");
 		final String language = literal.getLiteralLanguage();
-		if (language != null) {
+		if (isNotNullOrEmptyString(language)) {
 			buffer.append("@").append(language);
 		}
 		
 		final String datatypeURI = literal.getLiteralDatatypeURI();
 		if (datatypeURI != null) {
-			buffer.append("^^<");
+			buffer.append("^^");
 			escapeAndAppend(datatypeURI, buffer);
-			buffer.append(">");
 		}
 		return buffer.toString();
 	}
 
-	public static void escapeAndAppend(String value, final StringBuilder buffer) {
-		int labelLength = value.length();
+	/**
+	 * Escapes the given value by appending the result in the given buffer.
+	 * 
+	 * @param value the value to be escaped.
+	 * @param buffer the accumulator char buffer.
+	 */
+	private static void escapeAndAppend(final String value, final StringBuilder buffer) {
+		final int labelLength = value.length();
 
 		for (int i = 0; i < labelLength; i++) {
 			char c = value.charAt(i);
@@ -217,14 +271,19 @@ public abstract class NTriples {
 				} else if (cInt >= 0x10000 && cInt <= 0x10FFFF) {
 					buffer.append("\\U");
 					buffer.append(hex(cInt, 8));
-				}
-				else {
+				} else {
 					buffer.append(c);
 				}
 			} 
 		}
 	}
 	
+	/**
+	 * Unescapes a given value.
+	 * 
+	 * @param value the value to be unescaped.
+	 * @return the unescaped value.
+	 */
 	public static String unescape(final String value) {
 		int indexOfBackSlash = value.indexOf('\\');
 
@@ -288,8 +347,7 @@ public abstract class NTriples {
 					c = (char)Integer.parseInt(hex5, 16);
 					builder.append(c);
 					startIndexOfEscapedSequence = indexOfBackSlash + 6;
-				}
-				catch (final NumberFormatException e) {
+				} catch (final NumberFormatException e) {
 					throw new IllegalArgumentException("Bad unicode escape sequence '\\u" + hex5 + "' in: " + value);
 				}
 				break;
@@ -320,12 +378,18 @@ public abstract class NTriples {
 		return builder.toString();
 	}
 
+	/**
+	 * .
+	 * @param decimal
+	 * @param length
+	 * @return
+	 */
 	public static String hex(final int decimal, final int length) {
 		final StringBuilder builder = new StringBuilder(length);
 		final String hex = Integer.toHexString(decimal).toUpperCase();
 
-		final int nofZeros = length - hex.length();
-		for (int i = 0; i < nofZeros; i++) {
+		final int bound = length - hex.length();
+		for (int i = 0; i < bound; i++) {
 			builder.append('0');
 		}
 

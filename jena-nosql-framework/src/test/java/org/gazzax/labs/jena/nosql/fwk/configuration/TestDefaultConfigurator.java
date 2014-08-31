@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
 
 import java.io.File;
 import java.util.Map;
@@ -64,6 +63,8 @@ public class TestDefaultConfigurator {
 
 	/**
 	 * Strategy #1 (configuration file in a system property).
+	 * 
+	 * @throws Exception never, otherwise the test fails.
 	 */
 	@Test
 	public void strategyOneSucceeds() throws Exception {
@@ -82,6 +83,8 @@ public class TestDefaultConfigurator {
 
 	/**
 	 * Strategy #2 (configuration directory in a system property with a fixed filename).
+	 * 
+	 * @throws Exception never, otherwise the test fails.
 	 */
 	@Test
 	public void strategyTwoSucceeds() throws Exception {
@@ -119,6 +122,5 @@ public class TestDefaultConfigurator {
 		}
 		
 		assertTrue(trgt.isEmpty());
-	}
-	
+	}	
 }

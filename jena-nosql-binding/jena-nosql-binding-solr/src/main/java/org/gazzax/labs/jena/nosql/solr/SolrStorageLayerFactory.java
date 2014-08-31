@@ -6,8 +6,8 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
-import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 import org.gazzax.labs.jena.nosql.solr.dao.SolrGraphDAO;
@@ -26,12 +26,17 @@ import com.hp.hpl.jena.graph.TripleMatch;
  */
 public class SolrStorageLayerFactory extends StorageLayerFactory {
 	private final TopLevelDictionary dictionary = new NoOpDictionary();
+
 	private SolrServer solr;
-	
+	private int addCommitWithinMsecs;
+	private int deleteCommitWithinMsecs;
+
 	@Override
 	public void accept(final Configuration<Map<String, Object>> configuration) {
-		deletionBatchSize = configuration.getParameter("delete-batch-size", Integer.valueOf(1000));
 		
+		addCommitWithinMsecs = configuration.getParameter("add-commit-within-msecs", Integer.valueOf(1));
+		deleteCommitWithinMsecs = configuration.getParameter("delete-commit-within-msecs", Integer.valueOf(1));
+	
 		final String address = configuration.getParameter("solr-address", "http://127.0.0.1:8080/solr/store");
 		try {
 			solr = (SolrServer) Class.forName(configuration.getParameter("solr-server-class", HttpSolrServer.class.getName()))
@@ -54,22 +59,22 @@ public class SolrStorageLayerFactory extends StorageLayerFactory {
 
 	@Override
 	public Graph getGraph() {
-		return new SolrGraph(this, deletionBatchSize);
+		return new SolrGraph(this);
 	}	
 	
 	@Override
-	public Graph getGraph(Node graphNode) {
-		return new SolrGraph(graphNode, this, deletionBatchSize);
+	public Graph getGraph(final Node graphNode) {
+		return new SolrGraph(graphNode, this);
 	}	
 	
 	@Override
 	public GraphDAO<Triple, TripleMatch> getGraphDAO(final Node name) {
-		return new SolrGraphDAO(solr, name);
+		return new SolrGraphDAO(solr, name, addCommitWithinMsecs, deleteCommitWithinMsecs);
 	}
 	
 	@Override
 	public GraphDAO<Triple, TripleMatch> getGraphDAO() {
-		return new SolrGraphDAO(solr);
+		return new SolrGraphDAO(solr, addCommitWithinMsecs, deleteCommitWithinMsecs);
 	}
 	
 	@Override

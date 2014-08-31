@@ -14,14 +14,14 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
  * @param <T> how this DAO represents a triple.
  * @param <P> how this DAO represents a triple pattern.
  */
-public interface GraphDAO<T,P> {
+public interface GraphDAO<T, P> {
 	/**
 	 * Inserts a triple.
 	 * 
 	 * @param triple the incoming triple.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	void insertTriple(final T triple) throws StorageLayerException;
+	void insertTriple(T triple) throws StorageLayerException;
 
 	/**
 	 * Removes a triple from the storage.
@@ -29,24 +29,20 @@ public interface GraphDAO<T,P> {
 	 * @param triple the incoming triple.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	void deleteTriple(final T triple) throws StorageLayerException;
+	void deleteTriple(T triple) throws StorageLayerException;
 
 	/**
 	 * Removes the given triples from the storage.
 	 * 
 	 * @param triples the incoming triples.
-	 * @param batchSize how many delete will be grouped in a single chunks in order to optimize the command execution.
 	 * @return the triples that have been removed.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
-	List<T> deleteTriples(
-			final Iterator<T> triples, 
-			final int batchSize) throws StorageLayerException;
+	List<T> deleteTriples(Iterator<T> triples) throws StorageLayerException;
 
 	/**
 	 * When a command defines multiple mutations, then at the end the requestor is supposed to call this method.
 	 * 
-	 * FIXME: Definitely don't like this "client" responsibility: it could forget to call this method.
 	 * @throws StorageLayerException in case of storage layer access failure.
 	 */
 	void executePendingMutations() throws StorageLayerException;
@@ -64,4 +60,12 @@ public interface GraphDAO<T,P> {
 	 * @throws StorageLayerException in case of storage access failure.
 	 */
 	Iterator<T> query(P query) throws StorageLayerException;
+
+	/**
+	 * Counts how many triples we have in the graph associated with this DAO.
+	 * 
+	 * @return how many triples we have in the graph associated with this DAO.
+	 * @throws StorageLayerException in case of data access failure.
+	 */
+	long countTriples() throws StorageLayerException;
 }

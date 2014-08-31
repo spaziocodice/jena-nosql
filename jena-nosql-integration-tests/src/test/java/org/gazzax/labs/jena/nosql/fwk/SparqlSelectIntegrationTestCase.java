@@ -1,15 +1,12 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
+import static org.junit.Assert.assertTrue;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.sparql.resultset.ResultSetCompare;
 
 /**
  * Supertype layer for SPARQL SELECT integration tests.
@@ -21,25 +18,19 @@ public abstract class SparqlSelectIntegrationTestCase extends SparqlIntegrationT
 	@Override
 	protected void executeTestWithFile(final String filename) throws Exception {
 		final Query query = QueryFactory.create(queryString(filename + ".rq"));
-		final QueryExecution execution = QueryExecutionFactory.create(query, dataset);
-		final ResultSet rs = execution.execSelect();
+		QueryExecution execution = null;
+		QueryExecution inMemoryExecution = null;
 		
-		final String s = ResultSetFormatter.asText(rs, query).trim();
-
-		assertEquals(
-				results(filename + ".rs").trim(),
-				s.trim());
-		execution.close();
-	}	
-	
-	/**
-	 * Builds a string (from the file associated with this test) with the expected query results.
-	 * 
-	 * @param resultsFileName the results filename.
-	 * @return a string (from the file associated with this test) with the expected query results.
-	 * @throws IOException in case of I/O failure while reading the file.
-	 */
-	protected String results(final String resultsFileName) throws IOException {
-		return readFile(resultsFileName);
+		try {
+			assertTrue(
+					ResultSetCompare.isomorphic(
+							(execution = QueryExecutionFactory.create(query, dataset)).execSelect(),
+							(inMemoryExecution = QueryExecutionFactory.create(query, memoryDataset)).execSelect()));
+		} finally {
+			// CHECKSTYLE:OFF
+			if (execution != null) { execution.close(); }
+			if (inMemoryExecution != null) { inMemoryExecution.close(); }
+			// CHECKSTYLE:ON
+		}		
 	}	
 }

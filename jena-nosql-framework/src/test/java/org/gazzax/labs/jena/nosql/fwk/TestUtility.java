@@ -11,8 +11,8 @@ import java.util.Random;
 
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
-import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.factory.ClientShutdownHook;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
@@ -75,10 +75,10 @@ public abstract class TestUtility {
 		}
 	};
 	
-	public final static StorageLayerFactory STORAGE_LAYER_FACTORY = new TestStorageLayerFactory();
+	public static final StorageLayerFactory STORAGE_LAYER_FACTORY = new TestStorageLayerFactory();
 	
-	public final static Random RANDOMIZER = new Random();
-	public final static String DUMMY_BASE_URI = "http://example.org/";
+	public static final Random RANDOMIZER = new Random();
+	public static final String DUMMY_BASE_URI = "http://example.org/";
 	
 	/**
 	 * Produces a random string.
@@ -102,6 +102,7 @@ public abstract class TestUtility {
 	/**
 	 * Produces a random byte array.
 	 * 
+	 * @param size the size of the returned array.
 	 * @return a random byte array.
 	 */
 	public static byte[] randomBytes(final int size) {
@@ -145,6 +146,13 @@ public abstract class TestUtility {
 		return NodeFactory.createAnon(AnonId.create(id));
 	}	
 	
+	/**
+	 * Creates a dummy configuration (TEST ONLY).
+	 * 
+	 * @param file the file that will hold this dummy configuration.
+	 * @return a dummy configuration persieted to a (most probably) tmp file.
+	 * @throws Exception in case any failure occurred.
+	 */
 	public static Map<String, Object> createSampleConfiguration(final File file) throws Exception {
 		final Map<String, Object> configuration = new HashMap<String, Object>();
 		

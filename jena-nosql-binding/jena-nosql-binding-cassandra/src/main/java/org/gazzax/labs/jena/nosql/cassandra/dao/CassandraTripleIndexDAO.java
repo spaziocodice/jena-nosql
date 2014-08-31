@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
-import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 
 import com.datastax.driver.core.BatchStatement;
@@ -56,17 +55,20 @@ public class CassandraTripleIndexDAO implements GraphDAO<byte[][], byte[][]> {
 
 	private PreparedStatement[] queries;
 	
-	protected final TopLevelDictionary dictionary;
+	private int deletionBatchSize;
 	
 	/**
 	 * Buils a new {@link CassandraTripleIndexDAO} with the given data.
 	 * 
+	 * @param deletionBatchSize the batch size used in deletions.
 	 * @param session The connection to Cassandra.
-	 * @param dictionary the dictionary currently used.
 	 */
-	public CassandraTripleIndexDAO(final Session session, final TopLevelDictionary dictionary) {
+	public CassandraTripleIndexDAO(
+			final Session session, 
+			final int deletionBatchSize) {
 		this.session = session;
-		this.dictionary = dictionary;
+		this.deletionBatchSize = deletionBatchSize;
+		
 		prepareStatements();
 	}
 
@@ -124,14 +126,12 @@ public class CassandraTripleIndexDAO implements GraphDAO<byte[][], byte[][]> {
 	}
 	
 	@Override
-	public List<byte[][]> deleteTriples(
-			final Iterator<byte[][]> nodes, 
-			final int batchSize) throws StorageLayerException {
+	public List<byte[][]> deleteTriples(final Iterator<byte[][]> nodes) throws StorageLayerException {
 
-		final List<byte[][]> deleted = new ArrayList<byte[][]>(batchSize);
+		final List<byte[][]> deleted = new ArrayList<byte[][]>(deletionBatchSize);
 		
 		while (nodes.hasNext()) {
-			for (int i = 0; i < batchSize && nodes.hasNext(); i++) {
+			for (int i = 0; i < deletionBatchSize && nodes.hasNext(); i++) {
 
 				byte[][] ids = nodes.next();
 				if (ids == null || ids.length < 3) {
@@ -176,11 +176,17 @@ public class CassandraTripleIndexDAO implements GraphDAO<byte[][], byte[][]> {
 		return new AbstractIterator<byte[][]>() {
 			@Override
 			protected byte[][] computeNext() {
-				return iterator.hasNext()? asByteArray(iterator.next()) : endOfData();
+				return iterator.hasNext() ? asByteArray(iterator.next()) : endOfData();
 			}
 		};
 	}	
 	
+	/**
+	 * Transforms the given row in a byte array containing term identifiers.
+	 * 
+	 * @param row the row.
+	 * @return a byte array containing term identifiers.
+	 */
 	private byte[][] asByteArray(final Row row) {
 		final byte[] s = Bytes.getArray(row.getBytesUnsafe(0));
 		final byte[] p = Bytes.getArray(row.getBytesUnsafe(1));
@@ -271,5 +277,11 @@ public class CassandraTripleIndexDAO implements GraphDAO<byte[][], byte[][]> {
 		}
 
 		batchStatements.get().add(ospcStatement);
+	}
+
+	@Override
+	public long countTriples() throws StorageLayerException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

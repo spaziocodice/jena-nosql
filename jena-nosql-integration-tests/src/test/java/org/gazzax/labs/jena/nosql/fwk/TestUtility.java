@@ -8,4 +8,15 @@ package org.gazzax.labs.jena.nosql.fwk;
  */
 public abstract class TestUtility {
 	public static final String DUMMY_BASE_URI = "http://example.org/";
+	
+	/**
+	 * Waits for a second.
+	 */
+	public static void waitForOneSecond() {
+		try {
+			Thread.sleep(1000);
+		} catch (final Exception ignore) {
+			// Ignore
+		}
+	}
 }

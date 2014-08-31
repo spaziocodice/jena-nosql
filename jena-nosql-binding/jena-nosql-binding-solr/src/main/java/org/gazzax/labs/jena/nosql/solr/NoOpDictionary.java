@@ -2,7 +2,6 @@ package org.gazzax.labs.jena.nosql.solr;
 
 import java.util.Iterator;
 
-import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
 
@@ -24,19 +23,19 @@ class NoOpDictionary implements TopLevelDictionary {
 	}
 
 	@Override
-	public byte[] getID(Node node, boolean p) throws StorageLayerException {
+	public byte[] getID(final Node node, final boolean p) {
 		// Nothing to be done here...
 		return null;
 	}
 
 	@Override
-	public Node getValue(byte[] id, boolean p) throws StorageLayerException {
+	public Node getValue(final byte[] id, final boolean p) {
 		// Nothing to be done here...
 		return null;
 	}
 
 	@Override
-	public void removeValue(Node value, boolean p) throws StorageLayerException {
+	public void removeValue(final Node value, final boolean p) {
 		// Nothing to be done here...
 	}
 

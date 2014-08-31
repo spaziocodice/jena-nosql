@@ -43,9 +43,10 @@ public class SolrDeepPagingIterator extends UnmodifiableIterator<Triple> {
 		public boolean hasNext() {
 			try {
 				final QueryResponse response = solr.query(query);
+				sentCursorMark = query.get(CursorMarkParams.CURSOR_MARK_PARAM);
 				nextCursorMark = response.getNextCursorMark();
 				page = response.getResults();
-				return page.getNumFound() > 0;
+				return !page.isEmpty();
 			} catch (final Exception exception) {
 				throw new RuntimeException(exception);
 			}
@@ -69,7 +70,7 @@ public class SolrDeepPagingIterator extends UnmodifiableIterator<Triple> {
 			if (iterator().hasNext()) {
 				return true;
 			} else {
-				currentState = checkForIterationCompleteness;
+				currentState = checkForConsumptionCompleteness;
 				return currentState.hasNext();
 			}
 		}
@@ -95,16 +96,20 @@ public class SolrDeepPagingIterator extends UnmodifiableIterator<Triple> {
 	/**
 	 * Iteration state: once a page has been consumed we need to determine if another query should be issued or not. 
 	 */
-	private final Iterator<Triple> checkForIterationCompleteness = new UnmodifiableIterator<Triple>() {
+	private final Iterator<Triple> checkForConsumptionCompleteness = new UnmodifiableIterator<Triple>() {
 		@Override
 		public boolean hasNext() {
-			return !(page.size() < query.getRows() || sentCursorMark.equals(nextCursorMark));
+			final boolean hasNext = (page.size() == query.getRows() && !sentCursorMark.equals(nextCursorMark));
+			if (hasNext) {
+				query.set(CursorMarkParams.CURSOR_MARK_PARAM, nextCursorMark);			
+				currentState = executeQuery;
+				return currentState.hasNext();
+			}
+			return false;
 		}
 
 		@Override
 		public Triple next() {
-			query.set(CursorMarkParams.CURSOR_MARK_PARAM, nextCursorMark);
-			currentState = executeQuery;
 			return currentState.next();
 		}
 	};

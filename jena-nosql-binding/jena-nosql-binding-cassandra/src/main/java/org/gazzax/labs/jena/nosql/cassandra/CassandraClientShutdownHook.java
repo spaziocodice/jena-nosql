@@ -14,7 +14,7 @@ import com.datastax.driver.core.Session;
  * @since 1.0
  */
 public class CassandraClientShutdownHook implements ClientShutdownHook {
-	private final static Log LOGGER = new Log(LoggerFactory.getLogger(ClientShutdownHook.class));
+	private static final Log LOGGER = new Log(LoggerFactory.getLogger(ClientShutdownHook.class));
 	private final Session session;
 	
 	/**

@@ -8,8 +8,8 @@ import org.gazzax.labs.jena.nosql.fwk.configuration.Configurable;
 import org.gazzax.labs.jena.nosql.fwk.configuration.Configuration;
 import org.gazzax.labs.jena.nosql.fwk.configuration.DefaultConfigurator;
 import org.gazzax.labs.jena.nosql.fwk.dictionary.TopLevelDictionary;
-import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
+import org.gazzax.labs.jena.nosql.fwk.ds.MapDAO;
 import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlDatasetGraph;
 import org.gazzax.labs.jena.nosql.fwk.graph.NoSqlGraph;
 
@@ -41,8 +41,6 @@ public abstract class StorageLayerFactory implements Configurable {
 		final Iterator<StorageLayerFactory> iterator = loader.iterator();
 		default_factory = iterator.hasNext() ? iterator.next() : null;
 	}
-	
-	protected int deletionBatchSize;
 	
 	/**
 	 * Returns the {@link MapDAO}.
@@ -76,7 +74,6 @@ public abstract class StorageLayerFactory implements Configurable {
 	/**
 	 * Returns the Data Access Object for interacting with an unnamed graph.
 	 * 
-	 * @param name the name of the graph that will be associated with the resulting dao.
 	 * @return the Data Access Object for interacting with the triple index.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -88,16 +85,17 @@ public abstract class StorageLayerFactory implements Configurable {
 	 * @return an unnamed {@link Graph} specific implementation associated with the underlying kind of storage.
 	 */
 	public Graph getGraph() {
-		return new NoSqlGraph(this, deletionBatchSize);
+		return new NoSqlGraph(this);
 	}	
 	
 	/**
 	 * Returns a named {@link Graph} specific implementation associated with the underlying kind of storage.
 	 * 
+	 * @param graphNode the name of the graph.
 	 * @return a named {@link Graph} specific implementation associated with the underlying kind of storage.
 	 */
-	public Graph getGraph(Node graphNode) {
-		return new NoSqlGraph(graphNode, this, deletionBatchSize);
+	public Graph getGraph(final Node graphNode) {
+		return new NoSqlGraph(graphNode, this);
 	}
 	
 	/**
@@ -125,7 +123,6 @@ public abstract class StorageLayerFactory implements Configurable {
 			configuration.configure(default_factory);
 			return default_factory;
 		} catch (final Exception exception) {
-			// TODO: LOG
 			throw new RuntimeException(exception);
 		}
 	}

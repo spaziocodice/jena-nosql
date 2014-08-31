@@ -29,12 +29,10 @@ import com.hp.hpl.jena.util.iterator.WrappedIterator;
  * @since 1.0
  */
 public class NoSqlGraph extends GraphBase {
-	private final static Log LOGGER = new Log(LoggerFactory.getLogger(NoSqlGraph.class));
+	private static final Log LOGGER = new Log(LoggerFactory.getLogger(NoSqlGraph.class));
 	
-	private final static Iterator<byte[][]> EMPTY_IDS_ITERATOR = new ArrayList<byte[][]>(0).iterator();
-	private final static ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
-	
-	private final int deletionBatchSize;
+	private static final Iterator<byte[][]> EMPTY_IDS_ITERATOR = new ArrayList<byte[][]>(0).iterator();
+	private static final ExtendedIterator<Triple> EMPTY_TRIPLES_ITERATOR = WrappedIterator.createNoRemove(new ArrayList<Triple>(0).iterator());
 	
 	private final GraphDAO<byte[][], byte[][]> dao;
 	private final TopLevelDictionary dictionary;
@@ -43,26 +41,23 @@ public class NoSqlGraph extends GraphBase {
 	/**
 	 * Builds a new unnamed graph with the given factory.
 	 * 
-	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 * @param factory the storage layer factory.
 	 */
-	public NoSqlGraph(final StorageLayerFactory factory, final int deletionBatchSize) {
-		this(null, factory, deletionBatchSize);
+	public NoSqlGraph(final StorageLayerFactory factory) {
+		this(null, factory);
 	}
 	
 	/**
 	 * Builds a new named graph with the given data.
 	 * 
-	 * @param deletionBatchSize the batch size in case of massive deletions.
 	 * @param name the graph name.
 	 * @param factory the storage layer factory.
 	 */	
 	@SuppressWarnings("unchecked")
-	public NoSqlGraph(final Node name, final StorageLayerFactory factory, final int deletionBatchSize) {
+	public NoSqlGraph(final Node name, final StorageLayerFactory factory) {
 		this.name = name;
 		this.dao = name != null ? factory.getGraphDAO(name) : factory.getGraphDAO();
 		this.dictionary = factory.getDictionary();
-		this.deletionBatchSize = deletionBatchSize;
 	}
 	
 	@Override
@@ -101,7 +96,7 @@ public class NoSqlGraph extends GraphBase {
 			} else if (!triple.getSubject().isConcrete() && !triple.getPredicate().isConcrete() && !triple.getObject().isConcrete()) {
 				clear();
 			} else {
-				dao.deleteTriples(query(identifiers), deletionBatchSize);
+				dao.deleteTriples(query(identifiers));
 			}	
 		} catch (final StorageLayerException exception) {
 			final String message = MessageFactory.createMessage(MessageCatalog._00100_UNABLE_TO_DELETE_TRIPLE, triple);
@@ -111,16 +106,14 @@ public class NoSqlGraph extends GraphBase {
 	}
 	
 	@Override
-    public void clear()
-	{
+    public void clear() {
 	    dao.clear();
-        getEventManager().notifyEvent(this, GraphEvents.removeAll ) ;	
+        getEventManager().notifyEvent(this, GraphEvents.removeAll);
 	}
 	
 	@Override
 	protected ExtendedIterator<Triple> graphBaseFind(final TripleMatch pattern) {
-		try 
-		{
+		try {
 			final byte [][] identifiers = 
 				(name == null)
 					? dictionary.asIdentifiers(
@@ -139,6 +132,13 @@ public class NoSqlGraph extends GraphBase {
 		}
 	}
 	
+	/**
+	 * Executes a query using a given triple pattern.
+	 *  
+	 * @param query the query (as pattern).
+	 * @return an iterator of resulting triples.
+	 * @throws StorageLayerException in case of storage access layer.
+	 */
 	Iterator<byte[][]> query(final byte[][] query) throws StorageLayerException {
 		return (query != null && query.length >= 3) 
 					? dao.query(query)
