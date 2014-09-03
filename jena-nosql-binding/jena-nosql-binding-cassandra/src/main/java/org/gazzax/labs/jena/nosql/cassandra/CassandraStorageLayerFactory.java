@@ -166,7 +166,7 @@ public class CassandraStorageLayerFactory extends StorageLayerFactory {
 	
 	@Override
 	public ClientShutdownHook getClientShutdownHook() {
-		return new CassandraClientShutdownHook(session);
+		return new CassandraClientShutdownHook(session, dictionary);
 	}
 	
 	@Override
