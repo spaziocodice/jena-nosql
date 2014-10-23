@@ -70,6 +70,7 @@ public class SolrDeepPagingIterator extends UnmodifiableIterator<Triple> {
 			if (iterator().hasNext()) {
 				return true;
 			} else {
+				iterator = null;
 				currentState = checkForConsumptionCompleteness;
 				return currentState.hasNext();
 			}

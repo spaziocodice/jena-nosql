@@ -1,7 +1,7 @@
 package org.gazzax.labs.jena.nosql.fwk;
 
 import static org.gazzax.labs.jena.nosql.fwk.TestUtility.DUMMY_BASE_URI;
-import static org.gazzax.labs.jena.nosql.fwk.TestUtility.waitForOneSecond;
+import static org.gazzax.labs.jena.nosql.fwk.TestUtility.eheh;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -45,7 +45,7 @@ public abstract class SparqlIntegrationTestCase {
 		
 		load("data.ttl");
 	}
-	
+
 	/**
 	 * Returns the chapter the test refers to (e.g. 2.1, 2.2, 3.2).
 	 * 
@@ -128,7 +128,7 @@ public abstract class SparqlIntegrationTestCase {
 		final Model model = dataset.getDefaultModel().read(dataURL, DUMMY_BASE_URI, "TTL");
 		final Model memoryModel = memoryDataset.getDefaultModel().read(dataURL, DUMMY_BASE_URI, "TTL");
 		
-		waitForOneSecond();
+		eheh();
 		
 		assertFalse(model.isEmpty());
 		assertTrue(model.isIsomorphicWith(memoryModel));

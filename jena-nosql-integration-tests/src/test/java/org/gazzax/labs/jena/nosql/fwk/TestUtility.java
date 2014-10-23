@@ -12,7 +12,7 @@ public abstract class TestUtility {
 	/**
 	 * Waits for a second.
 	 */
-	public static void waitForOneSecond() {
+	public static void eheh() {
 		try {
 			Thread.sleep(1000);
 		} catch (final Exception ignore) {

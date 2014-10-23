@@ -163,6 +163,11 @@
 			<artifactId>jena-nosql-framework</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.gazzax.labs</groupId>
+			<artifactId>jena-nosql-binding-solr</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 	<name>Jena NoSQL Integration Tests</name>
 </project>
