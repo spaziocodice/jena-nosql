@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SolrClientShutdownHook implements ClientShutdownHook {
 	private static final Log LOGGER = new Log(LoggerFactory.getLogger(ClientShutdownHook.class));
-	private final SolrServer connection;
+	private final SolrServer facade;
 	
 	/**
 	 * Builds a new SOLR Client shutdown hook.
@@ -22,13 +22,13 @@ public class SolrClientShutdownHook implements ClientShutdownHook {
 	 * @param connection the connection to SOLR.
 	 */
 	public SolrClientShutdownHook(final SolrServer connection) {
-		this.connection = connection;
+		this.facade = connection;
 	}
 	
 	@Override
 	public void close() {
 		try {
-			connection.shutdown();
+			facade.shutdown();
 		} catch (final Exception exception) {
 			LOGGER.error(MessageCatalog._00099_CLIENT_SHUTDOWN_FAILURE, exception);
 		}
