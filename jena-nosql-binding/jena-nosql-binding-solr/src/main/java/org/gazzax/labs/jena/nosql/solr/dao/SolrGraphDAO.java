@@ -14,9 +14,12 @@ import org.gazzax.labs.jena.nosql.fwk.StorageLayerException;
 import org.gazzax.labs.jena.nosql.fwk.ds.GraphDAO;
 import org.gazzax.labs.jena.nosql.fwk.log.Log;
 import org.gazzax.labs.jena.nosql.fwk.log.MessageCatalog;
+import org.gazzax.labs.jena.nosql.fwk.util.Strings;
 import org.gazzax.labs.jena.nosql.solr.Field;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
@@ -68,8 +71,38 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 		final SolrInputDocument document = new SolrInputDocument();
 		document.setField(Field.S, asNt(triple.getSubject()));
 		document.setField(Field.P, asNtURI(triple.getPredicate()));
-		document.setField(Field.O, asNt(triple.getObject()));
 		document.setField(Field.C, name != null ? asNtURI(name) : null);
+		document.setField(Field.O, asNt(triple.getObject()));			
+
+		final Node object = triple.getObject();
+		if (object.isLiteral()) {
+			final RDFDatatype dataType = object.getLiteralDatatype();
+			final Object value = object.getLiteral().getLexicalForm();
+			document.setField(Field.LANG, object.getLiteralLanguage());				
+			
+			// TBD: +handle datatypes inheritance -remove conditional logic
+			if (dataType != null) {
+				final String uri = dataType.getURI();
+				if (XSDDatatype.XSDboolean.getURI().equals(uri)) {
+					document.setField(Field.BOOLEAN_OBJECT, value);
+				} else if (
+						XSDDatatype.XSDint.getURI().equals(uri) ||
+						XSDDatatype.XSDinteger.getURI().equals(uri) ||
+						XSDDatatype.XSDdecimal.getURI().equals(uri) ||
+						XSDDatatype.XSDdouble.getURI().equals(uri) ||
+						XSDDatatype.XSDlong.getURI().equals(uri)) {
+					document.setField(Field.NUMERIC_OBJECT, value);
+				} else if (
+						XSDDatatype.XSDdateTime.equals(uri) || 
+						XSDDatatype.XSDdate.equals(uri)) {
+					document.setField(Field.DATE_OBJECT, value);										
+				} else {
+					document.setField(Field.TEXT_OBJECT, value);								
+				}
+			} else {
+				document.setField(Field.TEXT_OBJECT, value);			
+			}
+		} 
 		
 		try {
 			solr.add(document, addCommitWithinMsecs);
@@ -89,7 +122,7 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	
 	@Override
 	public List<Triple> deleteTriples(final Iterator<Triple> triples) {
-		throw new UnsupportedOperationException("Not implemented when using SOLR.");
+		throw new UnsupportedOperationException("Not implemented in Apache SOLR binding.");
 	}
 
 	@Override
@@ -119,19 +152,46 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 		final Node o = query.getMatchObject();
 		
 		if (s != null) {
-			q.addFilterQuery(newFilterQuery(Field.S, asNt(s)));
+			q.addFilterQuery(newFilterQuery(Field.S, asNt(s), true));
 		}
 		
 		if (p != null) {
-			q.addFilterQuery(newFilterQuery(Field.P, asNtURI(p)));
+			q.addFilterQuery(newFilterQuery(Field.P, asNtURI(p), true));
 		}
 		
-		if (o != null) {
-			q.addFilterQuery(newFilterQuery(Field.O, asNt(o)));
+		if (o != null && o.isLiteral()) {
+			final String language = o.getLiteralLanguage();
+			if (Strings.isNotNullOrEmptyString(language)) {
+				q.addFilterQuery(newFilterQuery(Field.LANG, language != null ? language : "", true));				
+			}
+			
+			final String literalValue = o.getLiteralLexicalForm(); 
+			final RDFDatatype dataType = o.getLiteralDatatype();
+			if (dataType != null) {
+				final String uri = dataType.getURI();
+				if (XSDDatatype.XSDboolean.getURI().equals(uri)) {
+					q.addFilterQuery(newFilterQuery(Field.BOOLEAN_OBJECT, literalValue, false));
+				} else if (
+						XSDDatatype.XSDint.getURI().equals(uri) ||
+						XSDDatatype.XSDinteger.getURI().equals(uri) ||
+						XSDDatatype.XSDdecimal.getURI().equals(uri) ||
+						XSDDatatype.XSDdouble.getURI().equals(uri) ||
+						XSDDatatype.XSDlong.getURI().equals(uri)) {
+					q.addFilterQuery(newFilterQuery(Field.NUMERIC_OBJECT, literalValue, false));
+				} else if (
+						XSDDatatype.XSDdateTime.equals(uri) || 
+						XSDDatatype.XSDdate.equals(uri)) {
+					q.addFilterQuery(newFilterQuery(Field.DATE_OBJECT, literalValue, false));
+				} else {
+					q.addFilterQuery(newFilterQuery(Field.TEXT_OBJECT, literalValue, true));
+				}
+			} else {
+				q.addFilterQuery(newFilterQuery(Field.TEXT_OBJECT, literalValue, true));
+			}				
 		}
 		
 		if (name != null) {
-			q.addFilterQuery(newFilterQuery(Field.C, asNtURI(name)));			
+			q.addFilterQuery(newFilterQuery(Field.C, asNtURI(name), true));			
 		}
 		
 		return new SolrDeepPagingIterator(solr, q);
@@ -155,12 +215,12 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	 * @param value the field value.
 	 * @return a filter query with the given data.
 	 */
-	String newFilterQuery(final String fieldName, final String value) {
+	String newFilterQuery(final String fieldName, final String value, final boolean phraseQuery) {
 		return new StringBuilder()
 			.append(fieldName)
-			.append(":\"")
+			.append(phraseQuery ? ":\"" : ":")
 			.append(ClientUtils.escapeQueryChars(value))
-			.append("\"")
+			.append(phraseQuery ? "\"" : "")
 			.toString();
 	}
 	

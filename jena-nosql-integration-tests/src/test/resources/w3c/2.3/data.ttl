@@ -5,4 +5,5 @@
 
 :x   ns:p     "cat"@en .
 :y   ns:p     "42"^^xsd:integer .
+:k   ns:p     42 .
 :z   ns:p     "abc"^^dt:specialDatatype . 
