@@ -14,7 +14,7 @@ public abstract class TestUtility {
 	 */
 	public static void eheh() {
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(2000);
 		} catch (final Exception ignore) {
 			// Ignore
 		}

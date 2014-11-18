@@ -26,6 +26,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.gazzax.labs.jena.nosql.fwk.factory.StorageLayerFactory;
@@ -48,7 +49,7 @@ import com.hp.hpl.jena.sparql.resultset.ResultSetCompare;
 
 /**
  * SPARQL integration test.
- * 
+ *  
  * @author Andrea Gazzarini
  * @since 1.0
  */
@@ -63,25 +64,25 @@ public class LearningSparql_ITCase {
 	protected StorageLayerFactory factory;
 	
 	static final List<MisteryGuest> DATA = new ArrayList<MisteryGuest>();
-	
+	 
 	/**
 	 * Fills the data and queries map.
 	 */
 	@BeforeClass
 	public static void init() {
-		DATA.add(misteryGuest("ex003.rq", "ex002.ttl"));
-		DATA.add(misteryGuest("ex006.rq", "ex002.ttl"));
-		DATA.add(misteryGuest("ex007.rq", "ex002.ttl"));
-		DATA.add(misteryGuest("ex008.rq", "ex002.ttl"));
-		DATA.add(misteryGuest("ex010.rq", "ex002.ttl"));
+		DATA.add(misteryGuest("ex003.rq", "", "ex002.ttl"));
+		DATA.add(misteryGuest("ex006.rq", "", "ex002.ttl"));
+		DATA.add(misteryGuest("ex007.rq", "", "ex002.ttl"));
+		DATA.add(misteryGuest("ex008.rq", "", "ex002.ttl"));
+		DATA.add(misteryGuest("ex010.rq", "", "ex002.ttl"));
 
-		DATA.add(misteryGuest("ex013.rq", "ex012.ttl"));
-		DATA.add(misteryGuest("ex015.rq", "ex012.ttl"));
-		DATA.add(misteryGuest("ex017.rq", "ex012.ttl"));
-		DATA.add(misteryGuest("ex019.rq", "ex012.ttl"));
-		DATA.add(misteryGuest("ex021.rq", "ex012.ttl"));
-		DATA.add(misteryGuest("ex047.rq", "ex012.ttl"));
-		DATA.add(misteryGuest("ex052.rq", "ex050.ttl", "foaf.rdf"));
+		DATA.add(misteryGuest("ex013.rq", "", "ex012.ttl"));
+		DATA.add(misteryGuest("ex015.rq", "", "ex012.ttl"));
+		DATA.add(misteryGuest("ex017.rq", "", "ex012.ttl"));
+		DATA.add(misteryGuest("ex019.rq", "", "ex012.ttl"));
+		DATA.add(misteryGuest("ex021.rq", "", "ex012.ttl"));
+		DATA.add(misteryGuest("ex047.rq", "", "ex012.ttl"));
+		DATA.add(misteryGuest("ex052.rq", "", "ex050.ttl", "foaf.rdf"));
 		DATA.add(misteryGuest("ex055.rq", "", "ex054.ttl"));
 		DATA.add(misteryGuest("ex057.rq", "", "ex054.ttl"));
 		DATA.add(misteryGuest("ex059.rq", "", "ex054.ttl"));
@@ -92,15 +93,15 @@ public class LearningSparql_ITCase {
 		DATA.add(misteryGuest("ex068.rq", "MINUS", "ex054.ttl"));
 		DATA.add(misteryGuest("ex070.rq", "Multiple tables", "ex069.ttl"));
 		DATA.add(misteryGuest("ex070.rq", "Multiple tables with split datasets", "ex072.ttl", "ex073.ttl", "ex368.ttl"));
-		DATA.add(misteryGuest("ex075.rq", "Bind either", "ex074.ttl"));
-		DATA.add(misteryGuest("ex077.rq", "Bind either", "ex074.ttl"));
-		DATA.add(misteryGuest("ex078.rq", "Property paths", "ex074.ttl"));
-		DATA.add(misteryGuest("ex080.rq", "Property paths", "ex074.ttl"));
-		DATA.add(misteryGuest("ex082.rq", "Property paths", "ex074.ttl"));
-		DATA.add(misteryGuest("ex083.rq", "Property paths", "ex074.ttl"));
-		DATA.add(misteryGuest("ex084.rq", "Property paths", "ex074.ttl"));
-		DATA.add(misteryGuest("ex086.rq", "Querying blank nodes", "ex041.ttl"));
-		DATA.add(misteryGuest("ex088.rq", "Querying blank nodes", "ex041.ttl"));
+		DATA.add(misteryGuest("ex075.rq", "Bind either I", "ex074.ttl"));
+		DATA.add(misteryGuest("ex077.rq", "Bind either II", "ex074.ttl"));
+		DATA.add(misteryGuest("ex078.rq", "Property paths I", "ex074.ttl"));
+		DATA.add(misteryGuest("ex080.rq", "Property paths II", "ex074.ttl"));
+		DATA.add(misteryGuest("ex082.rq", "Property paths III", "ex074.ttl"));
+		DATA.add(misteryGuest("ex083.rq", "Property paths IV", "ex074.ttl"));
+		DATA.add(misteryGuest("ex084.rq", "Property paths V", "ex074.ttl"));
+		DATA.add(misteryGuest("ex086.rq", "Querying blank nodes I", "ex041.ttl"));
+		DATA.add(misteryGuest("ex088.rq", "Querying blank nodes II", "ex041.ttl"));
 	}
 	
 	/**
@@ -135,19 +136,21 @@ public class LearningSparql_ITCase {
 			
 			try {
 				assertTrue(
-						data.datasets + ", " + data.query,
+						Arrays.toString(data.datasets) + ", " + data.query,
 						ResultSetCompare.isomorphic(
 								(execution = QueryExecutionFactory.create(query, dataset)).execSelect(),
 								(inMemoryExecution = QueryExecutionFactory.create(query, memoryDataset)).execSelect()));
+			} catch (final AssertionError error) {
+				QueryExecution debugExecution = null;
+				log.debug("JNS\n" + ResultSetFormatter.asText(
+						(debugExecution = (QueryExecutionFactory.create(query, dataset))).execSelect()));
 				
-				if (log.isDebugEnabled()) {
-					QueryExecution secondExecution = null;
-					log.debug("\n" + ResultSetFormatter.asText(
-							(secondExecution = (QueryExecutionFactory.create(query, dataset))).execSelect()));
-					
-					secondExecution.close();
-				}
+				debugExecution.close();
+				log.debug("MEM\n" + ResultSetFormatter.asText(
+						(debugExecution = (QueryExecutionFactory.create(query, memoryDataset))).execSelect()));
 				
+				debugExecution.close();
+				throw error;
 			} finally {
 				clearDatasets();
 				execution.close();
@@ -196,8 +199,8 @@ public class LearningSparql_ITCase {
 		
 		eheh();
 		
-		assertFalse(data.datasets + ", " + data.query, model.isEmpty());
-		assertTrue(data.datasets + ", " + data.query, model.isIsomorphicWith(memoryModel));
+		assertFalse(Arrays.toString(data.datasets) + ", " + data.query, model.isEmpty());
+		assertTrue(Arrays.toString(data.datasets) + ", " + data.query, model.isIsomorphicWith(memoryModel));
 	}
 
 	/**

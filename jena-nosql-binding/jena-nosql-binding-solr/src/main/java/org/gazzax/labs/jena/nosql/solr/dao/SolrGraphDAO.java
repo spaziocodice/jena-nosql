@@ -102,7 +102,9 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 			} else {
 				document.setField(Field.TEXT_OBJECT, value);			
 			}
-		} 
+		} else {
+			document.setField(Field.TEXT_OBJECT, asNt(triple.getObject()));			
+		}
 		
 		try {
 			solr.add(document, addCommitWithinMsecs);
@@ -159,35 +161,39 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 			q.addFilterQuery(newFilterQuery(Field.P, asNtURI(p), true));
 		}
 		
-		if (o != null && o.isLiteral()) {
-			final String language = o.getLiteralLanguage();
-			if (Strings.isNotNullOrEmptyString(language)) {
-				q.addFilterQuery(newFilterQuery(Field.LANG, language != null ? language : "", true));				
-			}
-			
-			final String literalValue = o.getLiteralLexicalForm(); 
-			final RDFDatatype dataType = o.getLiteralDatatype();
-			if (dataType != null) {
-				final String uri = dataType.getURI();
-				if (XSDDatatype.XSDboolean.getURI().equals(uri)) {
-					q.addFilterQuery(newFilterQuery(Field.BOOLEAN_OBJECT, literalValue, false));
-				} else if (
-						XSDDatatype.XSDint.getURI().equals(uri) ||
-						XSDDatatype.XSDinteger.getURI().equals(uri) ||
-						XSDDatatype.XSDdecimal.getURI().equals(uri) ||
-						XSDDatatype.XSDdouble.getURI().equals(uri) ||
-						XSDDatatype.XSDlong.getURI().equals(uri)) {
-					q.addFilterQuery(newFilterQuery(Field.NUMERIC_OBJECT, literalValue, false));
-				} else if (
-						XSDDatatype.XSDdateTime.equals(uri) || 
-						XSDDatatype.XSDdate.equals(uri)) {
-					q.addFilterQuery(newFilterQuery(Field.DATE_OBJECT, literalValue, false));
+		if (o != null) {
+			if (o.isLiteral()) {
+				final String language = o.getLiteralLanguage();
+				if (Strings.isNotNullOrEmptyString(language)) {
+					q.addFilterQuery(newFilterQuery(Field.LANG, language != null ? language : "", true));				
+				}
+				
+				final String literalValue = o.getLiteralLexicalForm(); 
+				final RDFDatatype dataType = o.getLiteralDatatype();
+				if (dataType != null) {
+					final String uri = dataType.getURI();
+					if (XSDDatatype.XSDboolean.getURI().equals(uri)) {
+						q.addFilterQuery(newFilterQuery(Field.BOOLEAN_OBJECT, literalValue, false));
+					} else if (
+							XSDDatatype.XSDint.getURI().equals(uri) ||
+							XSDDatatype.XSDinteger.getURI().equals(uri) ||
+							XSDDatatype.XSDdecimal.getURI().equals(uri) ||
+							XSDDatatype.XSDdouble.getURI().equals(uri) ||
+							XSDDatatype.XSDlong.getURI().equals(uri)) {
+						q.addFilterQuery(newFilterQuery(Field.NUMERIC_OBJECT, literalValue, false));
+					} else if (
+							XSDDatatype.XSDdateTime.equals(uri) || 
+							XSDDatatype.XSDdate.equals(uri)) {
+						q.addFilterQuery(newFilterQuery(Field.DATE_OBJECT, literalValue, false));
+					} else {
+						q.addFilterQuery(newFilterQuery(Field.TEXT_OBJECT, literalValue, true));
+					}
 				} else {
 					q.addFilterQuery(newFilterQuery(Field.TEXT_OBJECT, literalValue, true));
-				}
+				}				
 			} else {
-				q.addFilterQuery(newFilterQuery(Field.TEXT_OBJECT, literalValue, true));
-			}				
+				q.addFilterQuery(newFilterQuery(Field.TEXT_OBJECT, asNt(o), true));				
+			}
 		}
 		
 		if (name != null) {

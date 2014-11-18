@@ -36,19 +36,15 @@ public class SimpleTestClient {
 			dataset = DatasetFactory.create(factory.getDatasetGraph());
 			
 			Model model = dataset.getDefaultModel(); 
-			model.read(new FileReader(new File("/work/workspaces/jena-nosql/jena-nosql/jena-nosql-integration-tests/src/test/resources/w3c/2.3/data.ttl")), "http://ba.s.d", "TTL");
+//			model.read(new FileReader(new File("/work/workspaces/jena-nosql/jena-nosql/jena-nosql-integration-tests/src/test/resources/w3c/2.3/data.ttl")), "http://ba.s.d", "TTL");
 			
-			Thread.sleep(1000);
+//			Thread.sleep(1000);
 			 
 			String q = 
-					"PREFIX dt:   <http://example.org/datatype#> " +
-					"PREFIX ns:   <http://example.org/ns#> " +
-					"PREFIX :     <http://example.org/ns#> " +
-					"PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> " +
-					"SELECT ?o WHERE { " + 
-					"	?s ?p ?o . " + 
-					"	?s ?p 42.00 ." +
-					"}";
+					"PREFIX : <http://learningsparql.com/ns/papers#> " +
+					"PREFIX c: <http://learningsparql.com/ns/citations#> " +
+					"SELECT ?s " + 
+					"WHERE { ?s c:cites :paperA . }";
 			
 			final Query query = QueryFactory.create(q);
 			execution = QueryExecutionFactory.create(query, model);
