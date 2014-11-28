@@ -168,6 +168,12 @@
 			<artifactId>jena-nosql-binding-solr</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-core</artifactId>
+			<version>${solr.version}</version>
+			<scope>test</scope>
+		</dependency>		
 	</dependencies>
 	<name>Jena NoSQL Integration Tests</name>
 </project>

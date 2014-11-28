@@ -14,23 +14,32 @@ import org.slf4j.LoggerFactory;
  */
 public class SolrClientShutdownHook implements ClientShutdownHook {
 	private static final Log LOGGER = new Log(LoggerFactory.getLogger(ClientShutdownHook.class));
-	private final SolrServer facade;
+	private final SolrServer indexer;
+	private final SolrServer searcher;
 	
 	/**
 	 * Builds a new SOLR Client shutdown hook.
 	 * 
-	 * @param connection the connection to SOLR.
+	 * @param indexer the SOLR proxy that will be used for index data.
+	 * @param searcher the SOLR proxy that will be used for issuing queries.
 	 */
-	public SolrClientShutdownHook(final SolrServer connection) {
-		this.facade = connection;
+	public SolrClientShutdownHook(final SolrServer indexer, final SolrServer searcher) {
+		this.indexer = indexer;
+		this.searcher = searcher;
 	}
 	
 	@Override
 	public void close() {
 		try {
-			facade.shutdown();
+			indexer.shutdown();
 		} catch (final Exception exception) {
 			LOGGER.error(MessageCatalog._00099_CLIENT_SHUTDOWN_FAILURE, exception);
 		}
-	}
+
+		try {
+			searcher.shutdown();
+		} catch (final Exception exception) {
+			LOGGER.error(MessageCatalog._00099_CLIENT_SHUTDOWN_FAILURE, exception);
+		}
+}
 }

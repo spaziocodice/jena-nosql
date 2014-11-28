@@ -6,6 +6,7 @@ import static org.gazzax.labs.jena.nosql.fwk.util.NTriples.asNtURI;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -34,7 +35,8 @@ import com.hp.hpl.jena.graph.TripleMatch;
 public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	protected final Log logger = new Log(LoggerFactory.getLogger(SolrGraphDAO.class));
 	
-	private final SolrServer solr;
+	private final SolrServer indexer;
+	private final SolrServer searcher;
 	private final int addCommitWithinMsecs;
 	private final int deleteCommitWithinMsecs;
 	
@@ -45,10 +47,15 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	 * 
 	 * @param addCommitWithin max time (in ms) before a commit will happen when inserting triples.
 	 * @param deleteCommitWithin max time (in ms) before a commit will happen when deleting triples.
-	 * @param solr the SOLR client.
+	 * @param indexer the SOLR proxy that will be used for index data.
+	 * @param searcher the SOLR proxy that will be used for issuing queries.
 	 */
-	public SolrGraphDAO(final SolrServer solr, final int addCommitWithin, final int deleteCommitWithin) {
-		this(solr, null, addCommitWithin, deleteCommitWithin);
+	public SolrGraphDAO(
+			final SolrServer indexer, 
+			final SolrServer searcher, 
+			final int addCommitWithin, 
+			final int deleteCommitWithin) {
+		this(indexer,searcher, null, addCommitWithin, deleteCommitWithin);
 	}
 	
 	/**
@@ -56,11 +63,18 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	 * 
 	 * @param addCommitWithin max time (in ms) before a commit will happen when inserting triples.
 	 * @param deleteCommitWithin max time (in ms) before a commit will happen when deleting triples.
-	 * @param solr the SOLR client.
+	 * @param indexer the SOLR proxy that will be used for index data.
+	 * @param searcher the SOLR proxy that will be used for issuing queries.
 	 * @param name the name of the graph associated with this DAO.
 	 */
-	public SolrGraphDAO(final SolrServer solr, final Node name, final int addCommitWithin, final int deleteCommitWithin) {
-		this.solr = solr;
+	public SolrGraphDAO(
+			final SolrServer indexer, 
+			final SolrServer searcher, 
+			final Node name, 
+			final int addCommitWithin, 
+			final int deleteCommitWithin) {
+		this.indexer = indexer;
+		this.searcher = searcher;
 		this.name = name;
 		this.addCommitWithinMsecs = addCommitWithin;
 		this.deleteCommitWithinMsecs = deleteCommitWithin;
@@ -72,7 +86,7 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 		document.setField(Field.S, asNt(triple.getSubject()));
 		document.setField(Field.P, asNtURI(triple.getPredicate()));
 		document.setField(Field.C, name != null ? asNtURI(name) : null);
-		document.setField(Field.O, asNt(triple.getObject()));			
+		document.setField(Field.O, asNt(triple.getObject()));
 
 		final Node object = triple.getObject();
 		if (object.isLiteral()) {
@@ -80,7 +94,6 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 			final Object value = object.getLiteral().getLexicalForm();
 			document.setField(Field.LANG, object.getLiteralLanguage());				
 			
-			// TBD: +handle datatypes inheritance -remove conditional logic
 			if (dataType != null) {
 				final String uri = dataType.getURI();
 				if (XSDDatatype.XSDboolean.getURI().equals(uri)) {
@@ -97,17 +110,17 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 						XSDDatatype.XSDdate.equals(uri)) {
 					document.setField(Field.DATE_OBJECT, value);										
 				} else {
-					document.setField(Field.TEXT_OBJECT, value);								
+					document.setField(Field.TEXT_OBJECT, StringEscapeUtils.escapeXml(String.valueOf(value)));								
 				}
 			} else {
-				document.setField(Field.TEXT_OBJECT, value);			
+				document.setField(Field.TEXT_OBJECT, StringEscapeUtils.escapeXml(String.valueOf(value)));			
 			}
 		} else {
 			document.setField(Field.TEXT_OBJECT, asNt(triple.getObject()));			
 		}
 		
 		try {
-			solr.add(document, addCommitWithinMsecs);
+			indexer.add(document, addCommitWithinMsecs);
 		} catch (final Exception exception) {
 			throw new StorageLayerException(exception);
 		}
@@ -116,7 +129,7 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	@Override
 	public void deleteTriple(final Triple triple) throws StorageLayerException {
 		try {
-			solr.deleteByQuery(deleteQuery(triple), deleteCommitWithinMsecs);
+			indexer.deleteByQuery(deleteQuery(triple), deleteCommitWithinMsecs);
 		} catch (final Exception exception) {
 			throw new StorageLayerException(exception);
 		}
@@ -130,7 +143,7 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	@Override
 	public void executePendingMutations() throws StorageLayerException {
 		try {
-			solr.commit();
+			indexer.commit();
 		} catch (Exception exception) {
 			throw new StorageLayerException(exception);
 		}
@@ -139,7 +152,7 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	@Override
 	public void clear() {
 		try {
-			solr.deleteByQuery(name == null ? "*:*" : (Field.C + ":\"" + ClientUtils.escapeQueryChars(asNtURI(name)) + "\""), deleteCommitWithinMsecs);
+			indexer.deleteByQuery(name == null ? "*:*" : (Field.C + ":\"" + ClientUtils.escapeQueryChars(asNtURI(name)) + "\""), deleteCommitWithinMsecs);
 		} catch (final Exception exception) {
 			logger.error(MessageCatalog._00170_UNABLE_TO_CLEAR, exception);
 		}
@@ -200,7 +213,7 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 			q.addFilterQuery(newFilterQuery(Field.C, asNtURI(name), true));			
 		}
 		
-		return new SolrDeepPagingIterator(solr, q);
+		return new SolrDeepPagingIterator(searcher, q);
 	}
 	
 
@@ -208,7 +221,7 @@ public class SolrGraphDAO implements GraphDAO<Triple, TripleMatch> {
 	public long countTriples() throws StorageLayerException {
 		final SolrQuery query = new SolrQuery();
 		try {
-			return solr.query(query).getResults().getNumFound();
+			return searcher.query(query).getResults().getNumFound();
 		} catch (final Exception exception) {
 			throw new StorageLayerException(exception);
 		}		
